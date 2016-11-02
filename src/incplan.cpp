@@ -32,6 +32,7 @@ struct Options {
 	bool unitInGoal2Assume;
 	bool solveBeforeGoalClauses;
 	bool nonIncrementalSolving;
+	bool normalOutput;
 };
 
 Options options;
@@ -192,18 +193,21 @@ class Solver {
 							val = j;
 						}
 
-						int offset = i * problem->numberLiterals;
-						if (val < 0) {
-							offset = -offset;
+						if (options.normalOutput) {
+							int offset = i * problem->numberLiterals;
+							if (val < 0) {
+								offset = -offset;
+							}
+							val += offset;
 						}
-						val += offset;
 
-						//assert(abs(val) == j);
 						std::cout << val << " ";
 					}
-					//std::cout << std::endl;
+					if (!options.normalOutput)
+						std::cout << std::endl;
 				}
-				std::cout << std::endl;
+				if (options.normalOutput)
+					std::cout << std::endl;
 			} else {
 				std::cout << "no solution" << std::endl;
 			}
@@ -312,6 +316,14 @@ int main(int argc, char **argv) {
 		TCLAP::SwitchArg unitInGoal2Assume("u", "unitInGoal2Assume", "Add units in goal clauses using assume instead of add.", cmd, defaultIsFalse);
 		TCLAP::SwitchArg solveBeforeGoalClauses("s", "solveBeforeGoalClauses", "Add an additional solve step before adding the goal clauses.", cmd, defaultIsFalse);
 		TCLAP::SwitchArg nonIncrementalSolving("n", "nonIncrementalSolving", "Do not use incremental solving.", cmd, defaultIsFalse);
+
+		//TCLAP::SwitchArg outputLinePerStep("", "outputLinePerStep", "Output each time point in a new line. Each time point will use the same literals.", defaultIsFalse);
+		TCLAP::SwitchArg outputSolverLike("", "outputSolverLike", "Output result like a normal solver is used. The literals for each time point t are in range t * [literalsPerTime] < lit <= (t + 1) * [literalsPerTime]", cmd, defaultIsFalse);
+
+		if (argc == 1) {
+			cmd.getOutput()->usage(cmd);
+			exit(0);
+		}
 		cmd.parse( argc, argv );
 
 		options.error = false;
@@ -319,6 +331,7 @@ int main(int argc, char **argv) {
 		options.unitInGoal2Assume = unitInGoal2Assume.getValue();
 		options.solveBeforeGoalClauses = solveBeforeGoalClauses.getValue();
 		options.nonIncrementalSolving = nonIncrementalSolving.getValue();
+		options.normalOutput = outputSolverLike.getValue();
 
 	} catch (TCLAP::ArgException &e) {
 		options.error = true;

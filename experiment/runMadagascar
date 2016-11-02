@@ -1,0 +1,39 @@
+#!/bin/bash
+# -A 1 Algoritm A with paralelity 1 (so basically sequential)
+# -S 1 test each step separately
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+madagascar=$DIR/../bin/MpC
+
+i=0
+for param in "$@"
+do
+i=$((i + 1))
+case $param in
+	::)
+		splitPoint=$i
+		;;
+esac
+done
+
+madagascarArgs="${@:2:$((splitPoint - 2))}"
+incplanArgs="${@:$((splitPoint + 1))}"
+
+problem="${@:1:1}"
+domain="$( dirname "${problem}" )/domain.pddl"
+
+incplanInput="problem.in"
+incplanOutput="problem.out"
+
+eval "$madagascar $domain $problem $madagascarArgs -b $incplanInput -L > /dev/null"
+incplanInput="$incplanInput.cnf"
+eval "$incplanArgs --outputSolverLike $incplanInput | grep -v '^c' > $incplanOutput"
+
+#extract the step size from the result
+header=($(head -n 1 $incplanOutput))
+steps="${header[2]}"
+steps=$((steps-1))
+sed -i '1d' $incplanOutput
+
+cmd="$madagascar $domain $problem -s $incplanOutput -T $steps"
+eval $cmd
