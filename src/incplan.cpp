@@ -34,6 +34,8 @@ struct Options {
 	bool solveBeforeGoalClauses;
 	bool nonIncrementalSolving;
 	bool normalOutput;
+	bool singleEnded;
+	bool cleanLitearl;
 	double ratio;
 };
 
@@ -188,10 +190,6 @@ public:
 			goalStack.push_back(result.addedSlot);
 		}
 
-		std::cout << "c add " << result.addedSlot << std::endl;
-		std::cout << "c src " << result.transitionSource << std::endl;
-		std::cout << "c dst " << result.transitionGoal << std::endl;
-
 		return result;
 	};
 
@@ -230,96 +228,25 @@ class Solver {
 	public:
 		Solver(const Problem* problem){
 			this->ipasir = ipasir_init();
-			this->offset = 0;
 			this->problem = problem;
 		}
 
 		/**
 		 * Solve the problem. Return true if a solution was found.
 		 */
-		bool solve2(){
-			int makeSpan = 0;
-			int previousMakeSpan = 0;
-
-			addInitialClauses();
-			addInvariantClauses(0);
-			addGoalClauses(0, onlyAtK(makeSpan));
-			ipasir_assume(ipasir, onlyAtK(0));
-			result = ipasir_solve(ipasir);
-
-			while (result == UNSAT && makeSpan < MAX_STEPS) {
-				makeSpan++;
-				if (options.nonIncrementalSolving) {
-					ipasir_release(ipasir);
-					ipasir = ipasir_init();
-					addInitialClauses();
-					addInvariantClauses(0);
-					previousMakeSpan = 0;
-				}
-
-				for (int k = previousMakeSpan + 1; k <= makeSpan; k++) {
-					addInvariantClauses(k);
-					addTransferClauses(k - 1, k);
-				}
-				previousMakeSpan = makeSpan;
-
-				if (options.solveBeforeGoalClauses) {
-					ipasir_solve(ipasir);
-				}
-
-				addGoalClauses(makeSpan, onlyAtK(makeSpan));
-				ipasir_assume(ipasir, onlyAtK(makeSpan));
-				result = ipasir_solve(ipasir);
-			}
-
-			this->finalMakeSpan = makeSpan;
-			return result == SAT;
-		}
-
 		bool solve(){
-			addInitialClauses();
-			{
-				double ratio = options.ratio;
-				int makeSpan = 0;
-				mapping = std::unique_ptr<TimeSlotMapping>(new TimeSlotMapping(ratio, makeSpan));
+			if (options.singleEnded) {
+				return solveOneEnded();
+			} else {
+				return solveDoubleEnded();
 			}
-
-			addInvariantClauses(mapping->startSlot());
-			addGoalClauses(mapping->goalSlot());
-
-			std::cout << "c linking " << mapping->startTop() << " - " << mapping->goalTop() << std::endl;
-			addLink(mapping->startTop(), mapping->goalTop(), onlyAtK(mapping->getMakeSpan()));
-
-			ipasir_assume(ipasir, onlyAtK(0));
-			result = ipasir_solve(ipasir);
-
-			while (result == UNSAT && mapping->getMakeSpan() < MAX_STEPS) {
-				mapping->incrementMakeSpan(1);
-				while (mapping->hasToAdd()) {
-					AddInfo info = mapping->add();
-					addInvariantClauses(info.addedSlot);
-					addTransferClauses(info.transitionSource, info.transitionGoal);
-				}
-				if (options.solveBeforeGoalClauses) {
-					ipasir_solve(ipasir);
-				}
-
-				std::cout << "c linking " << mapping->startTop() << " - " << mapping->goalTop() << std::endl;
-				addLink(mapping->startTop(), mapping->goalTop(), onlyAtK(mapping->getMakeSpan()));
-
-				ipasir_assume(ipasir, onlyAtK(mapping->getMakeSpan()));
-				result = ipasir_solve(ipasir);
-			}
-
-			this->finalMakeSpan = mapping->getMakeSpan();
-			return result == SAT;
 		}
 
 		void printSolution() {
 			if (this->result == SAT) {
 				std::cout << "solution " << this->problem->numberLiteralsPerTime << " " << this->finalMakeSpan + 1 << std::endl;
 				for (int time = 0; time <= this->finalMakeSpan; time++) {
-					int slot = mapping->getSlotForTime(time);
+					int slot = (options.singleEnded)?time:mapping->getSlotForTime(time);
 					for (unsigned j = 1; j <= this->problem->numberLiteralsPerTime; j++) {
 						int val = ipasir_val(ipasir, map(slot,j));
 						val = unmap(slot, val);
@@ -356,9 +283,94 @@ class Solver {
 		const Problem* problem;
 		void* ipasir;
 		std::unique_ptr<TimeSlotMapping> mapping;
-		int offset;
+
 		int finalMakeSpan;
 		int result;
+
+		bool solveOneEnded(){
+			int makeSpan = 0;
+			int previousMakeSpan = 0;
+
+			addInitialClauses();
+			addInvariantClauses(0);
+			addGoalClauses(0, onlyAtK(makeSpan));
+			ipasir_assume(ipasir, onlyAtK(0));
+			result = ipasir_solve(ipasir);
+
+			while (result == UNSAT && makeSpan < MAX_STEPS) {
+				if (options.cleanLitearl) {
+					ipasir_add(ipasir, onlyAtK(makeSpan));
+				}
+				makeSpan++;
+				if (options.nonIncrementalSolving) {
+					ipasir_release(ipasir);
+					ipasir = ipasir_init();
+					addInitialClauses();
+					addInvariantClauses(0);
+					previousMakeSpan = 0;
+				}
+
+				for (int k = previousMakeSpan + 1; k <= makeSpan; k++) {
+					addInvariantClauses(k);
+					addTransferClauses(k - 1, k);
+				}
+				previousMakeSpan = makeSpan;
+
+				if (options.solveBeforeGoalClauses) {
+					ipasir_solve(ipasir);
+				}
+
+				addGoalClauses(makeSpan, onlyAtK(makeSpan));
+				ipasir_assume(ipasir, onlyAtK(makeSpan));
+
+				result = ipasir_solve(ipasir);
+			}
+
+			this->finalMakeSpan = makeSpan;
+			return result == SAT;
+		}
+
+		bool solveDoubleEnded(){
+			addInitialClauses();
+			{
+				double ratio = options.ratio;
+				int makeSpan = 0;
+				mapping = std::unique_ptr<TimeSlotMapping>(new TimeSlotMapping(ratio, makeSpan));
+			}
+
+			addInvariantClauses(mapping->startSlot());
+			addGoalClauses(mapping->goalSlot());
+
+			addLink(mapping->startTop(), mapping->goalTop(), onlyAtK(mapping->getMakeSpan()));
+
+			ipasir_assume(ipasir, onlyAtK(0));
+			result = ipasir_solve(ipasir);
+
+			while (result == UNSAT && mapping->getMakeSpan() < MAX_STEPS) {
+				if (options.cleanLitearl) {
+					ipasir_add(ipasir, onlyAtK(mapping->getMakeSpan()));
+				}
+
+				mapping->incrementMakeSpan(1);
+
+				while (mapping->hasToAdd()) {
+					AddInfo info = mapping->add();
+					addInvariantClauses(info.addedSlot);
+					addTransferClauses(info.transitionSource, info.transitionGoal);
+				}
+				if (options.solveBeforeGoalClauses) {
+					ipasir_solve(ipasir);
+				}
+
+				addLink(mapping->startTop(), mapping->goalTop(), onlyAtK(mapping->getMakeSpan()));
+				ipasir_assume(ipasir, onlyAtK(mapping->getMakeSpan()));
+
+				result = ipasir_solve(ipasir);
+			}
+
+			this->finalMakeSpan = mapping->getMakeSpan();
+			return result == SAT;
+		}
 
 		int onlyAtK(unsigned k) {
 			return k + 1;
@@ -480,10 +492,12 @@ int main(int argc, char **argv) {
 		TCLAP::CmdLine cmd("This tool is does sat planing using an incremental sat solver.", ' ', "0.1");
 		TCLAP::UnlabeledValueArg<std::string>  inputFile( "inputFile", "File containing the problem. Omit or use - for stdin.", !neccessaryArgument, "-", "inputFile", cmd);
 		TCLAP::ValueArg<double>  ratio("r", "ratio", "Ratio between states from start to state from end.", !neccessaryArgument, 1.0, "number between 0 and 1", cmd);
-		TCLAP::SwitchArg unitInGoal2Assume("u", "unitInGoal2Assume", "Add units in goal clauses using assume instead of add.", cmd, defaultIsFalse);
-		TCLAP::SwitchArg solveBeforeGoalClauses("s", "solveBeforeGoalClauses", "Add an additional solve step before adding the goal clauses.", cmd, defaultIsFalse);
+		TCLAP::SwitchArg unitInGoal2Assume("u", "unitInGoal2Assume", "Add units in goal clauses using assume instead of add. (singleEnded only)", cmd, defaultIsFalse);
+		TCLAP::SwitchArg solveBeforeGoalClauses("i", "intermediateSolveStep", "Add an additional solve step before adding the goal or linking clauses.", cmd, defaultIsFalse);
 		TCLAP::SwitchArg nonIncrementalSolving("n", "nonIncrementalSolving", "Do not use incremental solving.", cmd, defaultIsFalse);
+		TCLAP::SwitchArg cleanLitearl("c", "cleanLitearl", "Add a literal to remove linking or goal clauses.", cmd, defaultIsFalse);
 
+		TCLAP::SwitchArg singleEnded("s", "singleEnded", "Do not use incremental solving.", cmd, defaultIsFalse);
 		//TCLAP::SwitchArg outputLinePerStep("", "outputLinePerStep", "Output each time point in a new line. Each time point will use the same literals.", defaultIsFalse);
 		TCLAP::SwitchArg outputSolverLike("", "outputSolverLike", "Output result like a normal solver is used. The literals for each time point t are in range t * [literalsPerTime] < lit <= (t + 1) * [literalsPerTime]", cmd, defaultIsFalse);
 
@@ -500,6 +514,12 @@ int main(int argc, char **argv) {
 		options.nonIncrementalSolving = nonIncrementalSolving.getValue();
 		options.normalOutput = outputSolverLike.getValue();
 		options.ratio = ratio.getValue();
+		options.singleEnded = singleEnded.getValue();
+		options.cleanLitearl = cleanLitearl.getValue();
+
+		if (options.nonIncrementalSolving) {
+			options.singleEnded = true;
+		}
 
 	} catch (TCLAP::ArgException &e) {
 		options.error = true;
