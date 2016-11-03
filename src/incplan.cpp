@@ -18,6 +18,7 @@ extern "C" {
 #include <fstream>
 #include <limits>
 #include <cassert>
+#include <memory>
 
 #include <tclap/CmdLine.h>
 
@@ -33,6 +34,7 @@ struct Options {
 	bool solveBeforeGoalClauses;
 	bool nonIncrementalSolving;
 	bool normalOutput;
+	double ratio;
 };
 
 Options options;
@@ -40,12 +42,12 @@ Options options;
 class Problem {
 public:
 	Problem(std::istream& in){
-		this->numberLiterals = 0;
+		this->numberLiteralsPerTime = 0;
 		parse(in);
 	}
 
 	std::vector<int> initial, invariant, goal , transfer;
-	int numberLiterals;
+	unsigned numberLiteralsPerTime;
 
 private:
 	void skipComments(std::istream& in){
@@ -66,7 +68,7 @@ private:
 
 	int parseCnfHeader(char expectedType, std::istream& in) {
 		char type;
-		int literals;
+		unsigned literals;
 		int numberClauses;
 		std::string cnfString;
 		in >> type >> cnfString >> literals >> numberClauses;
@@ -94,10 +96,10 @@ private:
 			std::abort();
 		}
 
-		if (numberLiterals == 0) {
-			numberLiterals = literals;
-		} else if (literals != numberLiterals && (type != 't' || literals != 2 * numberLiterals)) {
-			std::cout << "Input Error: Wrong Number of Literals!" << literals << ":" << numberLiterals << type << std::endl;
+		if (numberLiteralsPerTime == 0) {
+			numberLiteralsPerTime = literals;
+		} else if (literals != numberLiteralsPerTime && (type != 't' || literals != 2 * numberLiteralsPerTime)) {
+			std::cout << "Input Error: Wrong Number of Literals!" << literals << ":" << numberLiteralsPerTime << type << std::endl;
 			std::abort();
 		}
 
@@ -131,6 +133,99 @@ private:
 	}
 };
 
+struct AddInfo {
+	unsigned transitionSource;
+	unsigned transitionGoal;
+	unsigned addedSlot;
+};
+
+class TimeSlotMapping {
+public:
+	TimeSlotMapping(double ratio, unsigned makeSpan) {
+		this->ratio = ratio;
+		this->makeSpan = makeSpan;
+		startStack.push_back(0);
+		goalStack.push_back(1);
+	}
+
+	unsigned getSlotForTime(unsigned time) {
+		if (time < startStack.size()) {
+			return startStack[time];
+		} else {
+			time -= startStack.size();
+			// skip last time slot as they are equal in both slots
+			time += 1;
+			return goalStack[goalStack.size() - 1 - time];
+		}
+	}
+
+	bool hasToAdd(){
+		return makeSpan > (getNumberOfTimeSlots() - 2);
+	}
+
+	unsigned getNumberOfTimeSlots() {
+		return startStack.size() + goalStack.size();
+	}
+
+	unsigned getNextFreeSlot() {
+		return getNumberOfTimeSlots();
+	}
+
+	AddInfo add() {
+		AddInfo result;
+		double currentRatio = startStack.size() / (double) getNumberOfTimeSlots();
+		if (currentRatio <= ratio) {
+			result.addedSlot = getNextFreeSlot();
+			result.transitionSource = startTop();
+			result.transitionGoal = result.addedSlot;
+
+			startStack.push_back(result.addedSlot);
+		} else {
+			result.addedSlot = getNextFreeSlot();
+			result.transitionSource = result.addedSlot;
+			result.transitionGoal = goalTop();
+
+			goalStack.push_back(result.addedSlot);
+		}
+
+		std::cout << "c add " << result.addedSlot << std::endl;
+		std::cout << "c src " << result.transitionSource << std::endl;
+		std::cout << "c dst " << result.transitionGoal << std::endl;
+
+		return result;
+	};
+
+	unsigned startTop(){
+		return startStack.back();
+	}
+
+	unsigned goalTop(){
+		return goalStack.back();
+	}
+
+	unsigned startSlot(){
+		return startStack[0];
+	}
+
+	unsigned goalSlot(){
+		return goalStack[0];
+	}
+
+	void incrementMakeSpan(unsigned k) {
+		makeSpan += k;
+	}
+
+	unsigned getMakeSpan(){
+		return makeSpan;
+	}
+
+private:
+	unsigned makeSpan;
+	double ratio;
+	std::vector<int> startStack;
+	std::vector<int> goalStack;
+};
+
 class Solver {
 	public:
 		Solver(const Problem* problem){
@@ -142,13 +237,13 @@ class Solver {
 		/**
 		 * Solve the problem. Return true if a solution was found.
 		 */
-		bool solve(){
+		bool solve2(){
 			int makeSpan = 0;
 			int previousMakeSpan = 0;
 
 			addInitialClauses();
 			addInvariantClauses(0);
-			addGoalClauses(0);
+			addGoalClauses(0, onlyAtK(makeSpan));
 			ipasir_assume(ipasir, onlyAtK(0));
 			result = ipasir_solve(ipasir);
 
@@ -164,7 +259,7 @@ class Solver {
 
 				for (int k = previousMakeSpan + 1; k <= makeSpan; k++) {
 					addInvariantClauses(k);
-					addTransferClauses(k);
+					addTransferClauses(k - 1, k);
 				}
 				previousMakeSpan = makeSpan;
 
@@ -172,7 +267,7 @@ class Solver {
 					ipasir_solve(ipasir);
 				}
 
-				addGoalClauses(makeSpan);
+				addGoalClauses(makeSpan, onlyAtK(makeSpan));
 				ipasir_assume(ipasir, onlyAtK(makeSpan));
 				result = ipasir_solve(ipasir);
 			}
@@ -181,20 +276,60 @@ class Solver {
 			return result == SAT;
 		}
 
+		bool solve(){
+			addInitialClauses();
+			{
+				double ratio = options.ratio;
+				int makeSpan = 0;
+				mapping = std::unique_ptr<TimeSlotMapping>(new TimeSlotMapping(ratio, makeSpan));
+			}
+
+			addInvariantClauses(mapping->startSlot());
+			addGoalClauses(mapping->goalSlot());
+
+			std::cout << "c linking " << mapping->startTop() << " - " << mapping->goalTop() << std::endl;
+			addLink(mapping->startTop(), mapping->goalTop(), onlyAtK(mapping->getMakeSpan()));
+
+			ipasir_assume(ipasir, onlyAtK(0));
+			result = ipasir_solve(ipasir);
+
+			while (result == UNSAT && mapping->getMakeSpan() < MAX_STEPS) {
+				mapping->incrementMakeSpan(1);
+				while (mapping->hasToAdd()) {
+					AddInfo info = mapping->add();
+					addInvariantClauses(info.addedSlot);
+					addTransferClauses(info.transitionSource, info.transitionGoal);
+				}
+				if (options.solveBeforeGoalClauses) {
+					ipasir_solve(ipasir);
+				}
+
+				std::cout << "c linking " << mapping->startTop() << " - " << mapping->goalTop() << std::endl;
+				addLink(mapping->startTop(), mapping->goalTop(), onlyAtK(mapping->getMakeSpan()));
+
+				ipasir_assume(ipasir, onlyAtK(mapping->getMakeSpan()));
+				result = ipasir_solve(ipasir);
+			}
+
+			this->finalMakeSpan = mapping->getMakeSpan();
+			return result == SAT;
+		}
+
 		void printSolution() {
 			if (this->result == SAT) {
-				std::cout << "solution " << this->problem->numberLiterals << " " << this->finalMakeSpan + 1 << std::endl;
-				for (int i = 0; i <= this->finalMakeSpan; i++) {
-					for (int j = 1; j <= this->problem->numberLiterals; j++) {
-						int val = ipasir_val(ipasir, map(i,j));
-						val = unmap(i, val);
+				std::cout << "solution " << this->problem->numberLiteralsPerTime << " " << this->finalMakeSpan + 1 << std::endl;
+				for (int time = 0; time <= this->finalMakeSpan; time++) {
+					int slot = mapping->getSlotForTime(time);
+					for (unsigned j = 1; j <= this->problem->numberLiteralsPerTime; j++) {
+						int val = ipasir_val(ipasir, map(slot,j));
+						val = unmap(slot, val);
 
 						if (val == 0) {
 							val = j;
 						}
 
 						if (options.normalOutput) {
-							int offset = i * problem->numberLiterals;
+							int offset = time * problem->numberLiteralsPerTime;
 							if (val < 0) {
 								offset = -offset;
 							}
@@ -220,6 +355,7 @@ class Solver {
 	private:
 		const Problem* problem;
 		void* ipasir;
+		std::unique_ptr<TimeSlotMapping> mapping;
 		int offset;
 		int finalMakeSpan;
 		int result;
@@ -237,7 +373,7 @@ class Solver {
 				return 0;
 			}
 
-			int offset = (MAX_STEPS + 1) + k * problem->numberLiterals;
+			int offset = (MAX_STEPS + 1) + k * problem->numberLiteralsPerTime;
 			if (literal < 0) {
 				offset = -offset;
 			}
@@ -262,9 +398,21 @@ class Solver {
 			}
 		}
 
-		void addTransferClauses(unsigned k) {
+		void addTransferClauses(unsigned transferSrc, unsigned transferDst) {
 			for (int literal: problem->transfer) {
-				ipasir_add(ipasir, map(k - 1, literal));
+				int mapped;
+				if ((unsigned) std::abs(literal) <= problem->numberLiteralsPerTime) {
+					mapped = map(transferSrc, literal);
+				} else {
+					if (literal > 0) {
+						literal -= problem->numberLiteralsPerTime;
+					} else {
+						literal += problem->numberLiteralsPerTime;
+					}
+
+					mapped = map(transferDst, literal);
+				}
+				ipasir_add(ipasir, mapped);
 			}
 		}
 
@@ -289,30 +437,49 @@ class Solver {
 			return problem->goal[i + 1] == 0 && problem->goal[i - 1] == 0;
 		}
 
-		void addGoalClauses(unsigned k) {
+		void addGoalClauses(unsigned slot, int guard = 0) {
 			for (unsigned i = 0; i < problem->goal.size(); i++) {
 				int literal = problem->goal[i];
 				if (!isUnitGoal(i)) {
-					if (literal == 0) {
-						ipasir_add(ipasir, -onlyAtK(k));
+					if (literal == 0 && guard != 0) {
+						ipasir_add(ipasir, -guard);
 					}
-					ipasir_add(ipasir, map(k, literal));
+					ipasir_add(ipasir, map(slot, literal));
 				} else {
-					ipasir_assume(ipasir, map(k,literal));
+					ipasir_assume(ipasir, map(slot,literal));
 					++i; // skip following 0
 					assert(problem->goal[i] == 0);
 				}
 			}
 		}
+
+		void addLink(unsigned slotA, unsigned slotB, int guard) {
+			for (unsigned i = 1; i <= problem->numberLiteralsPerTime; i++) {
+				int litA = map(slotA, i);
+				int litB = map(slotB, i);
+
+				ipasir_add(ipasir, -guard);
+				ipasir_add(ipasir, -litA);
+				ipasir_add(ipasir, litB);
+				ipasir_add(ipasir, 0);
+
+				ipasir_add(ipasir, -guard);
+				ipasir_add(ipasir, litA);
+				ipasir_add(ipasir, -litB);
+				ipasir_add(ipasir, 0);
+			}
+
+		}
 };
 
 int main(int argc, char **argv) {
 	try {
-		bool defaultIsTrue = true;
+		//bool defaultIsTrue = true;
 		bool defaultIsFalse = false;
 		bool neccessaryArgument = true;
 		TCLAP::CmdLine cmd("This tool is does sat planing using an incremental sat solver.", ' ', "0.1");
 		TCLAP::UnlabeledValueArg<std::string>  inputFile( "inputFile", "File containing the problem. Omit or use - for stdin.", !neccessaryArgument, "-", "inputFile", cmd);
+		TCLAP::ValueArg<double>  ratio("r", "ratio", "Ratio between states from start to state from end.", !neccessaryArgument, 1.0, "number between 0 and 1", cmd);
 		TCLAP::SwitchArg unitInGoal2Assume("u", "unitInGoal2Assume", "Add units in goal clauses using assume instead of add.", cmd, defaultIsFalse);
 		TCLAP::SwitchArg solveBeforeGoalClauses("s", "solveBeforeGoalClauses", "Add an additional solve step before adding the goal clauses.", cmd, defaultIsFalse);
 		TCLAP::SwitchArg nonIncrementalSolving("n", "nonIncrementalSolving", "Do not use incremental solving.", cmd, defaultIsFalse);
@@ -332,6 +499,7 @@ int main(int argc, char **argv) {
 		options.solveBeforeGoalClauses = solveBeforeGoalClauses.getValue();
 		options.nonIncrementalSolving = nonIncrementalSolving.getValue();
 		options.normalOutput = outputSolverLike.getValue();
+		options.ratio = ratio.getValue();
 
 	} catch (TCLAP::ArgException &e) {
 		options.error = true;
