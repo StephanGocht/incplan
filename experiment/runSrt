@@ -1,48 +1,45 @@
 #!/bin/bash
 
-run() {
-	DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-	srt="java -jar $DIR/../bin/srt.jar"
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+srt="java -jar $DIR/../bin/srt.jar"
 
-	i=0
-	splitPoint=0
-	for param in "$@"
-	do
-	i=$((i + 1))
-	case $param in
-		::)
-			splitPoint=$i
-			;;
-	esac
-	done
+i=0
+splitPoint=0
+for param in "$@"
+do
+i=$((i + 1))
+case $param in
+	::)
+		splitPoint=$i
+		;;
+esac
+done
 
-	problem="${@:1:1}"
+problem="${@:1:1}"
+domain="$( dirname "${problem}" )/domain.pddl"
 
-	if [ $splitPoint != 0 ]; then
-		srtArgs="${@:2:$((splitPoint - 2))}"
-		incplanArgs="${@:$((splitPoint + 1))}"
+$DIR/../../fast-downward/src/translate/translate.py $domain $problem
+problem="output.sas"
 
-		incplanInput="problem.in"
-		incplanOutput="problem.out"
+if [ $splitPoint != 0 ]; then
+	srtArgs="${@:2:$((splitPoint - 2))}"
+	incplanArgs="${@:$((splitPoint + 1))}"
 
-		cmd="$srt $srtArgs $problem > $incplanInput"
-		echo $cmd
-		eval $cmd
+	incplanInput="problem.in"
+	incplanOutput="problem.out"
 
-		cmd="$incplanArgs $incplanInput | grep -v '^c' > $incplanOutput"
-		echo $cmd
-		/usr/bin/time -f "solvingTime=%e" bash -c "$cmd"
+	cmd="$srt $srtArgs $problem > $incplanInput"
+	echo $cmd
+	eval $cmd
 
-		cmd="$srt check $srtArgs $problem $incplanOutput"
-		echo $cmd
-		eval $cmd
+	cmd="$incplanArgs $incplanInput | grep -v '^c' > $incplanOutput"
+	echo $cmd
+	/usr/bin/time -f "solvingTime=%e" bash -c "$cmd"
 
-	else
-		echo "Srt cant solve problems alone please provide incplan"
-	fi
-}
+	cmd="$srt check $srtArgs $problem $incplanOutput"
+	echo $cmd
+	eval $cmd
 
-export -f run
-
-cmd="run $@"
-/usr/bin/time -f "completeTime=%e"  bash -c "$cmd"
+else
+	echo "Srt cant solve problems alone please provide incplan"
+fi

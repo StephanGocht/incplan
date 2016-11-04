@@ -1,0 +1,103 @@
+#!/bin/bash
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+filter="floor.*sat14.*\\.pddl"
+problems="$DIR/../../../benchmarks/pddl/planning.domains.zip"
+
+unzip -Z1 $problems | grep "$filter" | grep -v domain.pddl > problemList.txt
+
+runSingleIncrementalExperiment() {
+	DIR="$1"
+	problemFile="$2"
+	tool="$3"
+	option="$4"
+
+	problems="$DIR/../../../benchmarks/pddl/planning.domains.zip"
+
+	folder="$(dirname $problemFile)"
+	domainFile="$folder/domain.pddl"
+	domain="$(basename $folder)"
+	problem="$(basename $problemFile)"
+	problem="${problem%.*}"
+
+	conf="$tool-$option"
+
+	case $tool in
+		"MpC")
+		tool="$DIR/runMadagascar"
+		;;
+		"Srt")
+		tool="$DIR/runSrt"
+		toolOption="exist"
+		;;
+		*)
+		echo "unnown tool"
+		exit 1
+		;;
+	esac
+
+	case $option in
+		"n")
+		option="-n"
+		;;
+		"r1")
+		option="-r 1"
+		;;
+		"r0.5")
+		option="-r 0.5"
+		;;
+		*)
+		echo "unnown option"
+		exit 1
+		;;
+	esac
+
+	mkdir -p "$domain/$problem/$conf"
+	cd "$domain/$problem/$conf"
+
+	unzip -p $problems $domainFile > domain.pddl
+	unzip -p $problems $problemFile > problem.pddl
+
+	solver="$DIR/../bin/incplan-picosat961"
+
+	cmd="$tool problem.pddl $toolOption :: $solver $option"
+	eval "/usr/bin/time -f 'completeTime=%e' $cmd" &> result
+	#rm -f domain.pddl problem.pddl output.sas problem.in problem.in.cnf problem.out
+}
+
+runSingleMadagascar() {
+	DIR="$1"
+	problemFile="$2"
+	tool="$3"
+	option="$4"
+
+	problems="$DIR/../../../benchmarks/pddl/planning.domains.zip"
+
+	folder="$(dirname $problemFile)"
+	domainFile="$folder/domain.pddl"
+	domain="$(basename $folder)"
+	problem="$(basename $problemFile)"
+	problem="${problem%.*}"
+
+	conf="MpC-standalone"
+	tool="$DIR/runMadagascar"
+
+	mkdir -p "$domain/$problem/$conf"
+	cd "$domain/$problem/$conf"
+
+	unzip -p $problems $domainFile > domain.pddl
+	unzip -p $problems $problemFile > problem.pddl
+
+	solver="$DIR/../bin/incplan-picosat961"
+
+	cmd="$tool problem.pddl $toolOption"
+	eval "/usr/bin/time -f 'completeTime=%e' $cmd" &> result
+	rm -f domain.pddl problem.pddl output.sas problem.in problem.in.cnf problem.out
+}
+
+export -f runSingleIncrementalExperiment
+export -f runSingleMadagascar
+
+parallel runSingleIncrementalExperiment $DIR :::: problemList.txt ::: MpC Srt ::: n
+parallel runSingleMadagascar $DIR :::: problemList.txt
