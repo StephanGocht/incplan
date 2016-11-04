@@ -37,6 +37,7 @@ struct Options {
 	bool singleEnded;
 	bool cleanLitearl;
 	double ratio;
+	unsigned stepSize;
 };
 
 Options options;
@@ -301,7 +302,7 @@ class Solver {
 				if (options.cleanLitearl) {
 					ipasir_add(ipasir, onlyAtK(makeSpan));
 				}
-				makeSpan++;
+				makeSpan += options.stepSize;
 				if (options.nonIncrementalSolving) {
 					ipasir_release(ipasir);
 					ipasir = ipasir_init();
@@ -351,7 +352,7 @@ class Solver {
 					ipasir_add(ipasir, onlyAtK(mapping->getMakeSpan()));
 				}
 
-				mapping->incrementMakeSpan(1);
+				mapping->incrementMakeSpan(options.stepSize);
 
 				while (mapping->hasToAdd()) {
 					AddInfo info = mapping->add();
@@ -492,6 +493,7 @@ int main(int argc, char **argv) {
 		TCLAP::CmdLine cmd("This tool is does sat planing using an incremental sat solver.", ' ', "0.1");
 		TCLAP::UnlabeledValueArg<std::string>  inputFile( "inputFile", "File containing the problem. Omit or use - for stdin.", !neccessaryArgument, "-", "inputFile", cmd);
 		TCLAP::ValueArg<double>  ratio("r", "ratio", "Ratio between states from start to state from end.", !neccessaryArgument, 1.0, "number between 0 and 1", cmd);
+		TCLAP::ValueArg<unsigned>  stepSize("S", "stepSize", "Ratio between states from start to state from end.", !neccessaryArgument, 1, "natural number", cmd);
 		TCLAP::SwitchArg unitInGoal2Assume("u", "unitInGoal2Assume", "Add units in goal clauses using assume instead of add. (singleEnded only)", cmd, defaultIsFalse);
 		TCLAP::SwitchArg solveBeforeGoalClauses("i", "intermediateSolveStep", "Add an additional solve step before adding the goal or linking clauses.", cmd, defaultIsFalse);
 		TCLAP::SwitchArg nonIncrementalSolving("n", "nonIncrementalSolving", "Do not use incremental solving.", cmd, defaultIsFalse);
@@ -516,6 +518,7 @@ int main(int argc, char **argv) {
 		options.ratio = ratio.getValue();
 		options.singleEnded = singleEnded.getValue();
 		options.cleanLitearl = cleanLitearl.getValue();
+		options.stepSize = stepSize.getValue();
 
 		if (options.nonIncrementalSolving) {
 			options.singleEnded = true;

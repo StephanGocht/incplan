@@ -6,6 +6,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 madagascar=$DIR/../bin/MpC
 
 i=0
+splitPoint=0
 for param in "$@"
 do
 i=$((i + 1))
@@ -16,24 +17,29 @@ case $param in
 esac
 done
 
-madagascarArgs="${@:2:$((splitPoint - 2))}"
-incplanArgs="${@:$((splitPoint + 1))}"
-
 problem="${@:1:1}"
 domain="$( dirname "${problem}" )/domain.pddl"
 
-incplanInput="problem.in"
-incplanOutput="problem.out"
+if [ $splitPoint != 0 ]; then
+	madagascarArgs="${@:2:$((splitPoint - 2))}"
+	incplanArgs="${@:$((splitPoint + 1))}"
 
-eval "$madagascar $domain $problem $madagascarArgs -b $incplanInput -L > /dev/null"
-incplanInput="$incplanInput.cnf"
-eval "$incplanArgs --outputSolverLike $incplanInput | grep -v '^c' > $incplanOutput"
+	incplanInput="problem.in"
+	incplanOutput="problem.out"
 
-#extract the step size from the result
-header=($(head -n 1 $incplanOutput))
-steps="${header[2]}"
-steps=$((steps-1))
-sed -i '1d' $incplanOutput
+	eval "$madagascar $domain $problem $madagascarArgs -b $incplanInput -L > /dev/null"
+	incplanInput="$incplanInput.cnf"
+	eval "$incplanArgs --outputSolverLike $incplanInput | grep -v '^c' > $incplanOutput"
 
-cmd="$madagascar $domain $problem -s $incplanOutput -T $steps"
-eval $cmd
+	#extract the step size from the result
+	header=($(head -n 1 $incplanOutput))
+	steps="${header[2]}"
+	steps=$((steps-1))
+	sed -i '1d' $incplanOutput
+
+	cmd="$madagascar $domain $problem -s $incplanOutput -T $steps"
+	eval $cmd
+else
+	cmd="$madagascar $domain $problem ${@:2}"
+	eval $cmd
+fi
