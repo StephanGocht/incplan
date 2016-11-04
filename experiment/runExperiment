@@ -2,7 +2,7 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-filter="floor.*sat14.*\\.pddl"
+filter="sat14.*\\.pddl"
 problems="$DIR/../../../benchmarks/pddl/planning.domains.zip"
 
 unzip -Z1 $problems | grep "$filter" | grep -v domain.pddl > problemList.txt
@@ -62,15 +62,14 @@ runSingleIncrementalExperiment() {
 	solver="$DIR/../bin/incplan-picosat961"
 
 	cmd="$tool problem.pddl $toolOption :: $solver $option"
-	eval "/usr/bin/time -f 'completeTime=%e' $cmd" &> result
+	eval "timeout 5m /usr/bin/time -f 'completeTime=%e' $cmd" &> result
 	#rm -f domain.pddl problem.pddl output.sas problem.in problem.in.cnf problem.out
 }
 
 runSingleMadagascar() {
 	DIR="$1"
 	problemFile="$2"
-	tool="$3"
-	option="$4"
+	option="$3"
 
 	problems="$DIR/../../../benchmarks/pddl/planning.domains.zip"
 
@@ -91,13 +90,27 @@ runSingleMadagascar() {
 
 	solver="$DIR/../bin/incplan-picosat961"
 
+	case $option in
+		"S")
+			toolOption="-A 1 -S 1"
+		;;
+		"P")
+			toolOption=""
+		;;
+		*)
+		echo "unnown option"
+		exit 1
+		;;
+	esac
+
 	cmd="$tool problem.pddl $toolOption"
-	eval "/usr/bin/time -f 'completeTime=%e' $cmd" &> result
+	eval "timeout 5m /usr/bin/time -f 'completeTime=%e' $cmd" &> result
 	rm -f domain.pddl problem.pddl output.sas problem.in problem.in.cnf problem.out
 }
 
 export -f runSingleIncrementalExperiment
 export -f runSingleMadagascar
 
-parallel runSingleIncrementalExperiment $DIR :::: problemList.txt ::: MpC Srt ::: n
-parallel runSingleMadagascar $DIR :::: problemList.txt
+parallel -j 50 runSingleIncrementalExperiment $DIR :::: problemList.txt ::: MpC Srt ::: n r1 r0.5
+parallel -j 50 runSingleMadagascar $DIR :::: problemList.txt ::: S P
+echo "could complete" > completeFile
