@@ -266,11 +266,13 @@ class Solver {
 
 						std::cout << val << " ";
 					}
-					if (!options.normalOutput)
+					if (!options.normalOutput) {
 						std::cout << std::endl;
+					}
 				}
-				if (options.normalOutput)
+				if (options.normalOutput) {
 					std::cout << std::endl;
+				}
 			} else {
 				std::cout << "no solution" << std::endl;
 			}
