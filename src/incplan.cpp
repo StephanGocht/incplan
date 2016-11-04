@@ -343,6 +343,7 @@ class Solver {
 
 			addInvariantClauses(mapping->startSlot());
 			addGoalClauses(mapping->goalSlot());
+			addInvariantClauses(mapping->goalSlot());
 
 			addLink(mapping->startTop(), mapping->goalTop(), onlyAtK(mapping->getMakeSpan()));
 
