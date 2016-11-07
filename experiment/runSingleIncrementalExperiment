@@ -1,0 +1,60 @@
+#!/bin/bash
+DIR="$1"
+problemFile="$2"
+tool="$3"
+option="$4"
+
+problems="$DIR/../../../benchmarks/pddl/planning.domains.zip"
+
+folder="$(dirname $problemFile)"
+domainFile="$folder/domain.pddl"
+domain="$(basename $folder)"
+problem="$(basename $problemFile)"
+problem="${problem%.*}"
+
+conf="$tool-$option"
+
+case $tool in
+	"MpC")
+	tool="$DIR/runMadagascar"
+	;;
+	"Srt")
+	tool="$DIR/runSrt"
+	toolOption="exist"
+	;;
+	*)
+	echo "unnown tool"
+	exit 1
+	;;
+esac
+
+case $option in
+	"n")
+	option="-n"
+	;;
+	"r1")
+	option="-r 1"
+	;;
+	"r0.5")
+	option="-r 0.5"
+	;;
+	"r0.5-S5")
+	option="-r 0.5 -S 5"
+	;;
+	*)
+	echo "unnown option"
+	exit 1
+	;;
+esac
+
+mkdir -p "$domain/$problem/$conf"
+cd "$domain/$problem/$conf"
+
+unzip -p $problems $domainFile > domain.pddl
+unzip -p $problems $problemFile > problem.pddl
+
+solver="$DIR/../bin/incplan-picosat961"
+
+cmd="$tool problem.pddl $toolOption :: $solver $option"
+eval "timeout 5m /usr/bin/time -f 'completeTime=%e' $cmd" &> result
+rm -f domain.pddl problem.pddl output.sas problem.in problem.in.cnf problem.out

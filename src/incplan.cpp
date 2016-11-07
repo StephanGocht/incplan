@@ -496,7 +496,7 @@ int main(int argc, char **argv) {
 		TCLAP::CmdLine cmd("This tool is does sat planing using an incremental sat solver.", ' ', "0.1");
 		TCLAP::UnlabeledValueArg<std::string>  inputFile( "inputFile", "File containing the problem. Omit or use - for stdin.", !neccessaryArgument, "-", "inputFile", cmd);
 		TCLAP::ValueArg<double>  ratio("r", "ratio", "Ratio between states from start to state from end.", !neccessaryArgument, 1.0, "number between 0 and 1", cmd);
-		TCLAP::ValueArg<unsigned>  stepSize("S", "stepSize", "Ratio between states from start to state from end.", !neccessaryArgument, 1, "natural number", cmd);
+		TCLAP::ValueArg<unsigned>  stepSize("S", "stepSize", "Step size.", !neccessaryArgument, 1, "natural number", cmd);
 		TCLAP::SwitchArg unitInGoal2Assume("u", "unitInGoal2Assume", "Add units in goal clauses using assume instead of add. (singleEnded only)", cmd, defaultIsFalse);
 		TCLAP::SwitchArg solveBeforeGoalClauses("i", "intermediateSolveStep", "Add an additional solve step before adding the goal or linking clauses.", cmd, defaultIsFalse);
 		TCLAP::SwitchArg nonIncrementalSolving("n", "nonIncrementalSolving", "Do not use incremental solving.", cmd, defaultIsFalse);
