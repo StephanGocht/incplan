@@ -1,5 +1,5 @@
 #!/bin/bash
-DIR="$1"
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 problemFile="$2"
 tool="$3"
 option="$4"
@@ -7,10 +7,15 @@ option="$4"
 problems="$DIR/../../../benchmarks/pddl/planning.domains.zip"
 
 folder="$(dirname $problemFile)"
-domainFile="$folder/domain.pddl"
-domain="$(basename $folder)"
+
 problem="$(basename $problemFile)"
 problem="${problem%.*}"
+
+domain="$(basename $folder)"
+
+domainFile="$folder/domain.pddl"
+domainFile2="${folder}/domain_${problem}.pddl"
+
 
 conf="$tool-$option"
 
@@ -51,10 +56,14 @@ mkdir -p "$domain/$problem/$conf"
 cd "$domain/$problem/$conf"
 
 unzip -p $problems $domainFile > domain.pddl
+#if empty use alternate location
+if [ ! -s domain.pddl ] ; then
+	unzip -p $problems $domainFile2 > domain.pddl
+fi
 unzip -p $problems $problemFile > problem.pddl
 
 solver="$DIR/../bin/incplan-picosat961"
 
 cmd="$tool problem.pddl $toolOption :: $solver $option"
-eval "timeout 5m /usr/bin/time -f 'completeTime=%e' $cmd" &> result
-rm -f domain.pddl problem.pddl output.sas problem.in problem.in.cnf problem.out
+eval "/usr/bin/time -f 'completeTime=%e' timeout 5m $cmd" &> result
+#rm -f domain.pddl problem.pddl output.sas problem.in problem.in.cnf problem.out

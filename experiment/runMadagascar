@@ -26,12 +26,15 @@ if [ $splitPoint != 0 ]; then
 	incplanInput="problem.in"
 	incplanOutput="problem.out"
 
-	cmd="$madagascar $domain $problem $madagascarArgs -b $incplanInput -L > /dev/null"
+	cmd="$madagascar $domain $problem $madagascarArgs -b $incplanInput -L"
+	echo ""
+	echo $cmd
 	eval $cmd
 	incplanInput="$incplanInput.cnf"
 
 	cmd="$incplanArgs --outputSolverLike $incplanInput | grep -v '^c' > $incplanOutput"
-	echo "$cmd"
+	echo ""
+	echo $cmd
 	/usr/bin/time -f "solvingTime=%e" bash -c "$cmd"
 
 	#extract the step size from the result
@@ -41,8 +44,10 @@ if [ $splitPoint != 0 ]; then
 	sed -i '1d' $incplanOutput
 
 	cmd="$madagascar $domain $problem -s $incplanOutput -T $steps"
+	echo ""
+	echo $cmd
 	eval $cmd
 else
 	cmd="$madagascar $domain $problem ${@:2}"
-	eval $cmd
+	/usr/bin/time -f "solvingTime=%e" bash -c "$cmd"
 fi

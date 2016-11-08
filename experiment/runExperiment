@@ -4,8 +4,9 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 filter="sat14.*\\.pddl"
 problems="$DIR/../../../benchmarks/pddl/planning.domains.zip"
-unzip -Z1 $problems | grep "$filter" | grep -v domain.pddl > problemList.txt
+unzip -Z1 $problems | grep "$filter" | grep -v "domain[^/]*.pddl" > problemList.txt
 
-~/bin/parallel -j 62 taskset -c {%} {} ::: $DIR/runSingleMadagascar ::: $DIR :::: problemList.txt ::: S P
 ~/bin/parallel -j 62 taskset -c {%} {} ::: $DIR/runSingleIncrementalExperiment ::: $DIR :::: problemList.txt ::: MpC Srt ::: n r1 r0.5 r0.5-S5
+~/bin/parallel -j 62 taskset -c {%} {} ::: $DIR/runSingleMadagascar ::: $DIR :::: problemList.txt ::: S P
+
 echo "could complete" > completeFile

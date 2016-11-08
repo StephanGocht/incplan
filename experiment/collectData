@@ -1,0 +1,2 @@
+#!/bin/bash
+find . -name result -exec echo {} \; -exec grep -E "(Time)|(Plan is)" {} /dev/null \; > collectedData.txt
