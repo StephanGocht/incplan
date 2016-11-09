@@ -38,12 +38,12 @@ mkdir -p "$domain/$problem/$conf"
 cd "$domain/$problem/$conf"
 touch result
 
-unzip -p $problems $domainFile > domain.pddl
+unzip -p $zipFile $domainFile > domain.pddl
 #if empty use alternate location
 if [ ! -s domain.pddl ] ; then
-	unzip -p $problems $domainFile2 > domain.pddl
+	unzip -p $zipFile $domainFile2 > domain.pddl
 fi
-unzip -p $problems $problemFile > problem.pddl
+unzip -p $zipFile $problemFile > problem.pddl
 
 solver="$DIR/../bin/incplan-picosat961"
 

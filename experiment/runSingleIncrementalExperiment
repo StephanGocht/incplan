@@ -6,8 +6,6 @@ problemFile="$2"
 tool="$3"
 option="$4"
 
-problems="$DIR/../../../benchmarks/pddl/planning.domains.zip"
-
 folder="$(dirname $problemFile)"
 
 problem="$(basename $problemFile)"
@@ -38,7 +36,7 @@ case $tool in
 	toolOption="selective"
 	;;
 	*)
-	echo "unnown tool"
+	echo "unnown tool: >$tool<"
 	exit 1
 	;;
 esac
@@ -57,7 +55,7 @@ case $option in
 	option="-r 0.5 -S 5"
 	;;
 	*)
-	echo "unnown option"
+	echo "unnown option: $option"
 	exit 1
 	;;
 esac
@@ -65,14 +63,14 @@ esac
 mkdir -p "$domain/$problem/$conf"
 cd "$domain/$problem/$conf"
 
-unzip -p $problems $domainFile > domain.pddl
+unzip -p $zipFile $domainFile > domain.pddl
 #if empty use alternate location
 if [ ! -s domain.pddl ] ; then
-	unzip -p $problems $domainFile2 > domain.pddl
+	unzip -p $zipFile $domainFile2 > domain.pddl
 fi
-unzip -p $problems $problemFile > problem.pddl
+unzip -p $zipFile $problemFile > problem.pddl
 
-solver="$DIR/../bin/incplan-picosat961"
+solver="$DIR/../bin/incplan-glucose4"
 
 cmd="$tool problem.pddl $toolOption :: $solver $option"
 eval "/usr/bin/time -f 'completeTime=%e' timeout 5m $cmd" &> result
