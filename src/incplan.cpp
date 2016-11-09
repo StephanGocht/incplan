@@ -22,6 +22,8 @@ extern "C" {
 
 #include <tclap/CmdLine.h>
 
+#define UNUSED(x) (void)(x)
+
 #define MAX_STEPS 1000
 #define SAT 10
 #define UNSAT 20
@@ -225,10 +227,20 @@ private:
 	std::vector<int> goalStack;
 };
 
+extern "C" {
+	int state;
+	int callback(void* state){
+		UNUSED(state);
+		return 0;
+	}
+}
+
+
 class Solver {
 	public:
 		Solver(const Problem* problem){
 			this->ipasir = ipasir_init();
+			ipasir_set_terminate(this->ipasir, &state, &callback);
 			this->problem = problem;
 		}
 
