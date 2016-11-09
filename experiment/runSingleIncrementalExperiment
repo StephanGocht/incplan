@@ -1,5 +1,7 @@
 #!/bin/bash
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+zipFile="$1"
 problemFile="$2"
 tool="$3"
 option="$4"
@@ -23,9 +25,17 @@ case $tool in
 	"MpC")
 	tool="$DIR/runMadagascar"
 	;;
-	"Srt")
+	"Srt-e")
 	tool="$DIR/runSrt"
 	toolOption="exist"
+	;;
+	"Srt-r")
+	tool="$DIR/runSrt"
+	toolOption="reinforced"
+	;;
+	"Srt-s")
+	tool="$DIR/runSrt"
+	toolOption="selective"
 	;;
 	*)
 	echo "unnown tool"

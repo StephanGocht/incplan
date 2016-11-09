@@ -3,10 +3,14 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 filter="sat14.*\\.pddl"
-problems="$DIR/../../../benchmarks/pddl/planning.domains.zip"
-unzip -Z1 $problems | grep "$filter" | grep -v "domain[^/]*.pddl" > problemList.txt
+zipFile="$DIR/../../../benchmarks/pddl/planning.domains.zip"
 
-~/bin/parallel -j 62 taskset -c {%} {} ::: $DIR/runSingleIncrementalExperiment ::: $DIR :::: problemList.txt ::: MpC Srt ::: n r1 r0.5 r0.5-S5
-~/bin/parallel -j 62 taskset -c {%} {} ::: $DIR/runSingleMadagascar ::: $DIR :::: problemList.txt ::: S P
+filter="seq-agl.*\\.pddl"
+zipFile="$DIR/../../../benchmarks/pddl/ipc14.zip"
+
+unzip -Z1 $zipFile | grep "$filter" | grep -v "domain[^/]*.pddl" > problemList.txt
+
+~/bin/parallel -j 32 --shuf taskset -c {= '$_=$job->slot()-1' =} {} ::: $DIR/runSingleIncrementalExperiment ::: $zipFile :::: problemList.txt ::: MpC Srt ::: n r1 r0.5 r0.5-S5
+~/bin/parallel -j 32 --shuf taskset -c {= '$_=$job->slot()-1' =} {} ::: $DIR/runSingleMadagascar ::: $zipFile :::: problemList.txt ::: S P
 
 echo "could complete" > completeFile
