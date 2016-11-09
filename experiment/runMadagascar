@@ -39,6 +39,8 @@ if [ $splitPoint != 0 ]; then
 
 	#extract the step size from the result
 	header=($(head -n 1 $incplanOutput))
+	echo "header: $header"
+	varsPerTime="${header[1]}"
 	steps="${header[2]}"
 	steps=$((steps-1))
 	sed -i '1d' $incplanOutput
