@@ -5,6 +5,7 @@ zipFile="$1"
 problemFile="$2"
 tool="$3"
 option="$4"
+solver="$5"
 
 folder="$(dirname $problemFile)"
 
@@ -17,7 +18,8 @@ domainFile="$folder/domain.pddl"
 domainFile2="${folder}/domain_${problem}.pddl"
 
 
-conf="$tool-$option"
+conf="${solver}_${tool}_${option}"
+solver="$DIR/../bin/incplan-${solver}"
 
 case $tool in
 	"MpC")
@@ -70,8 +72,8 @@ if [ ! -s domain.pddl ] ; then
 fi
 unzip -p $zipFile $problemFile > problem.pddl
 
-solver="$DIR/../bin/incplan-glucose4"
+echo "$DIR/$@" > result
 
 cmd="$tool problem.pddl $toolOption :: $solver $option"
-eval "/usr/bin/time -f 'completeTime=%e' timeout 5m $cmd" &> result
-#rm -f domain.pddl problem.pddl output.sas problem.in problem.in.cnf problem.out
+eval "/usr/bin/time -f 'completeTime=%e' timeout 5m $cmd" &>> result
+rm -f domain.pddl problem.pddl output.sas problem.in problem.in.cnf problem.out

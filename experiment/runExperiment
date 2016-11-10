@@ -10,7 +10,33 @@ zipFile="$DIR/../../../benchmarks/pddl/ipc14.zip"
 
 unzip -Z1 $zipFile | grep "$filter" | grep -v "domain[^/]*.pddl" > problemList.txt
 
-~/bin/parallel -j 32 --shuf --rpl '{..} 1 $_=$job->slot()-1' taskset -c {..} {} ::: $DIR/runSingleIncrementalExperiment ::: $zipFile :::: problemList.txt ::: MpC Srt-e Srt-r Srt-s ::: n r1 r0.5 r0.5-S5
-~/bin/parallel -j 32 --shuf --rpl '{..} 1 $_=$job->slot()-1' taskset -c {..} {} ::: $DIR/runSingleMadagascar ::: $zipFile :::: problemList.txt ::: S P
+# Aviable Solver:
+# abcdsat_inc
+# cominisatps2sun
+# cominisatps2sun_nopre
+# cryptominisat4
+# cryptominisat4auto
+# debugprint
+# glucose4
+# minisat220
+# picosat961
+# riss_521
+# riss_600
+
+# Aviable Tools:
+# MpC
+# Srt-e
+# Srt-r
+# Srt-s
+
+# Aviable Options:
+# n
+# r1
+# r0.5
+# r0.5-S5
+
+~/bin/parallel -j 32 --shuf --rpl '{..} 1 $_=$job->slot()-1' taskset -c {..} {} ::: $DIR/runSingleIncrementalExperiment ::: $zipFile :::: problemList.txt ::: MpC ::: n r0.5 ::: abcdsat_inc cominisatps2sun cominisatps2sun_nopre cryptominisat4 cryptominisat4auto glucose4 minisat220 picosat961 riss_521 riss_600
+#~/bin/parallel -j 32 --shuf --rpl '{..} 1 $_=$job->slot()-1' taskset -c {..} {} ::: $DIR/runSingleIncrementalExperiment ::: $zipFile :::: problemList.txt ::: MpC Srt-e Srt-r Srt-s ::: n r1 r0.5 r0.5-S5 ::: picosat961
+#~/bin/parallel -j 32 --shuf --rpl '{..} 1 $_=$job->slot()-1' taskset -c {..} {} ::: $DIR/runSingleMadagascar ::: $zipFile :::: problemList.txt ::: S P
 
 echo "could complete" > completeFile
