@@ -318,8 +318,9 @@ class Solver {
 				}
 				makeSpan += options.stepSize;
 				if (options.nonIncrementalSolving) {
-					ipasir_release(ipasir);
-					ipasir = ipasir_init();
+					ipasir_release(this->ipasir);
+					this->ipasir = ipasir_init();
+					ipasir_set_terminate(this->ipasir, &state, &callback);
 					addInitialClauses();
 					addInvariantClauses(0);
 					previousMakeSpan = 0;
