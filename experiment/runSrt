@@ -34,7 +34,7 @@ if [ $splitPoint != 0 ]; then
 
 	cmd="$incplanArgs $incplanInput | grep -v '^c' > $incplanOutput"
 	echo $cmd
-	/usr/bin/time -f "solvingTime=%e" bash -c "$cmd"
+	/usr/bin/time -f "solvingTime=%e %S %U" bash -c "$cmd"
 
 	cmd="$srt check $srtArgs $problem $incplanOutput"
 	echo $cmd

@@ -35,7 +35,7 @@ if [ $splitPoint != 0 ]; then
 	cmd="$incplanArgs --outputSolverLike $incplanInput | grep -v '^c' > $incplanOutput"
 	echo ""
 	echo $cmd
-	/usr/bin/time -f "solvingTime=%e" bash -c "$cmd"
+	/usr/bin/time -f "solvingTime=%e %S %U" bash -c "$cmd"
 
 	#extract the step size from the result
 	header=($(head -n 1 $incplanOutput))

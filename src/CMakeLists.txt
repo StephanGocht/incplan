@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 project(incplan)
 
-set(CMAKE_CXX_FLAGS "-std=c++14 -g -Wall -Wextra -Wpedantic -pthread")
+set(CMAKE_CXX_FLAGS "-std=c++14 -O3 -Wall -Wextra -Wpedantic -pthread")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libstdc++")
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/../bin)

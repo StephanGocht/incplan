@@ -5,14 +5,14 @@ zipFile="$1"
 problemFile="$2"
 option="$3"
 
-problems="$DIR/../../../benchmarks/pddl/planning.domains.zip"
-
 folder="$(dirname $problemFile)"
+parentDirectory="$(dirname $folder)"
 
 problem="$(basename $problemFile)"
 problem="${problem%.*}"
 
 domain="$(basename $folder)"
+track="$(basename $parentDirectory)"
 
 domainFile="$folder/domain.pddl"
 domainFile2="${folder}/domain_${problem}.pddl"
@@ -34,8 +34,8 @@ esac
 
 tool="$DIR/runMadagascar"
 
-mkdir -p "$domain/$problem/$conf"
-cd "$domain/$problem/$conf"
+mkdir -p "$track/$domain/$problem/$conf"
+cd "$track/$domain/$problem/$conf"
 touch result
 
 unzip -p $zipFile $domainFile > domain.pddl
@@ -48,5 +48,5 @@ unzip -p $zipFile $problemFile > problem.pddl
 solver="$DIR/../bin/incplan-picosat961"
 
 cmd="$tool problem.pddl $toolOption"
-eval "/usr/bin/time -f 'completeTime=%e' timeout 5m $cmd" &> result
-#rm -f domain.pddl problem.pddl output.sas problem.in problem.in.cnf problem.out
+eval "/usr/bin/time -f 'completeTime=%e %S %U' timeout 5m $cmd" &> result
+rm -f domain.pddl problem.pddl output.sas problem.in problem.in.cnf problem.out gmon.out

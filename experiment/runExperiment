@@ -5,10 +5,10 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 filter="sat14.*\\.pddl"
 zipFile="$DIR/../../../benchmarks/pddl/planning.domains.zip"
 
-filter="seq-agl.*\\.pddl"
+filter="seq-(agl|opt|sat).*\.pddl"
 zipFile="$DIR/../../../benchmarks/pddl/ipc14.zip"
 
-unzip -Z1 $zipFile | grep "$filter" | grep -v "domain[^/]*.pddl" > problemList.txt
+unzip -Z1 $zipFile | grep -E "$filter" | grep -v "domain[^/]*.pddl" > problemList.txt
 
 # Aviable Solver:
 # abcdsat_inc
@@ -35,8 +35,10 @@ unzip -Z1 $zipFile | grep "$filter" | grep -v "domain[^/]*.pddl" > problemList.t
 # r0.5
 # r0.5-S5
 
-~/bin/parallel -j 32 --shuf --rpl '{..} 1 $_=$job->slot()-1' taskset -c {..} {} ::: $DIR/runSingleIncrementalExperiment ::: $zipFile :::: problemList.txt ::: MpC ::: n r0.5 ::: abcdsat_inc cominisatps2sun cominisatps2sun_nopre cryptominisat4 cryptominisat4auto glucose4 minisat220 picosat961 riss_521 riss_600
-#~/bin/parallel -j 32 --shuf --rpl '{..} 1 $_=$job->slot()-1' taskset -c {..} {} ::: $DIR/runSingleIncrementalExperiment ::: $zipFile :::: problemList.txt ::: MpC Srt-e Srt-r Srt-s ::: n r1 r0.5 r0.5-S5 ::: picosat961
-#~/bin/parallel -j 32 --shuf --rpl '{..} 1 $_=$job->slot()-1' taskset -c {..} {} ::: $DIR/runSingleMadagascar ::: $zipFile :::: problemList.txt ::: S P
+# Child processes will inherit limit, the limit is not shared
+ulimit -Sv 10000000 #10 Gb
+
+~/bin/parallel -j 32 --shuf --rpl '{..} 1 $_=$job->slot()-1' taskset -c {..} {} ::: $DIR/runSingleIncrementalExperiment ::: $zipFile :::: problemList.txt ::: MpC Srt-e Srt-r Srt-s ::: n r1 r0.5 r0.5-S5 ::: cominisatps2sun_nopre
+~/bin/parallel -j 32 --shuf --rpl '{..} 1 $_=$job->slot()-1' taskset -c {..} {} ::: $DIR/runSingleMadagascar ::: $zipFile :::: problemList.txt ::: S P
 
 echo "could complete" > completeFile

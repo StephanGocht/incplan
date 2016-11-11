@@ -8,11 +8,13 @@ option="$4"
 solver="$5"
 
 folder="$(dirname $problemFile)"
+parentDirectory="$(dirname $folder)"
 
 problem="$(basename $problemFile)"
 problem="${problem%.*}"
 
 domain="$(basename $folder)"
+track="$(basename $parentDirectory)"
 
 domainFile="$folder/domain.pddl"
 domainFile2="${folder}/domain_${problem}.pddl"
@@ -62,8 +64,9 @@ case $option in
 	;;
 esac
 
-mkdir -p "$domain/$problem/$conf"
-cd "$domain/$problem/$conf"
+mkdir -p "$track/$domain/$problem/$conf"
+cd "$track/$domain/$problem/$conf"
+touch result
 
 unzip -p $zipFile $domainFile > domain.pddl
 #if empty use alternate location
@@ -72,8 +75,8 @@ if [ ! -s domain.pddl ] ; then
 fi
 unzip -p $zipFile $problemFile > problem.pddl
 
-echo "$DIR/$@" > result
+echo "$DIR/runSingleIncrementalExperiment $@" > result
 
 cmd="$tool problem.pddl $toolOption :: $solver $option"
-eval "/usr/bin/time -f 'completeTime=%e' timeout 5m $cmd" &>> result
-rm -f domain.pddl problem.pddl output.sas problem.in problem.in.cnf problem.out
+eval "/usr/bin/time -f 'completeTime=%e %S %U' timeout 5m $cmd" &>> result
+rm -f domain.pddl problem.pddl output.sas problem.in problem.in.cnf problem.out gmon.out
