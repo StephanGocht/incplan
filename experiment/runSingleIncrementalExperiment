@@ -24,8 +24,20 @@ conf="${solver}_${tool}_${option}"
 solver="$DIR/../bin/incplan-${solver}"
 
 case $tool in
-	"MpC")
+	"MpC-e")
+	#exist
 	tool="$DIR/runMadagascar"
+	toolOption="-P 2"
+	;;
+	"MpC-a")
+	#forall
+	tool="$DIR/runMadagascar"
+	toolOption="-P 1"
+	;;
+	"MpC-s")
+	#sequential
+	tool="$DIR/runMadagascar"
+	toolOption="-P 0"
 	;;
 	"Srt-e")
 	tool="$DIR/runSrt"
@@ -48,6 +60,9 @@ esac
 case $option in
 	"n")
 	option="-n"
+	;;
+	"s")
+	option="-s"
 	;;
 	"r1")
 	option="-r 1"
@@ -78,5 +93,5 @@ unzip -p $zipFile $problemFile > problem.pddl
 echo "$DIR/runSingleIncrementalExperiment $@" > result
 
 cmd="$tool problem.pddl $toolOption :: $solver $option"
-eval "/usr/bin/time -f 'completeTime=%e %S %U' timeout 5m $cmd" &>> result
+/usr/bin/time -f 'completeTime=%e %S %U' bash -c "ulimit -St 300; $cmd" &>> result
 rm -f domain.pddl problem.pddl output.sas problem.in problem.in.cnf problem.out gmon.out

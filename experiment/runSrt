@@ -1,7 +1,7 @@
 #!/bin/bash
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-srt="java -jar $DIR/../bin/srt.jar"
+srt="java -Xmx8G -jar $DIR/../bin/srt.jar"
 
 i=0
 splitPoint=0
@@ -34,11 +34,13 @@ if [ $splitPoint != 0 ]; then
 
 	cmd="$incplanArgs $incplanInput | grep -v '^c' > $incplanOutput"
 	echo $cmd
-	/usr/bin/time -f "solvingTime=%e %S %U" bash -c "$cmd"
+	/usr/bin/time -f "solvingTime=%e %S %U" bash -c "ulimit -Sv 8388608; $cmd"
 
-	cmd="$srt check $srtArgs $problem $incplanOutput"
-	echo $cmd
-	eval $cmd
+	if [ "$?" -eq 0 ]; then
+		cmd="$srt check $srtArgs $problem $incplanOutput"
+		echo $cmd
+		eval $cmd
+	fi
 
 else
 	echo "Srt cant solve problems alone please provide incplan"

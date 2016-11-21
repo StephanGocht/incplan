@@ -48,5 +48,5 @@ unzip -p $zipFile $problemFile > problem.pddl
 solver="$DIR/../bin/incplan-picosat961"
 
 cmd="$tool problem.pddl $toolOption"
-eval "/usr/bin/time -f 'completeTime=%e %S %U' timeout 5m $cmd" &> result
+/usr/bin/time -f 'completeTime=%e %S %U' bash -c  "ulimit -St 300; $cmd" &> result
 rm -f domain.pddl problem.pddl output.sas problem.in problem.in.cnf problem.out gmon.out

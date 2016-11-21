@@ -26,7 +26,7 @@ if [ $splitPoint != 0 ]; then
 	incplanInput="problem.in"
 	incplanOutput="problem.out"
 
-	cmd="$madagascar $domain $problem $madagascarArgs -b $incplanInput -L"
+	cmd="$madagascar $domain $problem -m 8192 -t 300 $madagascarArgs -b $incplanInput -L"
 	echo ""
 	echo $cmd
 	eval $cmd
@@ -35,21 +35,25 @@ if [ $splitPoint != 0 ]; then
 	cmd="$incplanArgs --outputSolverLike $incplanInput | grep -v '^c' > $incplanOutput"
 	echo ""
 	echo $cmd
-	/usr/bin/time -f "solvingTime=%e %S %U" bash -c "$cmd"
+	/usr/bin/time -f "solvingTime=%e %S %U" bash -c "ulimit -Sv 8388608; $cmd"
 
-	#extract the step size from the result
-	header=($(head -n 1 $incplanOutput))
-	echo "header: $header"
-	varsPerTime="${header[1]}"
-	steps="${header[2]}"
-	steps=$((steps-1))
-	sed -i '1d' $incplanOutput
+	if [ "$?" -eq 0 ]; then
+		#extract the step size from the result
+		header=($(head -n 1 $incplanOutput))
+		varsPerTime="${header[1]}"
+		steps="${header[2]}"
+		echo "plan size: $steps"
+		echo "vars per time: $varsPerTime"
+		steps=$((steps-1))
+		sed -i '1d' $incplanOutput
 
-	cmd="$madagascar $domain $problem -s $incplanOutput -T $steps"
-	echo ""
-	echo $cmd
-	eval $cmd
+		cmd="$madagascar $domain $problem -m 8192 -t 300 $madagascarArgs -s $incplanOutput -T $steps"
+		echo ""
+		echo $cmd
+		eval $cmd
+	fi
 else
 	cmd="$madagascar $domain $problem ${@:2}"
-	/usr/bin/time -f "solvingTime=%e" bash -c "$cmd"
+	/usr/bin/time -f "solvingTime=%e %S %U" bash -c "$cmd"
 fi
+	echo ""
