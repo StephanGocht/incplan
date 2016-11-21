@@ -3,7 +3,7 @@ To view the benchmark results you need jupyter notebook. The resultAnalysis.ipyn
 
 2) Reproduce the experiments from the icaps 2017 paper
 
-To reproduce the experiment make sure to check out commit [todo].
+To reproduce the experiment make sure to check out commit f951c76b5cf97bf96.
 
 2.1) Planning Tools
 2.1.1) Madgascar

@@ -7,8 +7,13 @@ I.e. from http://baldur.iti.kit.edu/sat-race-2015/downloads/ipasir.zip
 Drop the sat solver library implementing the ipasir api in lib/ipasir
 
 ## Building
+```
 cd build
 cmake ../src
 make
+```
 
 The binaries will now be in bin/
+
+## Experiments
+For information about the experiments of our icaps17 paper submission see experiment/icaps17/README
