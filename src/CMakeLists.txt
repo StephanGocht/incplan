@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.8.12)
 project(incplan)
 
 set(CMAKE_CXX_FLAGS "-std=c++14 -O3 -Wall -Wextra -Wpedantic -pthread")
@@ -6,17 +6,29 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libstdc++")
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/../bin)
 
-set(ipasir_lib_dir "${CMAKE_SOURCE_DIR}/../lib/ipasir")
+set (CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake")
+include(cotire)
+set (COTIRE_MINIMUM_NUMBER_OF_TARGET_SOURCES 1)
 
+set(ipasir_lib_dir "${CMAKE_SOURCE_DIR}/../lib/ipasir")
 file(GLOB ipasir_libs RELATIVE ${ipasir_lib_dir}
 	${ipasir_lib_dir}/*.a
 	)
 
 include_directories(${CMAKE_SOURCE_DIR})
+include_directories(${CMAKE_SOURCE_DIR}/libs)
 file(WRITE ${CMAKE_BINARY_DIR}/dummy.cpp "")
 
 add_library(all_sources incplan.cpp)
+
+set_target_properties(all_sources PROPERTIES
+	COTIRE_PREFIX_HEADER_IGNORE_PATH "${CMAKE_SOURCE_DIR}"
+		_PREFIX_HEADER_INCLUDE_PATH "${CMAKE_SOURCE_DIR}/libs")
+
+cotire(all_sources)
+
 add_library(ipasirdebugprint ipasirprint.cpp)
+add_dependencies(all_sources ipasirdebugprint)
 
 FOREACH(ipasir_lib ${ipasir_libs})
 	string(REGEX REPLACE "libipasir(.*).a" "\\1" libname ${ipasir_lib})

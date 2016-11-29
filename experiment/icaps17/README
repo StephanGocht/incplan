@@ -12,13 +12,13 @@ Get madagascar from https://users.ics.aalto.fi/rintanen/satplan.html the Februar
 Apply the patch provided (./madagascarPatch.diff) and compile madagascar. Then move MpC to the bin directory of this repository.
 
 2.1.2) Freelunch
-Get the freelunch from [todo]
+Is already provided in this repository. (bin/srt.jar)
 
 2.2) Sat solver
 Get the incremental sat solvers from the 2016 SAT competition:
 http://baldur.iti.kit.edu/sat-competition-2016/downloads/incremental.zip
 
-compile the cominisatps2sun_nopre solver and copy libipasircominisatps2sun_nopre.a to lib/ipasir
+compile the cominisatps2sun_nopre solver and copy libipasircominisatps2sun_nopre.a to lib/ipasir/
 
 now compile incplan:
 cd incplan/build

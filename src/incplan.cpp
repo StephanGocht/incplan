@@ -1,11 +1,3 @@
-/*
- * genipaplan.cpp
- *
- *  Created on: Jul 20, 2015
- *      Author: Tomas Balyo, KIT
-		Stephan Gocht, KIT
- */
-
 extern "C" {
     #include "ipasir.h"
 }
@@ -19,8 +11,11 @@ extern "C" {
 #include <limits>
 #include <cassert>
 #include <memory>
+#include <cmath>
 
-#include <tclap/CmdLine.h>
+#include "tclap/CmdLine.h"
+#include "logging.h"
+INITIALIZE_EASYLOGGINGPP
 
 #define UNUSED(x) (void)(x)
 
@@ -39,7 +34,7 @@ struct Options {
 	bool singleEnded;
 	bool cleanLitearl;
 	double ratio;
-	unsigned stepSize;
+	std::function<int(int)> stepToMakespan;
 };
 
 Options options;
@@ -81,13 +76,11 @@ private:
 			std::string line;
 			in.clear();
 			in >> line;
-			std::cout << "Input Error: Expected [iugt] cnf [0-9*] [0-9*] but got: " << line << std::endl;
-			std::exit(1);
+			LOG(FATAL) << "Input Error: Expected [iugt] cnf [0-9*] [0-9*] but got: " << line;
 		}
 
 		if (type != expectedType) {
-			std::cout << "Input Error: Expected type " << expectedType << " but got: " << type << std::endl;
-			std::abort();
+			LOG(FATAL) << "Input Error: Expected type " << expectedType << " but got: " << type;
 		}
 
 		switch(type) {
@@ -97,15 +90,13 @@ private:
 			case 't':
 			break;
 			default:
-			std::cout << "Input Error: Expected type i,u,g or t but got " << type << std::endl;
-			std::abort();
+			LOG(FATAL) << "Input Error: Expected type i,u,g or t but got " << type;
 		}
 
 		if (numberLiteralsPerTime == 0) {
 			numberLiteralsPerTime = literals;
 		} else if (literals != numberLiteralsPerTime && (type != 't' || literals != 2 * numberLiteralsPerTime)) {
-			std::cout << "Input Error: Wrong Number of Literals!" << literals << ":" << numberLiteralsPerTime << type << std::endl;
-			std::abort();
+			LOG(FATAL) << "Input Error: Wrong Number of Literals!" << literals << ":" << numberLiteralsPerTime << type;
 		}
 
 		return numberClauses;
@@ -123,8 +114,7 @@ private:
 
 	void parse(std::istream& in) {
 		if (in.eof()) {
-			std::cout << "Input Error: Got empty File." << std::endl;
-			std::abort();
+			LOG(FATAL) << "Input Error: Got empty File.";
 		}
 		skipComments(in);
 		parseCnfHeader('i', in);
@@ -146,9 +136,10 @@ struct AddInfo {
 
 class TimeSlotMapping {
 public:
-	TimeSlotMapping(double ratio, unsigned makeSpan) {
+	TimeSlotMapping(double ratio, std::function<int(int)> makeSpanStep):
+			_makeSpanStep(makeSpanStep) {
 		this->ratio = ratio;
-		this->makeSpan = makeSpan;
+		this->_step = 0;
 		startStack.push_back(0);
 		goalStack.push_back(1);
 	}
@@ -165,7 +156,7 @@ public:
 	}
 
 	bool hasToAdd(){
-		return makeSpan > (getNumberOfTimeSlots() - 2);
+		return getMakeSpan() > (getNumberOfTimeSlots() - 2);
 	}
 
 	unsigned getNumberOfTimeSlots() {
@@ -212,16 +203,17 @@ public:
 		return goalStack[0];
 	}
 
-	void incrementMakeSpan(unsigned k) {
-		makeSpan += k;
+	void incrementMakeSpan() {
+		_step += 1;
 	}
 
 	unsigned getMakeSpan(){
-		return makeSpan;
+		return _makeSpanStep(_step);
 	}
 
 private:
-	unsigned makeSpan;
+	std::function<int(int)> _makeSpanStep;
+	unsigned _step;
 	double ratio;
 	std::vector<int> startStack;
 	std::vector<int> goalStack;
@@ -248,11 +240,14 @@ class Solver {
 		 * Solve the problem. Return true if a solution was found.
 		 */
 		bool solve(){
+			bool result;
 			if (options.singleEnded) {
-				return solveOneEnded();
+				result = solveOneEnded();
 			} else {
-				return solveDoubleEnded();
+				result = solveDoubleEnded();
 			}
+			LOG(INFO) << "Final Makespan: " << finalMakeSpan;
+			return result;
 		}
 
 		void printSolution() {
@@ -303,20 +298,27 @@ class Solver {
 		int result;
 
 		bool solveOneEnded(){
-			int makeSpan = 0;
+			int step = 0;
+			int makeSpan = options.stepToMakespan(0);
 			int previousMakeSpan = 0;
 
 			addInitialClauses();
 			addInvariantClauses(0);
 			addGoalClauses(0, onlyAtK(makeSpan));
-			ipasir_assume(ipasir, onlyAtK(0));
-			result = ipasir_solve(ipasir);
+
+			VLOG(1) << "Solving make span" << makeSpan;
+			{
+				TIMED_SCOPE(blkScope, "solve");
+				ipasir_assume(ipasir, onlyAtK(makeSpan));
+				result = ipasir_solve(ipasir);
+			}
 
 			while (result == UNSAT && makeSpan < MAX_STEPS) {
 				if (options.cleanLitearl) {
 					ipasir_add(ipasir, onlyAtK(makeSpan));
 				}
-				makeSpan += options.stepSize;
+				step += 1;
+				makeSpan += options.stepToMakespan(step);
 				if (options.nonIncrementalSolving) {
 					ipasir_release(this->ipasir);
 					this->ipasir = ipasir_init();
@@ -333,13 +335,18 @@ class Solver {
 				previousMakeSpan = makeSpan;
 
 				if (options.solveBeforeGoalClauses) {
+					TIMED_SCOPE(blkScope, "solveBeforeGoalClauses");
 					ipasir_solve(ipasir);
 				}
 
 				addGoalClauses(makeSpan, onlyAtK(makeSpan));
-				ipasir_assume(ipasir, onlyAtK(makeSpan));
 
-				result = ipasir_solve(ipasir);
+				VLOG(1) << "Solving make span" << makeSpan;
+				{
+					TIMED_SCOPE(blkScope, "solve");
+					ipasir_assume(ipasir, onlyAtK(makeSpan));
+					result = ipasir_solve(ipasir);
+				}
 			}
 
 			this->finalMakeSpan = makeSpan;
@@ -350,8 +357,8 @@ class Solver {
 			addInitialClauses();
 			{
 				double ratio = options.ratio;
-				int makeSpan = 0;
-				mapping = std::unique_ptr<TimeSlotMapping>(new TimeSlotMapping(ratio, makeSpan));
+				mapping = std::unique_ptr<TimeSlotMapping>(
+					new TimeSlotMapping(ratio, options.stepToMakespan));
 			}
 
 			addInvariantClauses(mapping->startSlot());
@@ -360,29 +367,39 @@ class Solver {
 
 			addLink(mapping->startTop(), mapping->goalTop(), onlyAtK(mapping->getMakeSpan()));
 
-			ipasir_assume(ipasir, onlyAtK(0));
-			result = ipasir_solve(ipasir);
+			VLOG(1) << "Solving make span" << mapping->getMakeSpan();
+			{
+				TIMED_SCOPE(blkScope, "solve");
+				ipasir_assume(ipasir, onlyAtK(mapping->getMakeSpan()));
+				result = ipasir_solve(ipasir);
+			}
 
 			while (result == UNSAT && mapping->getMakeSpan() < MAX_STEPS) {
 				if (options.cleanLitearl) {
 					ipasir_add(ipasir, onlyAtK(mapping->getMakeSpan()));
 				}
 
-				mapping->incrementMakeSpan(options.stepSize);
+				mapping->incrementMakeSpan();
 
 				while (mapping->hasToAdd()) {
 					AddInfo info = mapping->add();
 					addInvariantClauses(info.addedSlot);
 					addTransferClauses(info.transitionSource, info.transitionGoal);
 				}
+
 				if (options.solveBeforeGoalClauses) {
+					TIMED_SCOPE(blkScope, "solveBeforeGoalClauses");
 					ipasir_solve(ipasir);
 				}
 
 				addLink(mapping->startTop(), mapping->goalTop(), onlyAtK(mapping->getMakeSpan()));
-				ipasir_assume(ipasir, onlyAtK(mapping->getMakeSpan()));
 
-				result = ipasir_solve(ipasir);
+				VLOG(1) << "Solving make span" << mapping->getMakeSpan() << std::endl;
+				{
+					TIMED_SCOPE(blkScope, "solve");
+					ipasir_assume(ipasir, onlyAtK(mapping->getMakeSpan()));
+					result = ipasir_solve(ipasir);
+				}
 			}
 
 			this->finalMakeSpan = mapping->getMakeSpan();
@@ -501,7 +518,7 @@ class Solver {
 		}
 };
 
-int main(int argc, char **argv) {
+void parseOptions(int argc, char **argv) {
 	try {
 		//bool defaultIsTrue = true;
 		bool defaultIsFalse = false;
@@ -509,7 +526,9 @@ int main(int argc, char **argv) {
 		TCLAP::CmdLine cmd("This tool is does sat planing using an incremental sat solver.", ' ', "0.1");
 		TCLAP::UnlabeledValueArg<std::string>  inputFile( "inputFile", "File containing the problem. Omit or use - for stdin.", !neccessaryArgument, "-", "inputFile", cmd);
 		TCLAP::ValueArg<double>  ratio("r", "ratio", "Ratio between states from start to state from end.", !neccessaryArgument, 1.0, "number between 0 and 1", cmd);
-		TCLAP::ValueArg<unsigned>  stepSize("S", "stepSize", "Step size.", !neccessaryArgument, 1, "natural number", cmd);
+		TCLAP::ValueArg<unsigned>  linearStepSize("l", "linearStepSize", "Linear step size.", !neccessaryArgument, 1, "natural number", cmd);
+		TCLAP::ValueArg<float> exponentialStepBasis("e", "exponentialStepBasis", "Basis of exponential step size. Combinable with options -l and -o (varibale names are equal to parameter): step size = l*n + floor(e ^ (n + o))", !neccessaryArgument, 1, "natural number", cmd);
+		TCLAP::ValueArg<float> exponentialStepOffset("o", "exponentialStepOffset", "Basis of exponential step size.", !neccessaryArgument, 1, "natural number", cmd);
 		TCLAP::SwitchArg unitInGoal2Assume("u", "unitInGoal2Assume", "Add units in goal clauses using assume instead of add. (singleEnded only)", cmd, defaultIsFalse);
 		TCLAP::SwitchArg solveBeforeGoalClauses("i", "intermediateSolveStep", "Add an additional solve step before adding the goal or linking clauses.", cmd, defaultIsFalse);
 		TCLAP::SwitchArg nonIncrementalSolving("n", "nonIncrementalSolving", "Do not use incremental solving.", cmd, defaultIsFalse);
@@ -534,7 +553,13 @@ int main(int argc, char **argv) {
 		options.ratio = ratio.getValue();
 		options.singleEnded = singleEnded.getValue();
 		options.cleanLitearl = cleanLitearl.getValue();
-		options.stepSize = stepSize.getValue();
+		{
+			int l = linearStepSize.getValue();
+			float e = exponentialStepBasis.getValue();
+			float o = exponentialStepOffset.getValue();
+			options.stepToMakespan = [l,e,o](int n){return l * n + std::floor(pow(e,(n + o)));};
+		}
+
 
 		if (options.nonIncrementalSolving) {
 			options.singleEnded = true;
@@ -544,19 +569,35 @@ int main(int argc, char **argv) {
 		options.error = true;
 		std::cerr << "error: " << e.error() << " for arg " << e.argId() << std::endl;
 	}
+}
 
-	std::cout << "c Using the incremental SAT solver " << ipasir_signature() << std::endl;
+void initLogger(){
+el::Configurations conf;
+conf.setToDefault();
+conf.setGlobally(el::ConfigurationType::Format, "c %level %fbase:%line; %msg");
+conf.set(el::Level::Fatal, el::ConfigurationType::Format, "%level %fbase:%line; %msg");
+el::Loggers::reconfigureAllLoggers(conf);
+
+conf.setGlobally(el::ConfigurationType::Format, "c %level %datetime{%H:%m:%s}; %msg");
+el::Loggers::reconfigureLogger("performance", conf);
+}
+
+int main(int argc, char **argv) {
+	START_EASYLOGGINGPP(argc, argv);
+	initLogger();
+	parseOptions(argc, argv);
+
+	LOG(INFO) << "Using the incremental SAT solver " << ipasir_signature();
 
 	std::istream* in;
 	std::ifstream is;
 	if (options.inputFile == "-") {
 		in = &std::cin;
-		std::cout << "c Using standard input." << std::endl;
+		LOG(INFO) << "Using standard input." << std::endl;
 	} else {
 		is.open(options.inputFile);
 		if (is.fail()){
-			std::cout << "Input Error can't open file: " << options.inputFile << std::endl;
-			std::abort();
+			LOG(FATAL) << "Input Error can't open file: " << options.inputFile;
 		}
 		in = &is;
 	}
@@ -570,6 +611,6 @@ int main(int argc, char **argv) {
 	}
 
 	if (!solved) {
-		std::cout << "c WARNING: did not get a solution within the maximal make span" << std::endl;
+		LOG(WARNING) << "Did not get a solution within the maximal make span.";
 	}
 }
