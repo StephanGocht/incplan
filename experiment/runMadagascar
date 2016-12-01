@@ -3,6 +3,7 @@
 # -S 1 test each step separately
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 madagascar=$DIR/../bin/MpC
+# madagascar="$DIR/../bin/M -C 1.41"
 
 i=0
 splitPoint=0
@@ -32,12 +33,16 @@ if [ $splitPoint != 0 ]; then
 	eval $cmd
 	incplanInput="$incplanInput.cnf"
 
-	cmd="$incplanArgs --outputSolverLike $incplanInput | grep -v '^c' > $incplanOutput"
+	cmd="$incplanArgs --outputSolverLike $incplanInput > ${incplanOutput}.all"
 	echo ""
 	echo $cmd
 	/usr/bin/time -f "solvingTime=%e %S %U" bash -c "ulimit -Sv 8388608; $cmd"
-
 	if [ "$?" -eq 0 ]; then
+
+		#print comments from incplan
+		grep '^ci' "${incplanOutput}.all"
+		grep -v '^c' ${incplanOutput}.all | grep -v -e '^$' > $incplanOutput
+
 		#extract the step size from the result
 		header=($(head -n 1 $incplanOutput))
 		varsPerTime="${header[1]}"
@@ -45,7 +50,7 @@ if [ $splitPoint != 0 ]; then
 		echo "plan size: $steps"
 		echo "vars per time: $varsPerTime"
 		steps=$((steps-1))
-		sed -i '1d' $incplanOutput
+		sed -i '1d' "$incplanOutput"
 
 		cmd="$madagascar $domain $problem -m 8192 -t 300 $madagascarArgs -s $incplanOutput -T $steps"
 		echo ""

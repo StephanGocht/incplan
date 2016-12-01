@@ -306,7 +306,7 @@ class Solver {
 			addInvariantClauses(0);
 			addGoalClauses(0, onlyAtK(makeSpan));
 
-			VLOG(1) << "Solving make span" << makeSpan;
+			VLOG(1) << "Solving makespan " << makeSpan;
 			{
 				TIMED_SCOPE(blkScope, "solve");
 				ipasir_assume(ipasir, onlyAtK(makeSpan));
@@ -341,7 +341,7 @@ class Solver {
 
 				addGoalClauses(makeSpan, onlyAtK(makeSpan));
 
-				VLOG(1) << "Solving make span" << makeSpan;
+				VLOG(1) << "Solving makespan: " << makeSpan;
 				{
 					TIMED_SCOPE(blkScope, "solve");
 					ipasir_assume(ipasir, onlyAtK(makeSpan));
@@ -367,7 +367,7 @@ class Solver {
 
 			addLink(mapping->startTop(), mapping->goalTop(), onlyAtK(mapping->getMakeSpan()));
 
-			VLOG(1) << "Solving make span" << mapping->getMakeSpan();
+			VLOG(1) << "Solving makespan: " << mapping->getMakeSpan();
 			{
 				TIMED_SCOPE(blkScope, "solve");
 				ipasir_assume(ipasir, onlyAtK(mapping->getMakeSpan()));
@@ -394,7 +394,7 @@ class Solver {
 
 				addLink(mapping->startTop(), mapping->goalTop(), onlyAtK(mapping->getMakeSpan()));
 
-				VLOG(1) << "Solving make span" << mapping->getMakeSpan() << std::endl;
+				VLOG(1) << "Solving makespan: " << mapping->getMakeSpan();
 				{
 					TIMED_SCOPE(blkScope, "solve");
 					ipasir_assume(ipasir, onlyAtK(mapping->getMakeSpan()));
@@ -527,8 +527,8 @@ void parseOptions(int argc, char **argv) {
 		TCLAP::UnlabeledValueArg<std::string>  inputFile( "inputFile", "File containing the problem. Omit or use - for stdin.", !neccessaryArgument, "-", "inputFile", cmd);
 		TCLAP::ValueArg<double>  ratio("r", "ratio", "Ratio between states from start to state from end.", !neccessaryArgument, 1.0, "number between 0 and 1", cmd);
 		TCLAP::ValueArg<unsigned>  linearStepSize("l", "linearStepSize", "Linear step size.", !neccessaryArgument, 1, "natural number", cmd);
-		TCLAP::ValueArg<float> exponentialStepBasis("e", "exponentialStepBasis", "Basis of exponential step size. Combinable with options -l and -o (varibale names are equal to parameter): step size = l*n + floor(e ^ (n + o))", !neccessaryArgument, 1, "natural number", cmd);
-		TCLAP::ValueArg<float> exponentialStepOffset("o", "exponentialStepOffset", "Basis of exponential step size.", !neccessaryArgument, 1, "natural number", cmd);
+		TCLAP::ValueArg<float> exponentialStepBasis("e", "exponentialStepBasis", "Basis of exponential step size. Combinable with options -l and -o (varibale names are equal to parameter): step size = l*n + floor(e ^ (n + o))", !neccessaryArgument, 0, "natural number", cmd);
+		TCLAP::ValueArg<float> exponentialStepOffset("o", "exponentialStepOffset", "Basis of exponential step size.", !neccessaryArgument, 0, "natural number", cmd);
 		TCLAP::SwitchArg unitInGoal2Assume("u", "unitInGoal2Assume", "Add units in goal clauses using assume instead of add. (singleEnded only)", cmd, defaultIsFalse);
 		TCLAP::SwitchArg solveBeforeGoalClauses("i", "intermediateSolveStep", "Add an additional solve step before adding the goal or linking clauses.", cmd, defaultIsFalse);
 		TCLAP::SwitchArg nonIncrementalSolving("n", "nonIncrementalSolving", "Do not use incremental solving.", cmd, defaultIsFalse);
@@ -574,12 +574,13 @@ void parseOptions(int argc, char **argv) {
 void initLogger(){
 el::Configurations conf;
 conf.setToDefault();
-conf.setGlobally(el::ConfigurationType::Format, "c %level %fbase:%line; %msg");
+conf.setGlobally(el::ConfigurationType::Format, "ci %level %fbase:%line; %msg");
 conf.set(el::Level::Fatal, el::ConfigurationType::Format, "%level %fbase:%line; %msg");
 el::Loggers::reconfigureAllLoggers(conf);
 
-conf.setGlobally(el::ConfigurationType::Format, "c %level %datetime{%H:%m:%s}; %msg");
+conf.setGlobally(el::ConfigurationType::Format, "ci %level %datetime{%H:%m:%s}; %msg");
 el::Loggers::reconfigureLogger("performance", conf);
+el::Loggers::setVerboseLevel(1);
 }
 
 int main(int argc, char **argv) {
@@ -593,7 +594,7 @@ int main(int argc, char **argv) {
 	std::ifstream is;
 	if (options.inputFile == "-") {
 		in = &std::cin;
-		LOG(INFO) << "Using standard input." << std::endl;
+		LOG(INFO) << "Using standard input.";
 	} else {
 		is.open(options.inputFile);
 		if (is.fail()){

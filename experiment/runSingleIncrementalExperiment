@@ -74,8 +74,8 @@ case $option in
 	option="-r 0.5 -S 5"
 	;;
 	*)
-	echo "unnown option: $option"
-	exit 1
+#	echo "unnown option: $option"
+#	exit 1
 	;;
 esac
 
@@ -94,4 +94,4 @@ echo "$DIR/runSingleIncrementalExperiment $@" > result
 
 cmd="$tool problem.pddl $toolOption :: $solver $option"
 /usr/bin/time -f 'completeTime=%e %S %U' bash -c "ulimit -St 300; $cmd" &>> result
-rm -f domain.pddl problem.pddl output.sas problem.in problem.in.cnf problem.out gmon.out
+#rm -f domain.pddl problem.pddl output.sas problem.in problem.in.cnf problem.out problem.out.all gmon.out
