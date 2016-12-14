@@ -109,4 +109,8 @@ int ipasir_failed (void * solver, int lit);
  */
 void ipasir_set_terminate (void * solver, void * state, int (*terminate)(void * state));
 
+#ifdef USE_EXTENDED_IPASIR
+	void eipasir_set_select_literal_callback(void *solver, void *state, int (*select_literal)(void *));
+#endif
+
 #endif

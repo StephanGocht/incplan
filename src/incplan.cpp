@@ -13,6 +13,7 @@ extern "C" {
 #include <memory>
 #include <cmath>
 #include <set>
+#include <random>
 
 #include "tclap/CmdLine.h"
 #include "logging.h"
@@ -45,12 +46,80 @@ public:
 	Problem(std::istream& in){
 		this->numberLiteralsPerTime = 0;
 		parse(in);
+		inferAdditionalInformation();
 	}
 
 	std::vector<int> initial, invariant, goal , transfer;
 	unsigned numberLiteralsPerTime;
+	std::vector<int> actionVariables;
+	std::vector<int> stateVariables;
 
 private:
+	void inferAdditionalInformation() {
+		VLOG(2) << "Number Of Literals per Time: " << this->numberLiteralsPerTime;
+
+		// state variables should all be set in the initial state
+		std::set<int> stateVariables;
+		for (int lit: this->initial) {
+			stateVariables.insert(std::abs(lit));
+		}
+		stateVariables.erase(0);
+
+		// {
+		// 	std::stringstream ss;
+		// 	ss << "State Variables: ";
+		// 	for (int var: stateVariables) {
+		// 		ss << var << ", ";
+		// 	}
+		// 	VLOG(2) << ss.str();
+		// }
+
+
+		// guess action variables from clauses containing states
+		std::set<int> actionVariablesHelper;
+		size_t clauseStart = 0;
+		bool clauseHasStateVar = false;
+		for (size_t i = 0; i < this->transfer.size(); i++) {
+			unsigned var = std::abs(this->transfer[i]);
+			var = var > this->numberLiteralsPerTime ? var - this->numberLiteralsPerTime: var;
+			if (this->transfer[i] != 0) {
+				if (stateVariables.find(var) != stateVariables.end()) {
+					clauseHasStateVar = true;
+				}
+			} else {
+				if (clauseHasStateVar) {
+					for (size_t j = clauseStart; j < i; j++) {
+						unsigned var = std::abs(this->transfer[j]);
+						var = var > this->numberLiteralsPerTime ? var - this->numberLiteralsPerTime: var;
+						actionVariablesHelper.insert(var);
+					}
+				}
+
+				clauseStart = i + 1;
+				clauseHasStateVar = false;
+			}
+		}
+
+		std::set<int> actionVariables;
+		std::set_difference(actionVariablesHelper.begin(), actionVariablesHelper.end(),
+							stateVariables.begin(), stateVariables.end(),
+							std::inserter(actionVariables, actionVariables.end()));
+
+
+		std::copy(actionVariables.begin(), actionVariables.end(), std::back_inserter(this->actionVariables));
+		std::copy(stateVariables.begin(), stateVariables.end(), std::back_inserter(this->stateVariables));
+
+		// {
+		// 	std::stringstream ss;
+		// 	ss << "State Variables: ";
+		// 	for (int var: actionVariables) {
+		// 		ss << var << ", ";
+		// 	}
+		// 	VLOG(2) << ss.str();
+		// }
+
+	}
+
 	void skipComments(std::istream& in){
 		char nextChar;
 		in >> nextChar;
@@ -221,20 +290,36 @@ private:
 };
 
 extern "C" {
-	int state;
-	int callback(void* state){
-		UNUSED(state);
-		return 0;
-	}
+	int terminate_callback(void* state);
+	int select_literal_callback(void* state);
 }
 
 
 class Solver {
 	public:
 		Solver(const Problem* problem){
-			this->ipasir = ipasir_init();
-			ipasir_set_terminate(this->ipasir, &state, &callback);
+			initIpasir();
 			this->problem = problem;
+		}
+
+		/**
+		 * returns a hint on the literal to be set or zero if no hint is available
+		 */
+		int selectLiteral() {
+			static std::random_device rd;
+			static std::mt19937 mt(rd());
+
+			std::uniform_real_distribution<double> varDist(0, this->problem->actionVariables.size() - 1);
+			std::uniform_real_distribution<double> timeDist(0, this->mapping->getMakeSpan());
+			size_t index = varDist(mt);
+			uint time = timeDist(mt);
+			int var = this->problem->actionVariables[index] + time * this->problem->numberLiteralsPerTime;
+			if (ipasir_val(this->ipasir, var) == 0) {
+				VLOG(1) << "Chose Variable " << var;
+				return var;
+			}
+
+			return 0;
 		}
 
 		/**
@@ -298,6 +383,14 @@ class Solver {
 		int finalMakeSpan;
 		int result;
 
+		void initIpasir() {
+			this->ipasir = ipasir_init();
+			ipasir_set_terminate(this->ipasir, this, &terminate_callback);
+			#ifdef USE_EXTENDED_IPASIR
+			eipasir_set_select_literal_callback(this->ipasir, this, &select_literal_callback);
+			#endif
+		}
+
 		bool solveOneEnded(){
 			int step = 0;
 			int makeSpan = options.stepToMakespan(0);
@@ -322,8 +415,7 @@ class Solver {
 				makeSpan += options.stepToMakespan(step);
 				if (options.nonIncrementalSolving) {
 					ipasir_release(this->ipasir);
-					this->ipasir = ipasir_init();
-					ipasir_set_terminate(this->ipasir, &state, &callback);
+					initIpasir();
 					addInitialClauses();
 					addInvariantClauses(0);
 					previousMakeSpan = 0;
@@ -572,67 +664,6 @@ void parseOptions(int argc, char **argv) {
 	}
 }
 
-void printProblemInfo(Problem& problem) {
-	// initial, invariant, goal , transfer;
-	// numberLiteralsPerTime;
-	VLOG(2) << "Number Of Literals per Time: " << problem.numberLiteralsPerTime;
-
-	std::set<int> stateVariables;
-	for (int lit: problem.initial) {
-		stateVariables.insert(std::abs(lit));
-	}
-	stateVariables.erase(0);
-
-	{
-		std::stringstream ss;
-		ss << "State Variables: ";
-		for (int var: stateVariables) {
-			ss << var << ", ";
-		}
-		VLOG(2) << ss.str();
-	}
-
-
-	//guess action variables from clauses containing future states
-	std::set<int> actionVariablesHelper;
-	size_t clauseStart = 0;
-	bool clauseHasStateVar = false;
-	for (size_t i = 0; i < problem.transfer.size(); i++) {
-		unsigned var = std::abs(problem.transfer[i]);
-		var = var > problem.numberLiteralsPerTime ? var - problem.numberLiteralsPerTime: var;
-		if (problem.transfer[i] != 0) {
-			if (stateVariables.find(var) != stateVariables.end()) {
-				clauseHasStateVar = true;
-			}
-		} else {
-			if (clauseHasStateVar) {
-				for (size_t j = clauseStart; j < i; j++) {
-					unsigned var = std::abs(problem.transfer[j]);
-					var = var > problem.numberLiteralsPerTime ? var - problem.numberLiteralsPerTime: var;
-					actionVariablesHelper.insert(var);
-				}
-			}
-
-			clauseStart = i + 1;
-			clauseHasStateVar = false;
-		}
-	}
-
-	std::set<int> actionVariables;
-	std::set_difference(actionVariablesHelper.begin(), actionVariablesHelper.end(),
-						stateVariables.begin(), stateVariables.end(),
-						std::inserter(actionVariables, actionVariables.end()));
-
-	{
-		std::stringstream ss;
-		ss << "State Variables: ";
-		for (int var: actionVariables) {
-			ss << var << ", ";
-		}
-		VLOG(2) << ss.str();
-	}
-}
-
 void initLogger(){
 el::Configurations conf;
 conf.setToDefault();
@@ -668,7 +699,6 @@ int main(int argc, char **argv) {
 	bool solved;
 	{
 		Problem problem(*in);
-		printProblemInfo(problem);
 		Solver solver(&problem);
 		solved = solver.solve();
 		solver.printSolution();
@@ -676,5 +706,17 @@ int main(int argc, char **argv) {
 
 	if (!solved) {
 		LOG(WARNING) << "Did not get a solution within the maximal make span.";
+	}
+}
+
+extern "C" {
+	int state;
+	int terminate_callback(void* state){
+		UNUSED(state);
+		return 0;
+	}
+
+	int select_literal_callback(void* state){
+		return ((Solver*) state)->selectLiteral();
 	}
 }
