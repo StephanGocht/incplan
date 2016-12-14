@@ -12,6 +12,7 @@ extern "C" {
 #include <cassert>
 #include <memory>
 #include <cmath>
+#include <set>
 
 #include "tclap/CmdLine.h"
 #include "logging.h"
@@ -571,6 +572,67 @@ void parseOptions(int argc, char **argv) {
 	}
 }
 
+void printProblemInfo(Problem& problem) {
+	// initial, invariant, goal , transfer;
+	// numberLiteralsPerTime;
+	VLOG(2) << "Number Of Literals per Time: " << problem.numberLiteralsPerTime;
+
+	std::set<int> stateVariables;
+	for (int lit: problem.initial) {
+		stateVariables.insert(std::abs(lit));
+	}
+	stateVariables.erase(0);
+
+	{
+		std::stringstream ss;
+		ss << "State Variables: ";
+		for (int var: stateVariables) {
+			ss << var << ", ";
+		}
+		VLOG(2) << ss.str();
+	}
+
+
+	//guess action variables from clauses containing future states
+	std::set<int> actionVariablesHelper;
+	size_t clauseStart = 0;
+	bool clauseHasStateVar = false;
+	for (size_t i = 0; i < problem.transfer.size(); i++) {
+		unsigned var = std::abs(problem.transfer[i]);
+		var = var > problem.numberLiteralsPerTime ? var - problem.numberLiteralsPerTime: var;
+		if (problem.transfer[i] != 0) {
+			if (stateVariables.find(var) != stateVariables.end()) {
+				clauseHasStateVar = true;
+			}
+		} else {
+			if (clauseHasStateVar) {
+				for (size_t j = clauseStart; j < i; j++) {
+					unsigned var = std::abs(problem.transfer[j]);
+					var = var > problem.numberLiteralsPerTime ? var - problem.numberLiteralsPerTime: var;
+					actionVariablesHelper.insert(var);
+				}
+			}
+
+			clauseStart = i + 1;
+			clauseHasStateVar = false;
+		}
+	}
+
+	std::set<int> actionVariables;
+	std::set_difference(actionVariablesHelper.begin(), actionVariablesHelper.end(),
+						stateVariables.begin(), stateVariables.end(),
+						std::inserter(actionVariables, actionVariables.end()));
+
+	{
+		std::stringstream ss;
+		ss << "State Variables: ";
+		for (int var: actionVariables) {
+			ss << var << ", ";
+		}
+		VLOG(2) << ss.str();
+	}
+}
+
 void initLogger(){
 el::Configurations conf;
 conf.setToDefault();
@@ -580,7 +642,7 @@ el::Loggers::reconfigureAllLoggers(conf);
 
 conf.setGlobally(el::ConfigurationType::Format, "ci %level %datetime{%H:%m:%s}; %msg");
 el::Loggers::reconfigureLogger("performance", conf);
-el::Loggers::setVerboseLevel(1);
+el::Loggers::setVerboseLevel(2);
 }
 
 int main(int argc, char **argv) {
@@ -606,6 +668,7 @@ int main(int argc, char **argv) {
 	bool solved;
 	{
 		Problem problem(*in);
+		printProblemInfo(problem);
 		Solver solver(&problem);
 		solved = solver.solve();
 		solver.printSolution();
