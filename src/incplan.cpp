@@ -412,7 +412,7 @@ class Solver {
 					ipasir_add(ipasir, onlyAtK(makeSpan));
 				}
 				step += 1;
-				makeSpan += options.stepToMakespan(step);
+				makeSpan = options.stepToMakespan(step);
 				if (options.nonIncrementalSolving) {
 					ipasir_release(this->ipasir);
 					initIpasir();
