@@ -21,7 +21,7 @@ INITIALIZE_EASYLOGGINGPP
 
 #define UNUSED(x) (void)(x)
 
-#define MAX_STEPS 1000
+#define MAX_STEPS 5000
 #define SAT 10
 #define UNSAT 20
 #define TIMEOUT 0
