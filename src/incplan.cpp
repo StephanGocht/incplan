@@ -13,18 +13,20 @@ extern "C" {
 #include <memory>
 #include <cmath>
 #include <set>
+#include <map>
 #include <random>
+#include <stack>
 
-#include "tclap/CmdLine.h"
+#include "libs/tclap/CmdLine.h"
 #include "logging.h"
 INITIALIZE_EASYLOGGINGPP
+
+#include "TimeSlotMapping.h"
+#include "TimePointBasedSolver.h"
 
 #define UNUSED(x) (void)(x)
 
 #define MAX_STEPS 5000
-#define SAT 10
-#define UNSAT 20
-#define TIMEOUT 0
 
 struct Options {
 	bool error;
@@ -53,6 +55,7 @@ public:
 	unsigned numberLiteralsPerTime;
 	std::vector<int> actionVariables;
 	std::vector<int> stateVariables;
+	std::map<int, std::vector<int>> support;
 
 private:
 	void inferAdditionalInformation() {
@@ -105,6 +108,33 @@ private:
 							stateVariables.begin(), stateVariables.end(),
 							std::inserter(actionVariables, actionVariables.end()));
 
+		std::vector<int> currentClauseActions;
+		std::vector<int> currentClauseFutureState;
+		for (size_t i = 0; i < this->transfer.size(); i++) {
+			unsigned var = std::abs(this->transfer[i]);
+			if (var == 0) {
+				for (int stateVar: currentClauseFutureState) {
+					auto res = support.insert(std::make_pair(stateVar, std::vector<int>()));
+					std::copy(currentClauseActions.begin(), currentClauseActions.end(), std::back_inserter(res.first->second));
+				}
+
+			} else {
+				bool isNextTime = false;
+				if (var > this->numberLiteralsPerTime) {
+					isNextTime = true;
+					var -= this->numberLiteralsPerTime;
+				}
+
+				if (stateVariables.find(var) != stateVariables.end() && isNextTime) {
+					currentClauseFutureState.push_back(var);
+				}
+
+				if (actionVariables.find(var) != actionVariables.end()) {
+					assert(!isNextTime);
+					currentClauseActions.push_back(var);
+				}
+			}
+		}
 
 		std::copy(actionVariables.begin(), actionVariables.end(), std::back_inserter(this->actionVariables));
 		std::copy(stateVariables.begin(), stateVariables.end(), std::back_inserter(this->stateVariables));
@@ -204,6 +234,10 @@ struct AddInfo {
 	unsigned addedSlot;
 };
 
+
+/**
+ *  The prupose of this class is handle and organize time slots.
+ */
 class TimeSlotMapping {
 public:
 	TimeSlotMapping(double ratio, std::function<int(int)> makeSpanStep):
@@ -295,7 +329,9 @@ extern "C" {
 }
 
 
-class Solver {
+enum class HelperVariables { ActivationLiteral };
+
+class Solver : public TimePointBasedSolver {
 	public:
 		Solver(const Problem* problem){
 			initIpasir();
@@ -308,6 +344,17 @@ class Solver {
 		int selectLiteral() {
 			static std::random_device rd;
 			static std::mt19937 mt(rd());
+			static std::stack<int> todo;
+
+			static bool init = true;
+			if (init) {
+				init = false;
+				for (int goalLit:this->problem->goal) {
+					assert(goalLit > 0);
+					assert(ipasir_val(this->ipasir, goalLit) > 0);
+					todo.push(goalLit);
+				}
+			}
 
 			std::uniform_real_distribution<double> varDist(0, this->problem->actionVariables.size() - 1);
 			std::uniform_real_distribution<double> timeDist(0, this->mapping->getMakeSpan());
@@ -332,11 +379,15 @@ class Solver {
 			} else {
 				result = solveDoubleEnded();
 			}
+			assert(slv() == result);
+			assert(this->makeSpan == this->finalMakeSpan);
 			LOG(INFO) << "Final Makespan: " << finalMakeSpan;
 			return result;
 		}
 
 		void printSolution() {
+			std::vector<int> result;
+
 			if (this->result == SAT) {
 				std::cout << "solution " << this->problem->numberLiteralsPerTime << " " << this->finalMakeSpan + 1 << std::endl;
 				for (int time = 0; time <= this->finalMakeSpan; time++) {
@@ -356,6 +407,7 @@ class Solver {
 							}
 							val += offset;
 						}
+						result.push_back(val);
 
 						std::cout << val << " ";
 					}
@@ -369,6 +421,31 @@ class Solver {
 			} else {
 				std::cout << "no solution" << std::endl;
 			}
+
+			std::vector<int> resultNew;
+			if (this->result == SAT) {
+				std::cout << "solution " << this->problem->numberLiteralsPerTime << " " << this->finalMakeSpan + 1 << std::endl;
+				TimePoint t = timePointManager->getFirst();
+				int time = 0;
+				do {
+					for (unsigned j = 1; j <= this->problem->numberLiteralsPerTime; j++) {
+						int val = valueProblemLiteral(j,t);
+						if (options.normalOutput) {
+							int offset = time * problem->numberLiteralsPerTime;
+							if (val < 0) {
+								offset = -offset;
+							}
+							val += offset;
+						}
+						resultNew.push_back(val);
+					}
+
+					t = timePointManager->getSuccessor(t);
+					time++;
+				} while (t != timePointManager->getLast());
+			}
+
+			assert(std::equal(result.begin(), result.end(), resultNew.begin()));
 		}
 
 		~Solver(){
@@ -381,7 +458,9 @@ class Solver {
 		std::unique_ptr<TimeSlotMapping> mapping;
 
 		int finalMakeSpan;
+		int makeSpan;
 		int result;
+		std::unique_ptr<TimePointManager> timePointManager;
 
 		void initIpasir() {
 			this->ipasir = ipasir_init();
@@ -389,6 +468,80 @@ class Solver {
 			#ifdef USE_EXTENDED_IPASIR
 			eipasir_set_select_literal_callback(this->ipasir, this, &select_literal_callback);
 			#endif
+		}
+
+		TimePoint initialize() {
+			if (options.singleEnded) {
+				timePointManager = std::make_unique<SingleEndedTimePointManager>();
+			} else {
+				timePointManager = std::make_unique<DoubleEndedTimePointManager>();
+			}
+
+			TimePoint t0 = timePointManager->aquireNext();
+			addInitialClauses(t0);
+			addInvariantClauses(t0);
+
+			if (!options.singleEnded) {
+				TimePoint tN = timePointManager->aquireNext();
+				addGoalClauses(tN);
+				addInvariantClauses(tN);
+
+				return tN;
+			}
+
+			return t0;
+		}
+
+		void finalize(const TimePoint elementInsertedLast) {
+			if (options.singleEnded) {
+				addGoalClauses(elementInsertedLast, true);
+			} else {
+				TimePoint linkSource, linkDestination;
+				if (timePointManager->isOnForwardStack(elementInsertedLast)){
+					linkSource = elementInsertedLast;
+					linkDestination = timePointManager->getSuccessor(elementInsertedLast);
+				} else {
+					linkSource = timePointManager->getPredecessor(elementInsertedLast);
+					linkDestination = elementInsertedLast;
+				}
+
+				addLink(linkSource, linkDestination, elementInsertedLast);
+			}
+			int activationLiteral = static_cast<int>(HelperVariables::ActivationLiteral);
+			assumeHelperLiteral(activationLiteral, elementInsertedLast);
+		}
+
+		bool slv(){
+			int step = 0;
+			TimePoint elementInsertedLast = initialize();
+
+			int result = UNSAT;
+			for (;result != SAT;step++) {
+				if(options.nonIncrementalSolving) {
+					elementInsertedLast = initialize();
+				}
+
+				int targetMakeSpan = options.stepToMakespan(step);
+				for (; makeSpan < targetMakeSpan; makeSpan++) {
+					TimePoint tNew = timePointManager->aquireNext();
+					addInvariantClauses(tNew);
+
+					if (timePointManager->isOnForwardStack(tNew)) {
+						TimePoint pred = timePointManager->getPredecessor(tNew);
+						addTransferClauses(pred, tNew);
+					} else {
+						TimePoint succ = timePointManager->getSuccessor(tNew);
+						addTransferClauses(tNew, succ);
+					}
+
+					elementInsertedLast = tNew;
+				}
+
+				finalize(elementInsertedLast);
+				result = solveSAT();
+			}
+
+			return result == SAT;
 		}
 
 		bool solveOneEnded(){
@@ -525,15 +678,46 @@ class Solver {
 			return literal;
 		}
 
+		void addInitialClauses(TimePoint t) {
+			for (int literal:problem->initial) {
+				addProblemLiteral(literal, t);
+			}
+		}
+
 		void addInitialClauses() {
 			for (int literal:problem->initial) {
 				ipasir_add(ipasir, map(0, literal));
 			}
 		}
 
+		void addInvariantClauses(TimePoint t) {
+			for (int literal: problem->invariant) {
+				addProblemLiteral(literal, t);
+			}
+		}
+
 		void addInvariantClauses(unsigned k) {
 			for (int literal: problem->invariant) {
 				ipasir_add(ipasir, map(k, literal));
+			}
+		}
+
+		void addTransferClauses(TimePoint source, TimePoint destination) {
+			for (int literal: problem->transfer) {
+				bool literalIsSourceTime = static_cast<unsigned>(std::abs(literal)) <= problem->numberLiteralsPerTime;
+				if (!literalIsSourceTime) {
+					if (literal > 0) {
+						literal -= problem->numberLiteralsPerTime;
+					} else {
+						literal += problem->numberLiteralsPerTime;
+					}
+				}
+
+				if (literalIsSourceTime) {
+					addProblemLiteral(literal, source);
+				} else {
+					addProblemLiteral(literal, destination);
+				}
 			}
 		}
 
@@ -576,6 +760,23 @@ class Solver {
 			return problem->goal[i + 1] == 0 && problem->goal[i - 1] == 0;
 		}
 
+		void addGoalClauses(TimePoint t, bool isGuarded = false) {
+			for (unsigned i = 0; i < problem->goal.size(); i++) {
+				int literal = problem->goal[i];
+				if (!isUnitGoal(i)) {
+					if (literal == 0 && isGuarded) {
+						int activationLiteral = static_cast<int>(HelperVariables::ActivationLiteral);
+						addHelperLiteral(-activationLiteral, t);
+					}
+					addProblemLiteral(literal, t);
+				} else {
+					assumeProblemLiteral(literal, t);
+					++i; // skip following 0
+					assert(problem->goal[i] == 0);
+				}
+			}
+		}
+
 		void addGoalClauses(unsigned slot, int guard = 0) {
 			for (unsigned i = 0; i < problem->goal.size(); i++) {
 				int literal = problem->goal[i];
@@ -589,6 +790,22 @@ class Solver {
 					++i; // skip following 0
 					assert(problem->goal[i] == 0);
 				}
+			}
+		}
+
+		void addLink(TimePoint A, TimePoint B, TimePoint helperLiteralBinding) {
+			for (unsigned i = 1; i <= problem->numberLiteralsPerTime; i++) {
+				int activationLiteral = static_cast<int>(HelperVariables::ActivationLiteral);
+
+				addHelperLiteral(-activationLiteral, helperLiteralBinding);
+				addProblemLiteral(-i, A);
+				addProblemLiteral(i, B);
+				finalizeClause();
+
+				addHelperLiteral(-activationLiteral, helperLiteralBinding);
+				addProblemLiteral(i, A);
+				addProblemLiteral(-i, B);
+				finalizeClause();
 			}
 		}
 
@@ -607,7 +824,6 @@ class Solver {
 				ipasir_add(ipasir, -litB);
 				ipasir_add(ipasir, 0);
 			}
-
 		}
 };
 
@@ -706,17 +922,5 @@ int main(int argc, char **argv) {
 
 	if (!solved) {
 		LOG(WARNING) << "Did not get a solution within the maximal make span.";
-	}
-}
-
-extern "C" {
-	int state;
-	int terminate_callback(void* state){
-		UNUSED(state);
-		return 0;
-	}
-
-	int select_literal_callback(void* state){
-		return ((Solver*) state)->selectLiteral();
 	}
 }
