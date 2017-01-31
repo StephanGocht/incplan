@@ -48,7 +48,7 @@ public:
 	Problem(std::istream& in){
 		this->numberLiteralsPerTime = 0;
 		parse(in);
-		inferAdditionalInformation();
+		//inferAdditionalInformation();
 	}
 
 	std::vector<int> initial, invariant, goal , transfer;
@@ -329,11 +329,13 @@ extern "C" {
 }
 
 
-enum class HelperVariables { ActivationLiteral };
+enum class HelperVariables { ZeroVariableIsNotAllowed_DoNotRemoveThis,
+	ActivationLiteral };
 
 class Solver : public TimePointBasedSolver {
 	public:
-		Solver(const Problem* problem){
+		Solver(const Problem* problem):
+			TimePointBasedSolver(problem->numberLiteralsPerTime,1){
 			initIpasir();
 			this->problem = problem;
 		}
@@ -512,11 +514,13 @@ class Solver : public TimePointBasedSolver {
 		}
 
 		bool slv(){
+			LOG(INFO) << "Start solving";
 			int step = 0;
 			TimePoint elementInsertedLast = initialize();
 
 			int result = UNSAT;
 			for (;result != SAT;step++) {
+				LOG(INFO) << "Step " << step;
 				if(options.nonIncrementalSolving) {
 					elementInsertedLast = initialize();
 				}
@@ -892,7 +896,7 @@ el::Loggers::reconfigureLogger("performance", conf);
 el::Loggers::setVerboseLevel(2);
 }
 
-int main(int argc, char **argv) {
+int incplan_main(int argc, char **argv) {
 	START_EASYLOGGINGPP(argc, argv);
 	initLogger();
 	parseOptions(argc, argv);
@@ -923,4 +927,6 @@ int main(int argc, char **argv) {
 	if (!solved) {
 		LOG(WARNING) << "Did not get a solution within the maximal make span.";
 	}
+
+	return 0;
 }

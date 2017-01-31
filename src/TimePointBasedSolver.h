@@ -75,6 +75,13 @@ public:
 		resultLit = 0;
 	};
 
+	TimePointBasedSolver(int _varsPerTime, int _helperPerTime):
+		varsPerTime(_varsPerTime),
+		helperPerTime(_helperPerTime)
+	{
+		initIpasir();
+	}
+
 	virtual ~TimePointBasedSolver(){
 		ipasir_release(ipasir);
 	}
