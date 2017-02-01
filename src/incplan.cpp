@@ -1,6 +1,4 @@
-extern "C" {
-    #include "ipasir.h"
-}
+#include "ipasir/ipasir_cpp.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -17,7 +15,7 @@ extern "C" {
 #include <random>
 #include <stack>
 
-#include "libs/tclap/CmdLine.h"
+#include "tclap/CmdLine.h"
 #include "logging.h"
 INITIALIZE_EASYLOGGINGPP
 
@@ -25,8 +23,11 @@ INITIALIZE_EASYLOGGINGPP
 #include "TimePointBasedSolver.h"
 
 #define UNUSED(x) (void)(x)
-
 #define MAX_STEPS 5000
+
+const int SAT = 10;
+const int UNSAT = 20;
+const int TIMEOUT = 0;
 
 struct Options {
 	bool error;
@@ -324,10 +325,12 @@ private:
 };
 
 extern "C" {
-	int terminate_callback(void* state);
-	int select_literal_callback(void* state);
+	int state;
+	int terminate_callback(void* state){
+		UNUSED(state);
+		return 0;
+	}
 }
-
 
 enum class HelperVariables { ZeroVariableIsNotAllowed_DoNotRemoveThis,
 	ActivationLiteral };
@@ -467,9 +470,6 @@ class Solver : public TimePointBasedSolver {
 		void initIpasir() {
 			this->ipasir = ipasir_init();
 			ipasir_set_terminate(this->ipasir, this, &terminate_callback);
-			#ifdef USE_EXTENDED_IPASIR
-			eipasir_set_select_literal_callback(this->ipasir, this, &select_literal_callback);
-			#endif
 		}
 
 		TimePoint initialize() {
@@ -518,8 +518,8 @@ class Solver : public TimePointBasedSolver {
 			int step = 0;
 			TimePoint elementInsertedLast = initialize();
 
-			int result = UNSAT;
-			for (;result != SAT;step++) {
+			ipasir::SolveResult result = ipasir::SolveResult::UNSAT;
+			for (;result != ipasir::SolveResult::SAT;step++) {
 				LOG(INFO) << "Step " << step;
 				if(options.nonIncrementalSolving) {
 					elementInsertedLast = initialize();
@@ -545,7 +545,7 @@ class Solver : public TimePointBasedSolver {
 				result = solveSAT();
 			}
 
-			return result == SAT;
+			return result == ipasir::SolveResult::SAT;
 		}
 
 		bool solveOneEnded(){

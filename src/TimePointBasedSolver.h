@@ -1,56 +1,45 @@
 #pragma once
 
-extern "C" {
-	#include "ipasir.h"
-}
+#include "ipasir/ipasir_cpp.h"
 
 #include "TimeSlotMapping.h"
 
 #include <vector>
 #include <map>
-
-#define SAT 10
-#define UNSAT 20
-#define TIMEOUT 0
-
-
-extern "C" {
-	int terminate_callback(void* state);
-	int select_literal_callback(void* state);
-}
+#include <memory>
 
 class TimePointBasedSolver {
 private:
-	void *ipasir = nullptr;
 	int varsPerTime;
 	int helperPerTime;
 
 	std::map<TimePoint, int> timePoints;
+	std::unique_ptr<ipasir::Ipasir> solver;
 
 public:
 
 	void addProblemLiteral(int lit, TimePoint t) {
-		ipasir_add(ipasir, problemLiteral2Ipasir(lit, t));
+		solver->add(problemLiteral2Ipasir(lit, t));
 	}
 
 	void addHelperLiteral(int lit, TimePoint t) {
-		ipasir_add(ipasir, helperLiteral2Ipasir(lit, t));
+		solver->add(helperLiteral2Ipasir(lit, t));
 	}
 
 	void assumeProblemLiteral(int lit, TimePoint t) {
-		ipasir_assume(ipasir, problemLiteral2Ipasir(lit, t));
+		solver->assume(problemLiteral2Ipasir(lit, t));
 	}
 
 	void assumeHelperLiteral(int lit, TimePoint t) {
-		ipasir_assume(ipasir, helperLiteral2Ipasir(lit, t));
+		solver->assume(helperLiteral2Ipasir(lit, t));
 	}
 
 	void finalizeClause() {
-		ipasir_add(ipasir, 0);
+		solver->add(0);
 	}
 
 	int valueProblemLiteral(int lit, TimePoint t) {
-		int value = ipasir_val(ipasir, problemLiteral2Ipasir(lit, t));
+		int value = solver->val(problemLiteral2Ipasir(lit, t));
 		if (value == 0) {
 			return 0;
 		} else if (value < 0) {
@@ -61,8 +50,8 @@ public:
 	}
 
 
-	int solveSAT() {
-		return ipasir_solve(ipasir);
+	ipasir::SolveResult solveSAT() {
+		return solver->solve();
 	}
 
 	/**
@@ -75,28 +64,27 @@ public:
 		resultLit = 0;
 	};
 
-	TimePointBasedSolver(int _varsPerTime, int _helperPerTime):
+	TimePointBasedSolver(int _varsPerTime, int _helperPerTime,
+		std::unique_ptr<ipasir::Ipasir> _solver):
 		varsPerTime(_varsPerTime),
-		helperPerTime(_helperPerTime)
+		helperPerTime(_helperPerTime),
+		solver(std::move(_solver))
 	{
-		initIpasir();
+	}
+
+	TimePointBasedSolver(int _varsPerTime, int _helperPerTime):
+		TimePointBasedSolver(_varsPerTime, _helperPerTime,
+			std::make_unique<ipasir::Solver>())
+	{
 	}
 
 	virtual ~TimePointBasedSolver(){
-		ipasir_release(ipasir);
+
 	}
 
 private:
 	void initIpasir() {
-		if (ipasir != nullptr) {
-			ipasir_release(ipasir);
-		}
-
-		this->ipasir = ipasir_init();
-		ipasir_set_terminate(this->ipasir, this, &terminate_callback);
-		#ifdef USE_EXTENDED_IPASIR
-		eipasir_set_select_literal_callback(this->ipasir, this, &select_literal_callback);
-		#endif
+		solver->reset();
 	}
 
 	int getIndex(TimePoint t) {
@@ -124,7 +112,6 @@ private:
 		return getOffset(literal, t) + varsPerTime + literal;
 	}
 
-	friend int select_literal_callback(void* state);
 	int selectLiteralCallback() {
 		// Return Values:
 		int resultLit;
@@ -139,15 +126,3 @@ private:
 		}
 	};
 };
-
-extern "C" {
-	int state;
-	int terminate_callback(void* state){
-		UNUSED(state);
-		return 0;
-	}
-
-	int select_literal_callback(void* state){
-		return static_cast<TimePointBasedSolver*>(state)->selectLiteralCallback();
-	}
-}

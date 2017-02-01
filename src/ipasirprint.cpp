@@ -1,5 +1,5 @@
 extern "C" {
-	#include "ipasir.h"
+	#include "ipasir/ipasir.h"
 }
 
 #include <iostream>

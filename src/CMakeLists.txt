@@ -87,10 +87,16 @@ FOREACH(ipasir_lib ${ipasir_libs})
 		)
 ENDFOREACH()
 
+# === Target: runtest ===
+add_custom_target(runTest
+	COMMAND ./unitTest --gtest_color=yes
+	WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+	DEPENDS unitTest)
+
 # === Target: core ===
 
 # Dummy target which builds all targets but only for one solver
-add_custom_target(core DEPENDS incplan_debugprint unitTest)
+add_custom_target(core DEPENDS incplan_debugprint unitTest runTest)
 if (TARGET incplan-cominisatps2sun_nopre)
 	add_dependencies(core incplan-cominisatps2sun_nopre)
 endif()
