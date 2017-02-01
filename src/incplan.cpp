@@ -394,7 +394,7 @@ class Solver : public TimePointBasedSolver {
 			std::vector<int> result;
 
 			if (this->result == SAT) {
-				std::cout << "solution " << this->problem->numberLiteralsPerTime << " " << this->finalMakeSpan + 1 << std::endl;
+				// std::cout << "solution " << this->problem->numberLiteralsPerTime << " " << this->finalMakeSpan + 1 << std::endl;
 				for (int time = 0; time <= this->finalMakeSpan; time++) {
 					int slot = (options.singleEnded)?time:mapping->getSlotForTime(time);
 					for (unsigned j = 1; j <= this->problem->numberLiteralsPerTime; j++) {
@@ -414,17 +414,17 @@ class Solver : public TimePointBasedSolver {
 						}
 						result.push_back(val);
 
-						std::cout << val << " ";
+						// std::cout << val << " ";
 					}
-					if (!options.normalOutput) {
-						std::cout << std::endl;
-					}
+					// if (!options.normalOutput) {
+					// 	std::cout << std::endl;
+					// }
 				}
-				if (options.normalOutput) {
-					std::cout << std::endl;
-				}
+				// if (options.normalOutput) {
+				// 	std::cout << std::endl;
+				// }
 			} else {
-				std::cout << "no solution" << std::endl;
+				// std::cout << "no solution" << std::endl;
 			}
 
 			std::vector<int> resultNew;
@@ -432,6 +432,7 @@ class Solver : public TimePointBasedSolver {
 				std::cout << "solution " << this->problem->numberLiteralsPerTime << " " << this->finalMakeSpan + 1 << std::endl;
 				TimePoint t = timePointManager->getFirst();
 				int time = 0;
+
 				do {
 					for (unsigned j = 1; j <= this->problem->numberLiteralsPerTime; j++) {
 						int val = valueProblemLiteral(j,t);
@@ -442,15 +443,25 @@ class Solver : public TimePointBasedSolver {
 							}
 							val += offset;
 						}
+						std::cout << val << " ";
 						resultNew.push_back(val);
+					}
+					if (!options.normalOutput) {
+						std::cout << std::endl;
+					}
+					if (t == timePointManager->getLast()) {
+						break;
 					}
 
 					t = timePointManager->getSuccessor(t);
 					time++;
-				} while (t != timePointManager->getLast());
+				} while (true);
+			}
+			if (options.normalOutput) {
+				std::cout << std::endl;
 			}
 
-			assert(std::equal(result.begin(), result.end(), resultNew.begin()));
+			//assert(std::equal(result.begin(), result.end(), resultNew.begin()));
 		}
 
 		~Solver(){
@@ -476,7 +487,9 @@ class Solver : public TimePointBasedSolver {
 			if (options.singleEnded) {
 				timePointManager = std::make_unique<SingleEndedTimePointManager>();
 			} else {
-				timePointManager = std::make_unique<DoubleEndedTimePointManager>();
+				timePointManager = std::make_unique<DoubleEndedTimePointManager>(
+					options.ratio,
+					DoubleEndedTimePointManager::TopElementOption::Dublicated);
 			}
 
 			TimePoint t0 = timePointManager->aquireNext();
@@ -499,11 +512,16 @@ class Solver : public TimePointBasedSolver {
 				addGoalClauses(elementInsertedLast, true);
 			} else {
 				TimePoint linkSource, linkDestination;
-				if (timePointManager->isOnForwardStack(elementInsertedLast)){
+				if (elementInsertedLast == timePointManager->getLast()) {
+					linkSource = timePointManager->getFirst();
+					linkDestination = timePointManager->getLast();
+				} else if (timePointManager->isOnForwardStack(elementInsertedLast)){
 					linkSource = elementInsertedLast;
-					linkDestination = timePointManager->getSuccessor(elementInsertedLast);
+					linkDestination = timePointManager->getSuccessor(
+						timePointManager->getPredecessor(elementInsertedLast));
 				} else {
-					linkSource = timePointManager->getPredecessor(elementInsertedLast);
+					linkSource = timePointManager->getPredecessor(
+						timePointManager->getSuccessor(elementInsertedLast));
 					linkDestination = elementInsertedLast;
 				}
 
@@ -526,6 +544,7 @@ class Solver : public TimePointBasedSolver {
 				}
 
 				int targetMakeSpan = options.stepToMakespan(step);
+				LOG(INFO) << "Target Makespan: " << targetMakeSpan;
 				for (; makeSpan < targetMakeSpan; makeSpan++) {
 					TimePoint tNew = timePointManager->aquireNext();
 					addInvariantClauses(tNew);
@@ -870,7 +889,14 @@ void parseOptions(int argc, char **argv) {
 			int l = linearStepSize.getValue();
 			float e = exponentialStepBasis.getValue();
 			float o = exponentialStepOffset.getValue();
-			options.stepToMakespan = [l,e,o](int n){return l * n + std::floor(pow(e,(n + o)));};
+			if (e != 0) {
+				options.stepToMakespan =
+					[l,e,o](int n){return l * n + std::floor(pow(e,(n + o)));};
+			} else {
+				options.stepToMakespan =
+					[l,e,o](int n){return l * n;};
+			}
+
 		}
 
 

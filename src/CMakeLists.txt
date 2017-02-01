@@ -37,10 +37,15 @@ target_link_libraries(incplan_debugprint all_sources libincplan_debugprint)
 
 # === Target: unitTest ===
 set(UNIT_TEST_FILES
-	unit_tests/TestTimeSlotMapping.cpp)
+	unit_tests/TestTimeSlotMapping.cpp
+	unit_tests/TestTimePointBasedSolver.cpp)
 
 add_executable(unitTest ${UNIT_TEST_FILES})
-target_link_libraries(unitTest all_sources gtest_main libincplan_debugprint)
+target_link_libraries(unitTest
+	all_sources
+	gtest_main
+	gmock_main
+	libincplan_debugprint)
 set_target_properties(unitTest PROPERTIES
 	COTIRE_PREFIX_HEADER_IGNORE_PATH "${CMAKE_SOURCE_DIR}"
 		_PREFIX_HEADER_INCLUDE_PATH "${CMAKE_SOURCE_DIR}/libs")

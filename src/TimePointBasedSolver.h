@@ -92,15 +92,24 @@ private:
 		return insertResult.first->second;
 	}
 
-	int getOffset(int literal, TimePoint t) {
+	int getOffsetHelper(int literal, TimePoint t) {
+		return getOffset(literal, t, true);
+	}
+
+	int getOffset(int literal, TimePoint t, bool isHelper = false) {
 		if (literal == 0) {
 			return 0;
 		}
 
 		int offset = getIndex(t) * (varsPerTime + helperPerTime);
+		if (isHelper) {
+			offset += varsPerTime;
+		}
+
 		if (literal < 0) {
 			offset = -offset;
 		}
+
 		return offset;
 	}
 
@@ -109,7 +118,7 @@ private:
 	}
 
 	int helperLiteral2Ipasir(int literal, TimePoint t) {
-		return getOffset(literal, t) + varsPerTime + literal;
+		return getOffsetHelper(literal, t) + literal;
 	}
 
 	int selectLiteralCallback() {

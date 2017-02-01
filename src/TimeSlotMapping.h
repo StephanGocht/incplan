@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <functional>
+#include <stdexcept>
 
 #define UNUSED(x) (void)(x)
 
@@ -16,6 +17,8 @@ typedef int InternalLiteral;
 typedef std::pair<int, int> TimePoint;
 class TimePointManager {
 public:
+	class OutOfBound: public std::runtime_error {};
+
 	virtual TimePoint aquireNext() = 0;
 	virtual TimePoint getSuccessor(TimePoint t) = 0;
 	virtual TimePoint getPredecessor(TimePoint t) = 0;
@@ -83,52 +86,94 @@ public:
 	}
 
 	virtual TimePoint aquireNext() {
-		double newRatio = (currentBeginTop + 2) / static_cast<double>(currentBeginTop + currentEndTop + 3);
-		if (newRatio <= ratio) {
+		if (currentBeginTop == -1) {
+			return std::make_pair(FROM_BEGIN, ++currentBeginTop);
+		}
+		if (currentEndTop == -1) {
+			return std::make_pair(FROM_END, ++currentEndTop);
+		}
+
+		double countElementsBegin = currentBeginTop + 1;
+		double countElementsAll = currentBeginTop + currentEndTop + 2;
+		double currentRatio = countElementsBegin / countElementsAll;
+		if (currentRatio <= ratio) {
 			return std::make_pair(FROM_BEGIN, ++currentBeginTop);
 		} else {
 			return std::make_pair(FROM_END, ++currentEndTop);
 		}
 	};
 
+	virtual bool isValid(TimePoint t) {
+		return
+			  (    ((t.first == FROM_BEGIN) && (t.second <= currentBeginTop))
+				|| ((t.first == FROM_END)   && (t.second <= currentEndTop)))
+			&& (t.second >= 0);
+	}
+
 	virtual TimePoint getSuccessor(TimePoint t) {
+		if (!isValid(t)){
+			throw std::invalid_argument("Invalid Timepoint");
+		}
+
+		TimePoint result = std::make_pair(-1, -1);
 		if (t.first == FROM_BEGIN) {
-			if (t.second < currentBeginTop) {
-				return std::make_pair(FROM_BEGIN, t.second + 1);
-			} else {
-				if (topElementOption == TopElementOption::Dublicated) {
-					return std::make_pair(FROM_END, currentEndTop - 1);
-				} else {
-					return std::make_pair(FROM_END, currentEndTop);
+			result = std::make_pair(FROM_BEGIN, t.second + 1);
+		} else if (t.first == FROM_END) {
+			result = std::make_pair(FROM_END, t.second - 1);
+		}
+
+		if (topElementOption == TopElementOption::Dublicated) {
+			if (result.first == FROM_BEGIN) {
+				if (result.second == currentBeginTop) {
+					result = std::make_pair(FROM_END, currentEndTop);
+				} else if (result.second == currentBeginTop + 1) {
+					result = std::make_pair(FROM_END, currentEndTop - 1);
 				}
 			}
 		} else {
-			if (t.second > 0) {
-				return std::make_pair(FROM_END, t.second - 1);
-			} else {
-				return std::make_pair(-1, -1);
+			if (result.first == FROM_BEGIN && result.second > currentBeginTop) {
+				result = std::make_pair(FROM_END, currentEndTop);
 			}
 		}
+
+		if (!isValid(result)){
+			throw std::out_of_range("Timepoint successor Out of Range");
+		}
+
+		return result;
 	};
 
 	virtual TimePoint getPredecessor(TimePoint t) {
+		if (!isValid(t)){
+			throw std::invalid_argument("Invalid Timepoint");
+		}
+
+		TimePoint result = std::make_pair(-1, -1);
 		if (t.first == FROM_BEGIN) {
-			if (t.second > 0) {
-				return std::make_pair(FROM_BEGIN, t.second - 1);
-			} else {
-				return std::make_pair(-1, -1);
-			}
-		} else {
-			if (t.second < currentEndTop) {
-				return std::make_pair(FROM_END, t.second + 1);
-			} else {
-				if (topElementOption == TopElementOption::Dublicated) {
-					return std::make_pair(FROM_BEGIN, currentBeginTop - 1);
-				} else {
-					return std::make_pair(FROM_BEGIN, currentBeginTop);
+			result = std::make_pair(FROM_BEGIN, t.second - 1);
+		} else if (t.first == FROM_END) {
+			result = std::make_pair(FROM_END, t.second + 1);
+		}
+
+		if (topElementOption == TopElementOption::Dublicated) {
+			if (result.first == FROM_END) {
+				if (result.second == currentEndTop) {
+					result = std::make_pair(FROM_BEGIN, currentBeginTop);
+				} else if (result.second == currentEndTop + 1) {
+					result = std::make_pair(FROM_BEGIN, currentBeginTop - 1);
 				}
 			}
+		} else {
+			if (result.first == FROM_END && result.second > currentEndTop) {
+				result = std::make_pair(FROM_BEGIN, currentBeginTop);
+			}
 		}
+
+		if (!isValid(result)){
+			throw std::out_of_range("Timepoint successor Out of Range");
+		}
+
+		return result;
 	};
 
 	virtual bool isOnForwardStack(TimePoint t) {

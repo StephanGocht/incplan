@@ -100,8 +100,11 @@ extern "C" {
 
 class Solver: public Ipasir {
 public:
-	Solver() {
-			reset();
+	Solver():
+		solver(nullptr),
+		terminateCallback([]{return 0;}),
+		selectLiteralCallback([]{return 0;}) {
+		reset();
 	}
 
 	virtual ~Solver(){
@@ -137,7 +140,7 @@ public:
 	};
 
 	virtual void reset() {
-		if (solver) {
+		if (solver != nullptr) {
 			ipasir_release(solver);
 		}
 		solver = ipasir_init();
