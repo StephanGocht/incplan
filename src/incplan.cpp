@@ -492,6 +492,7 @@ class Solver : public TimePointBasedSolver {
 					DoubleEndedTimePointManager::TopElementOption::Dublicated);
 			}
 
+			makeSpan = 0;
 			TimePoint t0 = timePointManager->aquireNext();
 			addInitialClauses(t0);
 			addInvariantClauses(t0);
