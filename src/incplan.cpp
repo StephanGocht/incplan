@@ -384,9 +384,10 @@ class Solver : public TimePointBasedSolver {
 			} else {
 				result = solveDoubleEnded();
 			}
-			assert(slv() == result);
-			assert(this->makeSpan == this->finalMakeSpan);
-			LOG(INFO) << "Final Makespan: " << finalMakeSpan;
+			result = slv();
+			//assert(slv() == result);
+			//assert(this->makeSpan == this->finalMakeSpan);
+			LOG(INFO) << "Final Makespan: " << this->makeSpan;
 			return result;
 		}
 
@@ -539,13 +540,11 @@ class Solver : public TimePointBasedSolver {
 
 			ipasir::SolveResult result = ipasir::SolveResult::UNSAT;
 			for (;result != ipasir::SolveResult::SAT;step++) {
-				LOG(INFO) << "Step " << step;
 				if(options.nonIncrementalSolving) {
 					elementInsertedLast = initialize();
 				}
 
 				int targetMakeSpan = options.stepToMakespan(step);
-				LOG(INFO) << "Target Makespan: " << targetMakeSpan;
 				for (; makeSpan < targetMakeSpan; makeSpan++) {
 					TimePoint tNew = timePointManager->aquireNext();
 					addInvariantClauses(tNew);
@@ -561,8 +560,25 @@ class Solver : public TimePointBasedSolver {
 					elementInsertedLast = tNew;
 				}
 
+				if (options.solveBeforeGoalClauses) {
+					TIMED_SCOPE(blkScope, "intermediateSolve");
+					solveSAT();
+				}
+
 				finalize(elementInsertedLast);
-				result = solveSAT();
+
+				VLOG(1) << "Solving makespan " << makeSpan;
+				{
+					TIMED_SCOPE(blkScope, "solve");
+					result = solveSAT();
+				}
+
+				if (options.cleanLitearl) {
+					VLOG(1) << "Cleaning helper Literal.";
+					int activationLiteral = static_cast<int>(HelperVariables::ActivationLiteral);
+					addHelperLiteral(-activationLiteral, elementInsertedLast);
+					finalizeClause();
+				}
 			}
 
 			return result == ipasir::SolveResult::SAT;

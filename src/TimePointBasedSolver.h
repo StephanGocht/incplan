@@ -101,9 +101,18 @@ private:
 			return 0;
 		}
 
-		int offset = getIndex(t) * (varsPerTime + helperPerTime);
-		if (isHelper) {
-			offset += varsPerTime;
+		int offset;
+		if (true) {
+			offset = getIndex(t) * (varsPerTime + helperPerTime);
+			if (isHelper) {
+				offset += varsPerTime;
+			}
+		} else {
+			if (isHelper) {
+				offset = getIndex(t) * helperPerTime;
+			} else {
+				offset = getIndex(t) * varsPerTime + 250;
+			}
 		}
 
 		if (literal < 0) {
