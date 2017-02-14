@@ -63,8 +63,8 @@ private:
 	int currentEndTop = -1;
 	float ratio;
 	TopElementOption topElementOption;
-	static const int FROM_BEGIN = 0;
-	static const int FROM_END = 1;
+	static const int FROM_BEGIN;
+	static const int FROM_END;
 
 public:
 	/**

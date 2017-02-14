@@ -4,6 +4,7 @@ extern "C" {
 
 #include <iostream>
 #include <limits>
+#include "misc.h"
 
 extern "C" {
 	#define SAT 10
@@ -18,9 +19,12 @@ extern "C" {
 		return nullptr;
 	}
 
-	void ipasir_release (void * solver){}
+	void ipasir_release (void * solver){
+		UNUSED(solver);
+	}
 
 	void ipasir_add (void * solver, int lit_or_zero){
+		UNUSED(solver);
 		std::cout << lit_or_zero << " ";
 		if (lit_or_zero == 0) {
 			std::cout << std::endl;
@@ -28,10 +32,12 @@ extern "C" {
 	}
 
 	void ipasir_assume (void * solver, int lit){
+		UNUSED(solver);
 		std::cout << "a" << lit << " ";
 	}
 
 	int ipasir_solve (void * solver){
+		UNUSED(solver);
 		std::cout << " solved? 0/1 [0]: ";
 		bool solved = false;
 		if (std::cin.peek() == '\n') { //check if next character is newline
@@ -51,13 +57,21 @@ extern "C" {
 	}
 
 	int ipasir_val (void * solver, int lit){
+		UNUSED(solver);
+		UNUSED(lit);
 		return 0;
 	}
 
 
 	int ipasir_failed (void * solver, int lit){
+		UNUSED(solver);
+		UNUSED(lit);
 		return 0;
 	}
 
-	void ipasir_set_terminate (void * solver, void * state, int (*terminate)(void * state)){}
+	void ipasir_set_terminate (void * solver, void * state, int (*terminate)(void * state)){
+		UNUSED(solver);
+		UNUSED(state);
+		UNUSED(terminate);
+	}
 }

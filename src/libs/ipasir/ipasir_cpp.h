@@ -9,7 +9,7 @@ enum class SolveResult {SAT = 10, UNSAT = 20, TIMEOUT = 0};
 
 class Ipasir {
 public:
-	virtual std::string ipasir_signature() = 0;
+	virtual std::string signature() = 0;
 
 	virtual ~Ipasir() = default;
 
@@ -111,7 +111,7 @@ public:
 		ipasir_release(solver);
 	}
 
-	virtual std::string ipasir_signature() {
+	virtual std::string signature() {
 		return ipasir_signature();
 	};
 
