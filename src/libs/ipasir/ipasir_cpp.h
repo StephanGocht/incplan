@@ -4,6 +4,9 @@ extern "C" {
 	#include "ipasir/ipasir.h"
 }
 
+#include <string>
+#include <functional>
+
 namespace ipasir {
 enum class SolveResult {SAT = 10, UNSAT = 20, TIMEOUT = 0};
 

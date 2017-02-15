@@ -102,7 +102,7 @@ private:
 		}
 
 		int offset;
-		if (true) {
+		if (false) {
 			offset = getIndex(t) * (varsPerTime + helperPerTime);
 			if (isHelper) {
 				offset += varsPerTime;
