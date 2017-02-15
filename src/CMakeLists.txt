@@ -30,8 +30,8 @@ include(gtest)
 # Include cotire to precompile headers.
 # We don't need cotire, but it might speed up build process as we have header
 # only libraries.
-include(cotire)
-set (COTIRE_MINIMUM_NUMBER_OF_TARGET_SOURCES 1)
+#include(cotire)
+#set (COTIRE_MINIMUM_NUMBER_OF_TARGET_SOURCES 1)
 
 # === Target: all_sources ===
 
@@ -42,7 +42,7 @@ add_library(all_sources ${SRC_FILES})
 set_target_properties(all_sources PROPERTIES
 	COTIRE_PREFIX_HEADER_IGNORE_PATH "${CMAKE_SOURCE_DIR}"
 		_PREFIX_HEADER_INCLUDE_PATH "${CMAKE_SOURCE_DIR}/libs")
-cotire(all_sources)
+#cotire(all_sources)
 
 # === Target incplan-debugprint ===
 add_library(libincplan_debugprint ipasirprint.cpp)
@@ -60,7 +60,7 @@ target_link_libraries(unitTest
 set_target_properties(unitTest PROPERTIES
 	COTIRE_PREFIX_HEADER_IGNORE_PATH "${CMAKE_SOURCE_DIR}"
 		_PREFIX_HEADER_INCLUDE_PATH "${CMAKE_SOURCE_DIR}/libs")
-cotire(unitTest)
+#cotire(unitTest)
 
 # === Target: incplan-heuristical ===
 
@@ -73,7 +73,7 @@ if (EXISTS ${EXTENDED_IPASIR_SOLVER})
 	set_target_properties(all_sources_extended PROPERTIES
 		COTIRE_PREFIX_HEADER_IGNORE_PATH "${CMAKE_SOURCE_DIR}"
 			_PREFIX_HEADER_INCLUDE_PATH "${CMAKE_SOURCE_DIR}/libs")
-	cotire(all_sources_extended)
+	#cotire(all_sources_extended)
 
 	add_executable(incplan-heuristical main.cpp)
 	target_link_libraries(incplan-heuristical
