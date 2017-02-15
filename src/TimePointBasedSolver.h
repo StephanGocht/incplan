@@ -16,6 +16,8 @@ private:
 	std::map<TimePoint, int> timePoints;
 	std::unique_ptr<ipasir::Ipasir> solver;
 
+	enum class HelperConfiguration {AllBefore, SingleBefore, SingleAfter};
+
 public:
 
 	void addProblemLiteral(int lit, TimePoint t) {
@@ -102,17 +104,29 @@ private:
 		}
 
 		int offset;
-		if (false) {
+		HelperConfiguration conf = HelperConfiguration::SingleBefore;
+		switch (conf) {
+		case HelperConfiguration::SingleBefore:
+			offset = getIndex(t) * (varsPerTime + helperPerTime);
+			if (!isHelper) {
+				offset += helperPerTime;
+			}
+			break;
+
+		case HelperConfiguration::SingleAfter:
 			offset = getIndex(t) * (varsPerTime + helperPerTime);
 			if (isHelper) {
 				offset += varsPerTime;
 			}
-		} else {
+			offset += 5000;
+			break;
+		case HelperConfiguration::AllBefore:
 			if (isHelper) {
 				offset = getIndex(t) * helperPerTime;
 			} else {
-				offset = getIndex(t) * varsPerTime + 250;
+				offset = getIndex(t) * varsPerTime + 5000;
 			}
+			break;
 		}
 
 		if (literal < 0) {

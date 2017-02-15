@@ -79,8 +79,8 @@ case $option in
 	;;
 esac
 
-mkdir -p "$track/$domain/$problem/$conf"
-cd "$track/$domain/$problem/$conf"
+#mkdir -p "$track/$domain/$problem/$conf"
+#cd "$track/$domain/$problem/$conf"
 touch result
 
 unzip -p $zipFile $domainFile > domain.pddl

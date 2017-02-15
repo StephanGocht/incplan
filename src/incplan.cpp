@@ -531,6 +531,16 @@ class Solver : public TimePointBasedSolver {
 			}
 			int activationLiteral = static_cast<int>(HelperVariables::ActivationLiteral);
 			assumeHelperLiteral(activationLiteral, elementInsertedLast);
+
+			// if (elementInsertedLast != timePointManager->getFirst()) {
+			// 	TimePoint next = timePointManager->getPredecessor(elementInsertedLast);
+			// 	while (next != timePointManager->getFirst()) {
+			// 		VLOG(2) << next.second;
+			// 		assumeHelperLiteral(-activationLiteral, next);
+			// 		next = timePointManager->getPredecessor(next);
+			// 	}
+			// 	assumeHelperLiteral(-activationLiteral, next);
+			// }
 		}
 
 		bool slv(){
@@ -944,7 +954,7 @@ int incplan_main(int argc, char **argv) {
 	initLogger();
 	parseOptions(argc, argv);
 
-	LOG(INFO) << "Using the incremental SAT solver " << ipasir_signature();
+	//LOG(INFO) << "Using the incremental SAT solver " << ipasir_signature();
 
 	std::istream* in;
 	std::ifstream is;
