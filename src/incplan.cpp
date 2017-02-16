@@ -22,13 +22,6 @@ INITIALIZE_EASYLOGGINGPP
 #include "TimeSlotMapping.h"
 #include "TimePointBasedSolver.h"
 
-#define UNUSED(x) (void)(x)
-#define MAX_STEPS 5000
-
-const int SAT = 10;
-const int UNSAT = 20;
-const int TIMEOUT = 0;
-
 struct Options {
 	bool error;
 	std::string inputFile;
@@ -235,103 +228,6 @@ struct AddInfo {
 	unsigned addedSlot;
 };
 
-
-/**
- *  The prupose of this class is handle and organize time slots.
- */
-class TimeSlotMapping {
-public:
-	TimeSlotMapping(double ratio, std::function<int(int)> makeSpanStep):
-			_makeSpanStep(makeSpanStep) {
-		this->ratio = ratio;
-		this->_step = 0;
-		startStack.push_back(0);
-		goalStack.push_back(1);
-	}
-
-	unsigned getSlotForTime(unsigned time) {
-		if (time < startStack.size()) {
-			return startStack[time];
-		} else {
-			time -= startStack.size();
-			// skip last time slot as they are equal in both slots
-			time += 1;
-			return goalStack[goalStack.size() - 1 - time];
-		}
-	}
-
-	bool hasToAdd(){
-		return getMakeSpan() > (getNumberOfTimeSlots() - 2);
-	}
-
-	unsigned getNumberOfTimeSlots() {
-		return startStack.size() + goalStack.size();
-	}
-
-	unsigned getNextFreeSlot() {
-		return getNumberOfTimeSlots();
-	}
-
-	AddInfo add() {
-		AddInfo result;
-		double currentRatio = startStack.size() / (double) getNumberOfTimeSlots();
-		if (currentRatio <= ratio) {
-			result.addedSlot = getNextFreeSlot();
-			result.transitionSource = startTop();
-			result.transitionGoal = result.addedSlot;
-
-			startStack.push_back(result.addedSlot);
-		} else {
-			result.addedSlot = getNextFreeSlot();
-			result.transitionSource = result.addedSlot;
-			result.transitionGoal = goalTop();
-
-			goalStack.push_back(result.addedSlot);
-		}
-
-		return result;
-	};
-
-	unsigned startTop(){
-		return startStack.back();
-	}
-
-	unsigned goalTop(){
-		return goalStack.back();
-	}
-
-	unsigned startSlot(){
-		return startStack[0];
-	}
-
-	unsigned goalSlot(){
-		return goalStack[0];
-	}
-
-	void incrementMakeSpan() {
-		_step += 1;
-	}
-
-	unsigned getMakeSpan(){
-		return _makeSpanStep(_step);
-	}
-
-private:
-	std::function<int(int)> _makeSpanStep;
-	unsigned _step;
-	double ratio;
-	std::vector<int> startStack;
-	std::vector<int> goalStack;
-};
-
-extern "C" {
-	int state;
-	int terminate_callback(void* state){
-		UNUSED(state);
-		return 0;
-	}
-}
-
 enum class HelperVariables { ZeroVariableIsNotAllowed_DoNotRemoveThis,
 	ActivationLiteral };
 
@@ -339,97 +235,21 @@ class Solver : public TimePointBasedSolver {
 	public:
 		Solver(const Problem* problem):
 			TimePointBasedSolver(problem->numberLiteralsPerTime,1){
-			initIpasir();
 			this->problem = problem;
-		}
-
-		/**
-		 * returns a hint on the literal to be set or zero if no hint is available
-		 */
-		int selectLiteral() {
-			static std::random_device rd;
-			static std::mt19937 mt(rd());
-			static std::stack<int> todo;
-
-			static bool init = true;
-			if (init) {
-				init = false;
-				for (int goalLit:this->problem->goal) {
-					assert(goalLit > 0);
-					assert(ipasir_val(this->ipasir, goalLit) > 0);
-					todo.push(goalLit);
-				}
-			}
-
-			std::uniform_real_distribution<double> varDist(0, this->problem->actionVariables.size() - 1);
-			std::uniform_real_distribution<double> timeDist(0, this->mapping->getMakeSpan());
-			size_t index = varDist(mt);
-			uint time = timeDist(mt);
-			int var = this->problem->actionVariables[index] + time * this->problem->numberLiteralsPerTime;
-			if (ipasir_val(this->ipasir, var) == 0) {
-				VLOG(1) << "Chose Variable " << var;
-				return var;
-			}
-
-			return 0;
 		}
 
 		/**
 		 * Solve the problem. Return true if a solution was found.
 		 */
 		bool solve(){
-			bool result;
-			if (options.singleEnded) {
-				result = solveOneEnded();
-			} else {
-				result = solveDoubleEnded();
-			}
-			result = slv();
-			//assert(slv() == result);
-			//assert(this->makeSpan == this->finalMakeSpan);
+			bool result = slv();
 			LOG(INFO) << "Final Makespan: " << this->makeSpan;
+			this->finalMakeSpan = this->makeSpan;
 			return result;
 		}
 
 		void printSolution() {
-			std::vector<int> result;
-
-			if (this->result == SAT) {
-				// std::cout << "solution " << this->problem->numberLiteralsPerTime << " " << this->finalMakeSpan + 1 << std::endl;
-				for (int time = 0; time <= this->finalMakeSpan; time++) {
-					int slot = (options.singleEnded)?time:mapping->getSlotForTime(time);
-					for (unsigned j = 1; j <= this->problem->numberLiteralsPerTime; j++) {
-						int val = ipasir_val(ipasir, map(slot,j));
-						val = unmap(slot, val);
-
-						if (val == 0) {
-							val = j;
-						}
-
-						if (options.normalOutput) {
-							int offset = time * problem->numberLiteralsPerTime;
-							if (val < 0) {
-								offset = -offset;
-							}
-							val += offset;
-						}
-						result.push_back(val);
-
-						// std::cout << val << " ";
-					}
-					// if (!options.normalOutput) {
-					// 	std::cout << std::endl;
-					// }
-				}
-				// if (options.normalOutput) {
-				// 	std::cout << std::endl;
-				// }
-			} else {
-				// std::cout << "no solution" << std::endl;
-			}
-
-			std::vector<int> resultNew;
-			if (this->result == SAT) {
+			if (this->solveResult == ipasir::SolveResult::SAT) {
 				std::cout << "solution " << this->problem->numberLiteralsPerTime << " " << this->finalMakeSpan + 1 << std::endl;
 				TimePoint t = timePointManager->getFirst();
 				int time = 0;
@@ -445,7 +265,6 @@ class Solver : public TimePointBasedSolver {
 							val += offset;
 						}
 						std::cout << val << " ";
-						resultNew.push_back(val);
 					}
 					if (!options.normalOutput) {
 						std::cout << std::endl;
@@ -457,32 +276,25 @@ class Solver : public TimePointBasedSolver {
 					t = timePointManager->getSuccessor(t);
 					time++;
 				} while (true);
-			}
-			if (options.normalOutput) {
-				std::cout << std::endl;
-			}
 
-			//assert(std::equal(result.begin(), result.end(), resultNew.begin()));
+				if (options.normalOutput) {
+					std::cout << std::endl;
+				}
+			} else {
+				std::cout << "no solution" << std::endl;
+			}
 		}
 
 		~Solver(){
-			ipasir_release(ipasir);
 		}
 
 	private:
 		const Problem* problem;
-		void* ipasir;
-		std::unique_ptr<TimeSlotMapping> mapping;
 
 		int finalMakeSpan;
 		int makeSpan;
-		int result;
+		ipasir::SolveResult solveResult;
 		std::unique_ptr<TimePointManager> timePointManager;
-
-		void initIpasir() {
-			this->ipasir = ipasir_init();
-			ipasir_set_terminate(this->ipasir, this, &terminate_callback);
-		}
 
 		TimePoint initialize() {
 			if (options.singleEnded) {
@@ -591,141 +403,8 @@ class Solver : public TimePointBasedSolver {
 				}
 			}
 
+			this->solveResult = result;
 			return result == ipasir::SolveResult::SAT;
-		}
-
-		bool solveOneEnded(){
-			int step = 0;
-			int makeSpan = options.stepToMakespan(0);
-			int previousMakeSpan = 0;
-
-			addInitialClauses();
-			addInvariantClauses(0);
-			addGoalClauses(0, onlyAtK(makeSpan));
-
-			VLOG(1) << "Solving makespan " << makeSpan;
-			{
-				TIMED_SCOPE(blkScope, "solve");
-				ipasir_assume(ipasir, onlyAtK(makeSpan));
-				result = ipasir_solve(ipasir);
-			}
-
-			while (result == UNSAT && makeSpan < MAX_STEPS) {
-				if (options.cleanLitearl) {
-					ipasir_add(ipasir, onlyAtK(makeSpan));
-				}
-				step += 1;
-				makeSpan = options.stepToMakespan(step);
-				if (options.nonIncrementalSolving) {
-					ipasir_release(this->ipasir);
-					initIpasir();
-					addInitialClauses();
-					addInvariantClauses(0);
-					previousMakeSpan = 0;
-				}
-
-				for (int k = previousMakeSpan + 1; k <= makeSpan; k++) {
-					addInvariantClauses(k);
-					addTransferClauses(k - 1, k);
-				}
-				previousMakeSpan = makeSpan;
-
-				if (options.solveBeforeGoalClauses) {
-					TIMED_SCOPE(blkScope, "solveBeforeGoalClauses");
-					ipasir_solve(ipasir);
-				}
-
-				addGoalClauses(makeSpan, onlyAtK(makeSpan));
-
-				VLOG(1) << "Solving makespan: " << makeSpan;
-				{
-					TIMED_SCOPE(blkScope, "solve");
-					ipasir_assume(ipasir, onlyAtK(makeSpan));
-					result = ipasir_solve(ipasir);
-				}
-			}
-
-			this->finalMakeSpan = makeSpan;
-			return result == SAT;
-		}
-
-		bool solveDoubleEnded(){
-			addInitialClauses();
-			{
-				double ratio = options.ratio;
-				mapping = std::unique_ptr<TimeSlotMapping>(
-					new TimeSlotMapping(ratio, options.stepToMakespan));
-			}
-
-			addInvariantClauses(mapping->startSlot());
-			addGoalClauses(mapping->goalSlot());
-			addInvariantClauses(mapping->goalSlot());
-
-			addLink(mapping->startTop(), mapping->goalTop(), onlyAtK(mapping->getMakeSpan()));
-
-			VLOG(1) << "Solving makespan: " << mapping->getMakeSpan();
-			{
-				TIMED_SCOPE(blkScope, "solve");
-				ipasir_assume(ipasir, onlyAtK(mapping->getMakeSpan()));
-				result = ipasir_solve(ipasir);
-			}
-
-			while (result == UNSAT && mapping->getMakeSpan() < MAX_STEPS) {
-				if (options.cleanLitearl) {
-					ipasir_add(ipasir, onlyAtK(mapping->getMakeSpan()));
-				}
-
-				mapping->incrementMakeSpan();
-
-				while (mapping->hasToAdd()) {
-					AddInfo info = mapping->add();
-					addInvariantClauses(info.addedSlot);
-					addTransferClauses(info.transitionSource, info.transitionGoal);
-				}
-
-				if (options.solveBeforeGoalClauses) {
-					TIMED_SCOPE(blkScope, "solveBeforeGoalClauses");
-					ipasir_solve(ipasir);
-				}
-
-				addLink(mapping->startTop(), mapping->goalTop(), onlyAtK(mapping->getMakeSpan()));
-
-				VLOG(1) << "Solving makespan: " << mapping->getMakeSpan();
-				{
-					TIMED_SCOPE(blkScope, "solve");
-					ipasir_assume(ipasir, onlyAtK(mapping->getMakeSpan()));
-					result = ipasir_solve(ipasir);
-				}
-			}
-
-			this->finalMakeSpan = mapping->getMakeSpan();
-			return result == SAT;
-		}
-
-		int onlyAtK(unsigned k) {
-			return k + 1;
-		}
-
-		int unmap(int k, int literal){
-			return map(k, literal, true);
-		}
-
-		int map(int k, int literal, bool unmap = false) {
-			if (literal == 0) {
-				return 0;
-			}
-
-			int offset = (MAX_STEPS + 1) + k * problem->numberLiteralsPerTime;
-			if (literal < 0) {
-				offset = -offset;
-			}
-
-			if (unmap) {
-				literal -= offset;
-			} else {
-				literal += offset;
-			}
-			return literal;
 		}
 
 		void addInitialClauses(TimePoint t) {
@@ -734,21 +413,9 @@ class Solver : public TimePointBasedSolver {
 			}
 		}
 
-		void addInitialClauses() {
-			for (int literal:problem->initial) {
-				ipasir_add(ipasir, map(0, literal));
-			}
-		}
-
 		void addInvariantClauses(TimePoint t) {
 			for (int literal: problem->invariant) {
 				addProblemLiteral(literal, t);
-			}
-		}
-
-		void addInvariantClauses(unsigned k) {
-			for (int literal: problem->invariant) {
-				ipasir_add(ipasir, map(k, literal));
 			}
 		}
 
@@ -768,24 +435,6 @@ class Solver : public TimePointBasedSolver {
 				} else {
 					addProblemLiteral(literal, destination);
 				}
-			}
-		}
-
-		void addTransferClauses(unsigned transferSrc, unsigned transferDst) {
-			for (int literal: problem->transfer) {
-				int mapped;
-				if ((unsigned) std::abs(literal) <= problem->numberLiteralsPerTime) {
-					mapped = map(transferSrc, literal);
-				} else {
-					if (literal > 0) {
-						literal -= problem->numberLiteralsPerTime;
-					} else {
-						literal += problem->numberLiteralsPerTime;
-					}
-
-					mapped = map(transferDst, literal);
-				}
-				ipasir_add(ipasir, mapped);
 			}
 		}
 
@@ -827,22 +476,6 @@ class Solver : public TimePointBasedSolver {
 			}
 		}
 
-		void addGoalClauses(unsigned slot, int guard = 0) {
-			for (unsigned i = 0; i < problem->goal.size(); i++) {
-				int literal = problem->goal[i];
-				if (!isUnitGoal(i)) {
-					if (literal == 0 && guard != 0) {
-						ipasir_add(ipasir, -guard);
-					}
-					ipasir_add(ipasir, map(slot, literal));
-				} else {
-					ipasir_assume(ipasir, map(slot,literal));
-					++i; // skip following 0
-					assert(problem->goal[i] == 0);
-				}
-			}
-		}
-
 		void addLink(TimePoint A, TimePoint B, TimePoint helperLiteralBinding) {
 			for (unsigned i = 1; i <= problem->numberLiteralsPerTime; i++) {
 				int activationLiteral = static_cast<int>(HelperVariables::ActivationLiteral);
@@ -856,23 +489,6 @@ class Solver : public TimePointBasedSolver {
 				addProblemLiteral(i, A);
 				addProblemLiteral(-i, B);
 				finalizeClause();
-			}
-		}
-
-		void addLink(unsigned slotA, unsigned slotB, int guard) {
-			for (unsigned i = 1; i <= problem->numberLiteralsPerTime; i++) {
-				int litA = map(slotA, i);
-				int litB = map(slotB, i);
-
-				ipasir_add(ipasir, -guard);
-				ipasir_add(ipasir, -litA);
-				ipasir_add(ipasir, litB);
-				ipasir_add(ipasir, 0);
-
-				ipasir_add(ipasir, -guard);
-				ipasir_add(ipasir, litA);
-				ipasir_add(ipasir, -litB);
-				ipasir_add(ipasir, 0);
 			}
 		}
 };

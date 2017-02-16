@@ -120,8 +120,8 @@ if (TARGET incplan-cominisatps2sun_nopre)
 	add_dependencies(runTest incplan-cominisatps2sun_nopre)
 endif()
 if (TARGET incplan-heuristical)
-	# add_dependencies(core incplan-heuristical)
+	add_dependencies(core incplan-heuristical)
 
-	# # Make sure the tool is build, even if tests fail.
-	# add_dependencies(runTest incplan-heuristical)
+	# Make sure the tool is build, even if tests fail.
+	add_dependencies(runTest incplan-heuristical)
 endif()

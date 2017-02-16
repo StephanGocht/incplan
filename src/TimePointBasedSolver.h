@@ -106,7 +106,7 @@ private:
 		}
 
 		int offset;
-		HelperConfiguration conf = HelperConfiguration::SingleBefore;
+		HelperConfiguration conf = HelperConfiguration::SingleAfter;
 		switch (conf) {
 		case HelperConfiguration::SingleBefore:
 			offset = getIndex(t) * (varsPerTime + helperPerTime);
