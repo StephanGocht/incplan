@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ipasir/ipasir_cpp.h"
+#include "ipasir/randomized_ipasir.h"
 
 #include "TimeSlotMapping.h"
 
@@ -76,6 +77,7 @@ public:
 
 	TimePointBasedSolver(int _varsPerTime, int _helperPerTime):
 		TimePointBasedSolver(_varsPerTime, _helperPerTime,
+			//std::make_unique<ipasir::RandomizedSolver>((_varsPerTime + _helperPerTime) * 4))
 			std::make_unique<ipasir::Solver>())
 	{
 	}
@@ -118,8 +120,8 @@ private:
 			if (isHelper) {
 				offset += varsPerTime;
 			}
-			offset += 5000;
 			break;
+
 		case HelperConfiguration::AllBefore:
 			if (isHelper) {
 				offset = getIndex(t) * helperPerTime;
