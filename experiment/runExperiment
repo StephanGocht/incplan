@@ -20,6 +20,8 @@ unzip -Z1 $zipFile | grep -E "$filter" | grep -v "domain[^/]*.pddl" > problemLis
 # riss_521
 # riss_600
 
+# heuristical
+
 # Aviable Tools:
 # MpC-e exist
 # MpC-a forall
@@ -39,9 +41,15 @@ unzip -Z1 $zipFile | grep -E "$filter" | grep -v "domain[^/]*.pddl" > problemLis
 # ulimit -Sv 8000000 #8 Gb
 
 ## All in one parallel call:
-~/bin/parallel -j 2 --rpl '{..} 1 $_=$job->slot()-1' taskset -c {..} {} ::: $DIR/runSingleIncrementalExperiment ::: $zipFile :::: problemList.txt ::: MpC-e ::: '-n' '-r 0.5 -l 1' '-r 0.5 -l 2' '-r 0.5 -l 4' '-r 0.5 -l 8' ::: cominisatps2sun_nopre
+#~/bin/parallel -j 2 --rpl '{..} 1 $_=$job->slot()-1' taskset -c {..} {} ::: $DIR/runSingleIncrementalExperiment ::: $zipFile :::: problemList.txt ::: MpC-e ::: '-n' '-r 0.5 -l 1' '-r 0.5 -l 2' '-r 0.5 -l 4' '-r 0.5 -l 8' ::: cominisatps2sun_nopre
 
+~/bin/parallel -j 32 --rpl '{..} 1 $_=$job->slot()-1' taskset -c {..} {} ::: $DIR/runSingleIncrementalExperiment ::: $zipFile :::: problemList.txt ::: MpC-e ::: '-r 0.5' ::: heuristical
+~/bin/parallel -j 32 --rpl '{..} 1 $_=$job->slot()-1' taskset -c {..} {} ::: $DIR/runSingleIncrementalExperiment ::: $zipFile :::: problemList.txt ::: MpC-e ::: '-n' ::: heuristical
+~/bin/parallel -j 32 --rpl '{..} 1 $_=$job->slot()-1' taskset -c {..} {} ::: $DIR/runSingleIncrementalExperiment ::: $zipFile :::: problemList.txt ::: MpC-e ::: '-s' ::: heuristical
 
+~/bin/parallel -j 32 --rpl '{..} 1 $_=$job->slot()-1' taskset -c {..} {} ::: $DIR/runSingleIncrementalExperiment ::: $zipFile :::: problemList.txt ::: MpC-e ::: '-r 0.5' ::: cominisatps2sun_nopre
+~/bin/parallel -j 32 --rpl '{..} 1 $_=$job->slot()-1' taskset -c {..} {} ::: $DIR/runSingleIncrementalExperiment ::: $zipFile :::: problemList.txt ::: MpC-e ::: '-n' ::: cominisatps2sun_nopre
+~/bin/parallel -j 32 --rpl '{..} 1 $_=$job->slot()-1' taskset -c {..} {} ::: $DIR/runSingleIncrementalExperiment ::: $zipFile :::: problemList.txt ::: MpC-e ::: '-s' ::: cominisatps2sun_nopre
 
 ## Multiple parallel calls:
 # ~/bin/parallel -j 32 --shuf --rpl '{..} 1 $_=$job->slot()-1' taskset -c {..} {} ::: $DIR/runSingleIncrementalExperiment ::: $zipFile :::: problemList.txt ::: MpC-e ::: r0.5 ::: cominisatps2sun_nopre
