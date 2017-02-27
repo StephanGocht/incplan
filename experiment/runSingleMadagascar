@@ -18,8 +18,7 @@ domainFile="$folder/domain.pddl"
 domainFile2="${folder}/domain_${problem}.pddl"
 
 case $option in
-	"S")
-		toolOption="-A 1 -S 1"
+	"M")
 		conf="M"
 	;;
 	"P")

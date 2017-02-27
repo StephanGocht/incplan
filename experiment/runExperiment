@@ -43,13 +43,19 @@ unzip -Z1 $zipFile | grep -E "$filter" | grep -v "domain[^/]*.pddl" > problemLis
 ## All in one parallel call:
 #~/bin/parallel -j 2 --rpl '{..} 1 $_=$job->slot()-1' taskset -c {..} {} ::: $DIR/runSingleIncrementalExperiment ::: $zipFile :::: problemList.txt ::: MpC-e ::: '-n' '-r 0.5 -l 1' '-r 0.5 -l 2' '-r 0.5 -l 4' '-r 0.5 -l 8' ::: cominisatps2sun_nopre
 
-~/bin/parallel -j 32 --rpl '{..} 1 $_=$job->slot()-1' taskset -c {..} {} ::: $DIR/runSingleIncrementalExperiment ::: $zipFile :::: problemList.txt ::: MpC-e ::: '-r 0.5' ::: heuristical
-~/bin/parallel -j 32 --rpl '{..} 1 $_=$job->slot()-1' taskset -c {..} {} ::: $DIR/runSingleIncrementalExperiment ::: $zipFile :::: problemList.txt ::: MpC-e ::: '-n' ::: heuristical
-~/bin/parallel -j 32 --rpl '{..} 1 $_=$job->slot()-1' taskset -c {..} {} ::: $DIR/runSingleIncrementalExperiment ::: $zipFile :::: problemList.txt ::: MpC-e ::: '-s' ::: heuristical
+#~/bin/parallel -j 32 --rpl '{..} 1 $_=$job->slot()-1' taskset -c {..} {} ::: $DIR/runSingleIncrementalExperiment ::: $zipFile :::: problemList.txt ::: MpC-e ::: '-r 0.5' '-r 0.5 ' '-r 0.5  ' '-r 0.5   ' '-n' '-s' ::: heuristical
 
-~/bin/parallel -j 32 --rpl '{..} 1 $_=$job->slot()-1' taskset -c {..} {} ::: $DIR/runSingleIncrementalExperiment ::: $zipFile :::: problemList.txt ::: MpC-e ::: '-r 0.5' ::: cominisatps2sun_nopre
-~/bin/parallel -j 32 --rpl '{..} 1 $_=$job->slot()-1' taskset -c {..} {} ::: $DIR/runSingleIncrementalExperiment ::: $zipFile :::: problemList.txt ::: MpC-e ::: '-n' ::: cominisatps2sun_nopre
-~/bin/parallel -j 32 --rpl '{..} 1 $_=$job->slot()-1' taskset -c {..} {} ::: $DIR/runSingleIncrementalExperiment ::: $zipFile :::: problemList.txt ::: MpC-e ::: '-s' ::: cominisatps2sun_nopre
+# ~/bin/parallel -j 32 --rpl '{..} 1 $_=$job->slot()-1' taskset -c {..} {} ::: $DIR/runSingleIncrementalExperiment ::: $zipFile :::: problemList.txt ::: MpC-e ::: '-r 0.5' ::: cominisatps2sun_nopre
+# ~/bin/parallel -j 32 --rpl '{..} 1 $_=$job->slot()-1' taskset -c {..} {} ::: $DIR/runSingleIncrementalExperiment ::: $zipFile :::: problemList.txt ::: MpC-e ::: '-n' ::: cominisatps2sun_nopre
+# ~/bin/parallel -j 32 --rpl '{..} 1 $_=$job->slot()-1' taskset -c {..} {} ::: $DIR/runSingleIncrementalExperiment ::: $zipFile :::: problemList.txt ::: MpC-e ::: '-s' ::: cominisatps2sun_nopre
+
+# ~/bin/parallel -j 32 --rpl '{..} 1 $_=$job->slot()-1' taskset -c {..} {} ::: $DIR/runSingleIncrementalExperiment ::: $zipFile :::: problemList.txt ::: MpC-e ::: '--icaps2017 -r 0.5' ::: heuristical
+# ~/bin/parallel -j 32 --rpl '{..} 1 $_=$job->slot()-1' taskset -c {..} {} ::: $DIR/runSingleIncrementalExperiment ::: $zipFile :::: problemList.txt ::: MpC-e ::: '--icaps2017 -n' ::: heuristical
+# ~/bin/parallel -j 32 --rpl '{..} 1 $_=$job->slot()-1' taskset -c {..} {} ::: $DIR/runSingleIncrementalExperiment ::: $zipFile :::: problemList.txt ::: MpC-e ::: '--icaps2017 -s' ::: heuristical
+
+# ~/bin/parallel -j 32 --rpl '{..} 1 $_=$job->slot()-1' taskset -c {..} {} ::: $DIR/runSingleIncrementalExperiment ::: $zipFile :::: problemList.txt ::: MpC-e ::: '--icaps2017 -r 0.5' ::: cominisatps2sun_nopre
+# ~/bin/parallel -j 32 --rpl '{..} 1 $_=$job->slot()-1' taskset -c {..} {} ::: $DIR/runSingleIncrementalExperiment ::: $zipFile :::: problemList.txt ::: MpC-e ::: '--icaps2017 -n' ::: cominisatps2sun_nopre
+# ~/bin/parallel -j 32 --rpl '{..} 1 $_=$job->slot()-1' taskset -c {..} {} ::: $DIR/runSingleIncrementalExperiment ::: $zipFile :::: problemList.txt ::: MpC-e ::: '--icaps2017 -s' ::: cominisatps2sun_nopre
 
 ## Multiple parallel calls:
 # ~/bin/parallel -j 32 --shuf --rpl '{..} 1 $_=$job->slot()-1' taskset -c {..} {} ::: $DIR/runSingleIncrementalExperiment ::: $zipFile :::: problemList.txt ::: MpC-e ::: r0.5 ::: cominisatps2sun_nopre
@@ -69,5 +75,6 @@ unzip -Z1 $zipFile | grep -E "$filter" | grep -v "domain[^/]*.pddl" > problemLis
 
 # ## Madagascar call, must be seperate
 # ~/bin/parallel -j 32 --shuf --rpl '{..} 1 $_=$job->slot()-1' taskset -c {..} {} ::: $DIR/runSingleMadagascar ::: $zipFile :::: problemList.txt ::: P
+~/bin/parallel -j 32 --shuf --rpl '{..} 1 $_=$job->slot()-1' taskset -c {..} {} ::: $DIR/runSingleMadagascar ::: $zipFile :::: problemList.txt ::: M
 
 echo "could complete" > completeFile

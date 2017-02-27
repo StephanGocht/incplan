@@ -2,8 +2,8 @@
 # -A 1 Algoritm A with paralelity 1 (so basically sequential)
 # -S 1 test each step separately
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-madagascar=$DIR/../bin/MpC
-# madagascar="$DIR/../bin/M -C 1.41"
+#madagascar=$DIR/../bin/MpC
+madagascar="$DIR/../bin/M"
 
 i=0
 splitPoint=0
