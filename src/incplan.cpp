@@ -31,6 +31,7 @@ struct Options {
 	bool normalOutput;
 	bool singleEnded;
 	bool cleanLitearl;
+	bool icaps2017Version;
 	double ratio;
 	std::function<int(int)> stepToMakespan;
 };
@@ -234,7 +235,13 @@ enum class HelperVariables { ZeroVariableIsNotAllowed_DoNotRemoveThis,
 class Solver : public TimePointBasedSolver {
 	public:
 		Solver(const Problem* problem):
-			TimePointBasedSolver(problem->numberLiteralsPerTime,1){
+			TimePointBasedSolver(
+				problem->numberLiteralsPerTime,
+				1,
+				std::make_unique<ipasir::Solver>(),
+				options.icaps2017Version?
+					TimePointBasedSolver::HelperVariablePosition::AllBefore:
+					TimePointBasedSolver::HelperVariablePosition::SingleAfter){
 			this->problem = problem;
 		}
 
@@ -512,6 +519,7 @@ void parseOptions(int argc, char **argv) {
 		TCLAP::SwitchArg singleEnded("s", "singleEnded", "Do not use incremental solving.", cmd, defaultIsFalse);
 		//TCLAP::SwitchArg outputLinePerStep("", "outputLinePerStep", "Output each time point in a new line. Each time point will use the same literals.", defaultIsFalse);
 		TCLAP::SwitchArg outputSolverLike("", "outputSolverLike", "Output result like a normal solver is used. The literals for each time point t are in range t * [literalsPerTime] < lit <= (t + 1) * [literalsPerTime]", cmd, defaultIsFalse);
+		TCLAP::SwitchArg icaps2017Version("", "icaps2017", "Use this option to use encoding as used in the icaps paper.", cmd, defaultIsFalse);
 
 		if (argc == 1) {
 			cmd.getOutput()->usage(cmd);
@@ -528,6 +536,7 @@ void parseOptions(int argc, char **argv) {
 		options.ratio = ratio.getValue();
 		options.singleEnded = singleEnded.getValue();
 		options.cleanLitearl = cleanLitearl.getValue();
+		options.icaps2017Version = icaps2017Version.getValue();
 		{
 			int l = linearStepSize.getValue();
 			float e = exponentialStepBasis.getValue();

@@ -4,12 +4,16 @@
 #include "ipasir/randomized_ipasir.h"
 
 #include "TimeSlotMapping.h"
+#include "logging.h"
 
 #include <vector>
 #include <map>
 #include <memory>
 
 class TimePointBasedSolver {
+public:
+	enum class HelperVariablePosition {AllBefore, SingleBefore, SingleAfter};
+
 private:
 	int varsPerTime;
 	int helperPerTime;
@@ -17,10 +21,9 @@ private:
 	std::map<TimePoint, int> timePoints;
 	std::unique_ptr<ipasir::Ipasir> solver;
 
-	enum class HelperConfiguration {AllBefore, SingleBefore, SingleAfter};
+	HelperVariablePosition helperVariablePosition;
 
 public:
-
 	void addProblemLiteral(int lit, TimePoint t) {
 		solver->add(problemLiteral2Ipasir(lit, t));
 	}
@@ -68,17 +71,31 @@ public:
 	};
 
 	TimePointBasedSolver(int _varsPerTime, int _helperPerTime,
-		std::unique_ptr<ipasir::Ipasir> _solver):
+		std::unique_ptr<ipasir::Ipasir> _solver,
+		HelperVariablePosition _helperVariablePosition):
 		varsPerTime(_varsPerTime),
 		helperPerTime(_helperPerTime),
-		solver(std::move(_solver))
+		solver(std::move(_solver)),
+		helperVariablePosition(_helperVariablePosition)
+	{
+		if (helperVariablePosition == HelperVariablePosition::AllBefore) {
+			VLOG(1) << "Placing helper variables before encoding.";
+		}
+	}
+
+	TimePointBasedSolver(int _varsPerTime, int _helperPerTime,
+			std::unique_ptr<ipasir::Ipasir> _solver):
+		TimePointBasedSolver(_varsPerTime, _helperPerTime,
+			std::move(_solver),
+			HelperVariablePosition::SingleAfter)
 	{
 	}
 
 	TimePointBasedSolver(int _varsPerTime, int _helperPerTime):
 		TimePointBasedSolver(_varsPerTime, _helperPerTime,
-			//std::make_unique<ipasir::RandomizedSolver>((_varsPerTime + _helperPerTime) * 4))
-			std::make_unique<ipasir::Solver>())
+			//std::make_unique<ipasir::RandomizedSolver>((_varsPerTime + _helperPerTime) * 4),
+			std::make_unique<ipasir::Solver>(),
+			HelperVariablePosition::SingleAfter)
 	{
 	}
 
@@ -106,27 +123,26 @@ private:
 		}
 
 		int offset;
-		HelperConfiguration conf = HelperConfiguration::SingleAfter;
-		switch (conf) {
-		case HelperConfiguration::SingleBefore:
+		switch (helperVariablePosition) {
+		case HelperVariablePosition::SingleBefore:
 			offset = getIndex(t) * (varsPerTime + helperPerTime);
 			if (!isHelper) {
 				offset += helperPerTime;
 			}
 			break;
 
-		case HelperConfiguration::SingleAfter:
+		case HelperVariablePosition::SingleAfter:
 			offset = getIndex(t) * (varsPerTime + helperPerTime);
 			if (isHelper) {
 				offset += varsPerTime;
 			}
 			break;
 
-		case HelperConfiguration::AllBefore:
+		case HelperVariablePosition::AllBefore:
 			if (isHelper) {
 				offset = getIndex(t) * helperPerTime;
 			} else {
-				offset = getIndex(t) * varsPerTime + 5000;
+				offset = getIndex(t) * varsPerTime + 1000;
 			}
 			break;
 		}
