@@ -122,7 +122,7 @@ private:
 			return 0;
 		}
 
-		int offset;
+		int offset = 0;
 		switch (helperVariablePosition) {
 		case HelperVariablePosition::SingleBefore:
 			offset = getIndex(t) * (varsPerTime + helperPerTime);

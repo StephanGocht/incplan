@@ -103,68 +103,32 @@ extern "C" {
 
 class Solver: public Ipasir {
 public:
-	Solver():
-		solver(nullptr),
-		terminateCallback([]{return 0;}),
-		selectLiteralCallback([]{return 0;}) {
-		reset();
-	}
+	Solver();
 
-	virtual ~Solver(){
-		ipasir_release(solver);
-	}
+	virtual ~Solver();
 
-	virtual std::string signature() {
-		return ipasir_signature();
-	};
+	virtual std::string signature();
 
-	virtual void add(int lit_or_zero) {
-		ipasir_add(solver, lit_or_zero);
-	}
+	virtual void add(int lit_or_zero);
 
-	virtual void assume(int lit) {
-		ipasir_assume(solver, lit);
-	}
+	virtual void assume(int lit);
 
-	virtual SolveResult solve() {
-		return static_cast<SolveResult>(ipasir_solve(solver));
-	};
+	virtual SolveResult solve();
 
-	virtual int val(int lit) {
-		return ipasir_val (solver, lit);
-	};
+	virtual int val(int lit);
 
-	virtual int failed (int lit) {
-		return ipasir_failed(solver, lit);
-	};
+	virtual int failed (int lit);
 
-	virtual void set_terminate (std::function<int(void)> callback) {
-		terminateCallback = callback;
-	};
+	virtual void set_terminate (std::function<int(void)> callback);
 
-	virtual void reset() {
-		if (solver != nullptr) {
-			ipasir_release(solver);
-		}
-		solver = ipasir_init();
-
-		ipasir_set_terminate(this->solver, this, &ipasir_terminate_callback);
-		#ifdef USE_EXTENDED_IPASIR
-		eipasir_set_select_literal_callback(this->solver, this, &ipasir_select_literal_callback);
-		#endif
-	}
+	virtual void reset();
 
 private:
 	void* solver;
 	std::function<int(void)> terminateCallback;
 	std::function<int(void)> selectLiteralCallback;
 
-	friend int ipasir_terminate_callback(void* state) {
-		return static_cast<Solver*>(state)->terminateCallback();
-	}
-
-	friend int ipasir_select_literal_callback(void* state) {
-		return static_cast<Solver*>(state)->selectLiteralCallback();
-	}
+	friend int ipasir_terminate_callback(void* state);
+	friend int ipasir_select_literal_callback(void* state);
 };
 }

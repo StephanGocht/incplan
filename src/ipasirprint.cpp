@@ -6,6 +6,8 @@ extern "C" {
 #include <limits>
 #include "misc.h"
 
+using namespace incplan;
+
 extern "C" {
 	#define SAT 10
 	#define UNSAT 20

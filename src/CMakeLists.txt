@@ -33,6 +33,10 @@ include(gtest)
 #include(cotire)
 #set (COTIRE_MINIMUM_NUMBER_OF_TARGET_SOURCES 1)
 
+add_library(ipasir_wrapper libs/ipasir/ipasir_cpp.cpp)
+add_library(ipasir_wrapper_extended libs/ipasir/ipasir_cpp.cpp)
+target_compile_definitions(ipasir_wrapper_extended PRIVATE USE_EXTENDED_IPASIR=1)
+
 # === Target: all_sources ===
 
 # This library contains every source file. We pack them into a library as we
@@ -47,13 +51,17 @@ set_target_properties(all_sources PROPERTIES
 # === Target incplan-debugprint ===
 add_library(libincplan_debugprint ipasirprint.cpp)
 add_executable(incplan_debugprint main.cpp)
-target_link_libraries(incplan_debugprint all_sources libincplan_debugprint)
+target_link_libraries(incplan_debugprint
+	all_sources
+	ipasir_wrapper
+	libincplan_debugprint)
 
 # === Target: unitTest ===
 
 add_executable(unitTest ${UNIT_TEST_FILES})
 target_link_libraries(unitTest
 	all_sources
+	ipasir_wrapper
 	gtest_main
 	gmock_main
 	libincplan_debugprint)
@@ -68,16 +76,10 @@ set_target_properties(unitTest PROPERTIES
 
 set(EXTENDED_IPASIR_SOLVER ${CMAKE_SOURCE_DIR}/../lib/libipasirExt_cominisatps2sun_nopre.a)
 if (EXISTS ${EXTENDED_IPASIR_SOLVER})
-	add_library(all_sources_extended ${SRC_FILES})
-	target_compile_definitions(all_sources_extended PRIVATE USE_EXTENDED_IPASIR=1)
-	set_target_properties(all_sources_extended PROPERTIES
-		COTIRE_PREFIX_HEADER_IGNORE_PATH "${CMAKE_SOURCE_DIR}"
-			_PREFIX_HEADER_INCLUDE_PATH "${CMAKE_SOURCE_DIR}/libs")
-	#cotire(all_sources_extended)
-
 	add_executable(incplan-heuristical main.cpp)
 	target_link_libraries(incplan-heuristical
-		all_sources_extended
+		all_sources
+		ipasir_wrapper_extended
 		${EXTENDED_IPASIR_SOLVER}
 		)
 endif()
@@ -99,6 +101,7 @@ FOREACH(ipasir_lib ${ipasir_libs})
 	add_executable(incplan-${libname} main.cpp)
 	target_link_libraries(incplan-${libname}
 		all_sources
+		ipasir_wrapper
 		${CMAKE_SOURCE_DIR}/../lib/ipasir/${ipasir_lib}
 		)
 ENDFOREACH()
