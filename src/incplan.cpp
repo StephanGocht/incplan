@@ -16,11 +16,13 @@
 #include <stack>
 
 #include "tclap/CmdLine.h"
-#include "logging.h"
-INITIALIZE_EASYLOGGINGPP
 
 #include "TimeSlotMapping.h"
 #include "TimePointBasedSolver.h"
+#include "carj/carj.h"
+#include "carj/logging.h"
+#include "carj/ScopedTimer.h"
+
 
 struct Options {
 	bool error;
@@ -364,6 +366,7 @@ class Solver : public TimePointBasedSolver {
 
 		bool slv(){
 			LOG(INFO) << "Start solving";
+			nlohmann::json solves;
 			int step = 0;
 			TimePoint elementInsertedLast = initialize();
 
@@ -397,7 +400,12 @@ class Solver : public TimePointBasedSolver {
 				finalize(elementInsertedLast);
 
 				VLOG(1) << "Solving makespan " << makeSpan;
+				solves.push_back({
+					{"makespan", makeSpan},
+					{"time", -1}
+				});
 				{
+					carj::ScopedTimer timer((*solves.rbegin())["time"]);
 					TIMED_SCOPE(blkScope, "solve");
 					result = solveSAT();
 				}
@@ -410,6 +418,8 @@ class Solver : public TimePointBasedSolver {
 				}
 			}
 
+			carj::getCarj().data["/incplan/result/solves"_json_pointer] =
+				solves;
 			this->solveResult = result;
 			return result == ipasir::SolveResult::SAT;
 		}
@@ -500,32 +510,28 @@ class Solver : public TimePointBasedSolver {
 		}
 };
 
-void parseOptions(int argc, char **argv) {
+void parseOptions(int argc, const char **argv) {
 	try {
 		//bool defaultIsTrue = true;
 		bool defaultIsFalse = false;
 		bool neccessaryArgument = true;
 		TCLAP::CmdLine cmd("This tool is does sat planing using an incremental sat solver.", ' ', "0.1");
-		TCLAP::UnlabeledValueArg<std::string>  inputFile( "inputFile", "File containing the problem. Omit or use - for stdin.", !neccessaryArgument, "-", "inputFile", cmd);
-		TCLAP::ValueArg<double>  ratio("r", "ratio", "Ratio between states from start to state from end.", !neccessaryArgument, 1.0, "number between 0 and 1", cmd);
-		TCLAP::ValueArg<unsigned>  linearStepSize("l", "linearStepSize", "Linear step size.", !neccessaryArgument, 1, "natural number", cmd);
-		TCLAP::ValueArg<float> exponentialStepBasis("e", "exponentialStepBasis", "Basis of exponential step size. Combinable with options -l and -o (varibale names are equal to parameter): step size = l*n + floor(e ^ (n + o))", !neccessaryArgument, 0, "natural number", cmd);
-		TCLAP::ValueArg<float> exponentialStepOffset("o", "exponentialStepOffset", "Basis of exponential step size.", !neccessaryArgument, 0, "natural number", cmd);
-		TCLAP::SwitchArg unitInGoal2Assume("u", "unitInGoal2Assume", "Add units in goal clauses using assume instead of add. (singleEnded only)", cmd, defaultIsFalse);
-		TCLAP::SwitchArg solveBeforeGoalClauses("i", "intermediateSolveStep", "Add an additional solve step before adding the goal or linking clauses.", cmd, defaultIsFalse);
-		TCLAP::SwitchArg nonIncrementalSolving("n", "nonIncrementalSolving", "Do not use incremental solving.", cmd, defaultIsFalse);
-		TCLAP::SwitchArg cleanLitearl("c", "cleanLitearl", "Add a literal to remove linking or goal clauses.", cmd, defaultIsFalse);
+		carj::TCarjArg<TCLAP::UnlabeledValueArg,std::string>  inputFile( "inputFile", "File containing the problem. Omit or use - for stdin.", !neccessaryArgument, "-", "inputFile", cmd);
+		carj::TCarjArg<TCLAP::ValueArg, double>  ratio("r", "ratio", "Ratio between states from start to state from end.", !neccessaryArgument, 1.0, "number between 0 and 1", cmd);
+		carj::TCarjArg<TCLAP::ValueArg, unsigned>  linearStepSize("l", "linearStepSize", "Linear step size.", !neccessaryArgument, 1, "natural number", cmd);
+		carj::TCarjArg<TCLAP::ValueArg, float> exponentialStepBasis("e", "exponentialStepBasis", "Basis of exponential step size. Combinable with options -l and -o (varibale names are equal to parameter): step size = l*n + floor(e ^ (n + o))", !neccessaryArgument, 0, "natural number", cmd);
+		carj::TCarjArg<TCLAP::ValueArg, float> exponentialStepOffset("o", "exponentialStepOffset", "Basis of exponential step size.", !neccessaryArgument, 0, "natural number", cmd);
+		carj::CarjArg<TCLAP::SwitchArg, bool> unitInGoal2Assume("u", "unitInGoal2Assume", "Add units in goal clauses using assume instead of add. (singleEnded only)", cmd, defaultIsFalse);
+		carj::CarjArg<TCLAP::SwitchArg, bool> solveBeforeGoalClauses("i", "intermediateSolveStep", "Add an additional solve step before adding the goal or linking clauses.", cmd, defaultIsFalse);
+		carj::CarjArg<TCLAP::SwitchArg, bool> nonIncrementalSolving("n", "nonIncrementalSolving", "Do not use incremental solving.", cmd, defaultIsFalse);
+		carj::CarjArg<TCLAP::SwitchArg, bool> cleanLitearl("c", "cleanLitearl", "Add a literal to remove linking or goal clauses.", cmd, defaultIsFalse);
 
-		TCLAP::SwitchArg singleEnded("s", "singleEnded", "Do not use incremental solving.", cmd, defaultIsFalse);
+		carj::CarjArg<TCLAP::SwitchArg, bool> singleEnded("s", "singleEnded", "Do not use incremental solving.", cmd, defaultIsFalse);
 		//TCLAP::SwitchArg outputLinePerStep("", "outputLinePerStep", "Output each time point in a new line. Each time point will use the same literals.", defaultIsFalse);
-		TCLAP::SwitchArg outputSolverLike("", "outputSolverLike", "Output result like a normal solver is used. The literals for each time point t are in range t * [literalsPerTime] < lit <= (t + 1) * [literalsPerTime]", cmd, defaultIsFalse);
-		TCLAP::SwitchArg icaps2017Version("", "icaps2017", "Use this option to use encoding as used in the icaps paper.", cmd, defaultIsFalse);
+		carj::CarjArg<TCLAP::SwitchArg, bool> outputSolverLike("", "outputSolverLike", "Output result like a normal solver is used. The literals for each time point t are in range t * [literalsPerTime] < lit <= (t + 1) * [literalsPerTime]", cmd, defaultIsFalse);
+		carj::CarjArg<TCLAP::SwitchArg, bool> icaps2017Version("", "icaps2017", "Use this option to use encoding as used in the icaps paper.", cmd, defaultIsFalse);
 
-		if (argc == 1) {
-			cmd.getOutput()->usage(cmd);
-			exit(0);
-		}
-		cmd.parse( argc, argv );
+		carj::init(argc, argv, cmd, "/incplan/parameters");
 
 		options.error = false;
 		options.inputFile = inputFile.getValue();
@@ -562,21 +568,8 @@ void parseOptions(int argc, char **argv) {
 	}
 }
 
-void initLogger(){
-el::Configurations conf;
-conf.setToDefault();
-conf.setGlobally(el::ConfigurationType::Format, "ci %level %fbase:%line; %msg");
-conf.set(el::Level::Fatal, el::ConfigurationType::Format, "%level %fbase:%line; %msg");
-el::Loggers::reconfigureAllLoggers(conf);
 
-conf.setGlobally(el::ConfigurationType::Format, "ci %level %datetime{%H:%m:%s}; %msg");
-el::Loggers::reconfigureLogger("performance", conf);
-el::Loggers::setVerboseLevel(2);
-}
-
-int incplan_main(int argc, char **argv) {
-	START_EASYLOGGINGPP(argc, argv);
-	initLogger();
+int incplan_main(int argc, const char **argv) {
 	parseOptions(argc, argv);
 
 	//LOG(INFO) << "Using the incremental SAT solver " << ipasir_signature();

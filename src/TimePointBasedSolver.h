@@ -4,7 +4,7 @@
 #include "ipasir/randomized_ipasir.h"
 
 #include "TimeSlotMapping.h"
-#include "logging.h"
+#include "carj/logging.h"
 
 #include <vector>
 #include <map>

@@ -21,6 +21,7 @@ set(UNIT_TEST_FILES
 set(SRC_FILES
 	incplan.cpp
 	TimeSlotMapping.cpp
+	carj/carj.cpp
 	)
 
 
