@@ -57,6 +57,6 @@ void carj::init(int argc, const char **argv, TCLAP::CmdLine& cmd,
 
 	carj::getCarj().init(useConfig.getValue(), jsonParameterBase.getValue());
 	carj::CarjArgBase::writeAllToJson();
-	carj::getCarj().writeToFile();
+
 
 }

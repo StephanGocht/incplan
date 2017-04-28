@@ -306,6 +306,8 @@ class Solver : public TimePointBasedSolver {
 		std::unique_ptr<TimePointManager> timePointManager;
 
 		TimePoint initialize() {
+			this->reset();
+
 			if (options.singleEnded) {
 				timePointManager = std::make_unique<SingleEndedTimePointManager>();
 			} else {

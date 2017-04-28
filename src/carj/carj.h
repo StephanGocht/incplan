@@ -35,18 +35,14 @@ namespace carj {
 				if (inStream) {
 					inStream >> data;
 				}
-				json::json_pointer p(base);
-				parameter = &data[p];
 			}
-		}
-
-		void writeToFile() {
-			std::ofstream o(configPath);
-			o << std::setw(4) << data << std::endl;
+			json::json_pointer p(base);
+			parameter = &data[p];
 		}
 
 		~Carj(){
-			writeToFile();
+			std::ofstream o(configPath);
+			o << std::setw(4) << data << std::endl;
 		}
 
 		json data;

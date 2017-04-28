@@ -103,11 +103,11 @@ public:
 
 	}
 
-private:
-	void initIpasir() {
+	void reset() {
 		solver->reset();
 	}
 
+private:
 	int getIndex(TimePoint t) {
 		auto insertResult = timePoints.insert(std::make_pair(t, timePoints.size()));
 		return insertResult.first->second;
