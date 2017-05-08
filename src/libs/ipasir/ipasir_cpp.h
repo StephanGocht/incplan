@@ -6,6 +6,7 @@ extern "C" {
 
 #include <string>
 #include <functional>
+#include <vector>
 
 namespace ipasir {
 enum class SolveResult {SAT = 10, UNSAT = 20, TIMEOUT = 0};
@@ -32,6 +33,14 @@ public:
 	 * arguments in API functions.
 	 */
 	virtual void add(int lit_or_zero) = 0;
+
+	/**
+	 * Perform add for every literal in clause and add(0)
+	 *
+	 * Required state: INPUT or SAT or UNSAT
+	 * State after: INPUT
+	 */
+	virtual void addClause(std::vector<int> clause);
 
 	/**
 	 * Add an assumption for the next SAT search (the next call
@@ -93,6 +102,22 @@ public:
 	 */
 	virtual void set_terminate (std::function<int(void)> callback) = 0;
 
+	/**
+	 * Set a callback function used to extract learned clauses up to a given lenght from the
+	 * solver. The solver will call this function for each learned clause that satisfies
+	 * the maximum length (literal count) condition. The ipasir_set_learn function can be called in any
+	 * state of the solver, the state remains unchanged after the call.
+	 * The callback function is of the form "void learn(void * state, int * clause)"
+	 *   - the solver calls the callback function with the parameter "state"
+	 *     having the value passed in the ipasir_set_terminate function (2nd parameter).
+	 *   - the argument "clause" is a pointer to a null terminated integer array containing the learned clause.
+	 *     the solver can change the data at the memory location that "clause" points to after the function call.
+	 *
+	 * Required state: INPUT or SAT or UNSAT
+	 * State after: INPUT or SAT or UNSAT
+	 */
+	virtual void set_learn (int max_length, std::function<void(int*)>) = 0;
+
 	virtual void reset() = 0;
 };
 
@@ -121,14 +146,18 @@ public:
 
 	virtual void set_terminate (std::function<int(void)> callback);
 
+	virtual void set_learn (int max_length, std::function<void(int*)>);
+
 	virtual void reset();
 
 private:
 	void* solver;
 	std::function<int(void)> terminateCallback;
 	std::function<int(void)> selectLiteralCallback;
+	std::function<void(int*)> learnedClauseCallback;
 
 	friend int ipasir_terminate_callback(void* state);
 	friend int ipasir_select_literal_callback(void* state);
+	friend void ipasir_learn_callback(void* state, int* clause);
 };
 }

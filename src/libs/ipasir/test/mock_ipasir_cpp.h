@@ -12,6 +12,7 @@ public:
 	MOCK_METHOD1(val, int (int lit));
 	MOCK_METHOD1(failed, int  (int lit));
 	MOCK_METHOD1(set_terminate, void  (std::function<int(void)> callback));
+	MOCK_METHOD2(set_learn, void (int max_length, std::function<void(int*)> callback));
 	MOCK_METHOD0(reset, void ());
 };
 }

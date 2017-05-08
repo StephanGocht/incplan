@@ -93,7 +93,7 @@ public:
 
 	TimePointBasedSolver(int _varsPerTime, int _helperPerTime):
 		TimePointBasedSolver(_varsPerTime, _helperPerTime,
-			//std::make_unique<ipasir::RandomizedSolver>((_varsPerTime + _helperPerTime) * 4),
+			//std::make_unique<ipasir::RandomizedSolver>(std::make_unique<ipasir::Solver>()),
 			std::make_unique<ipasir::Solver>(),
 			HelperVariablePosition::SingleAfter)
 	{

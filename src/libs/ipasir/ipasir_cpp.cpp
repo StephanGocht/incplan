@@ -1,10 +1,24 @@
 #include "ipasir_cpp.h"
 
 namespace ipasir {
+	int ipasir_terminate_callback(void* state) {
+		return static_cast<Solver*>(state)->terminateCallback();
+	}
+
+	int ipasir_select_literal_callback(void* state) {
+		return static_cast<Solver*>(state)->selectLiteralCallback();
+	}
+
+	void ipasir_learn_callback(void* state, int* clause) {
+		static_cast<Solver*>(state)->learnedClauseCallback(clause);
+	}
+
 	Solver::Solver():
 		solver(nullptr),
 		terminateCallback([]{return 0;}),
-		selectLiteralCallback([]{return 0;}) {
+		selectLiteralCallback([]{return 0;}),
+		learnedClauseCallback([](int*){return;}) {
+
 		reset();
 	}
 
@@ -18,6 +32,13 @@ namespace ipasir {
 
 	void Solver::add(int lit_or_zero) {
 		ipasir_add(solver, lit_or_zero);
+	}
+
+	void Ipasir::addClause(std::vector<int> clause) {
+		for (int literal: clause) {
+			this->add(literal);
+		}
+		this->add(0);
 	}
 
 	void Solver::assume(int lit) {
@@ -38,6 +59,14 @@ namespace ipasir {
 
 	void Solver::set_terminate (std::function<int(void)> callback) {
 		terminateCallback = callback;
+		ipasir_set_terminate(this->solver, this, &ipasir_terminate_callback);
+	}
+
+	void Solver::set_learn (int max_length, std::function<void(int*)> callback) {
+		learnedClauseCallback = callback;
+		#ifdef IPASIR_LEARNED_CLAUSE_CALLBACK
+			ipasir_set_learn(this->solver, this, max_length, &ipasir_learn_callback);
+		#endif
 	}
 
 	void Solver::reset() {
@@ -50,13 +79,5 @@ namespace ipasir {
 		#ifdef USE_EXTENDED_IPASIR
 		eipasir_set_select_literal_callback(this->solver, this, &ipasir_select_literal_callback);
 		#endif
-	}
-
-	int ipasir_terminate_callback(void* state) {
-		return static_cast<Solver*>(state)->terminateCallback();
-	}
-
-	int ipasir_select_literal_callback(void* state) {
-		return static_cast<Solver*>(state)->selectLiteralCallback();
 	}
 }
