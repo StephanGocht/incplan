@@ -4,6 +4,11 @@ project(incplan)
 # Options
 set(USER_CXX_FLAGS "" CACHE STRING "Use this variable to provide additional\
 flags to the compiler.")
+set(IPASIR_DIR "${CMAKE_SOURCE_DIR}/../lib/ipasir" CACHE STRING
+"The directory which contains one or more implemntations to the ipasir \
+interface. The libs should have the format 'libipasir[solver-name].a'")
+set(BUILD_TESTS "ON" CACHE STRING
+"Whether to build tests. Values: ON, OFF")
 
 # Basic Settings
 set(CMAKE_CXX_FLAGS "-std=c++14 -O3 -Wall -Wextra -Wpedantic -pthread -g ${USER_CXX_FLAGS}")
@@ -24,9 +29,6 @@ set(SRC_FILES
 	carj/carj.cpp
 	)
 
-
-# Include google test, our testing framework
-include(gtest)
 
 # Include cotire to precompile headers.
 # We don't need cotire, but it might speed up build process as we have header
@@ -57,19 +59,33 @@ target_link_libraries(incplan_debugprint
 	ipasir_wrapper
 	libincplan_debugprint)
 
-# === Target: unitTest ===
 
-add_executable(unitTest ${UNIT_TEST_FILES})
-target_link_libraries(unitTest
-	all_sources
-	ipasir_wrapper
-	gtest_main
-	gmock_main
-	libincplan_debugprint)
-set_target_properties(unitTest PROPERTIES
-	COTIRE_PREFIX_HEADER_IGNORE_PATH "${CMAKE_SOURCE_DIR}"
-		_PREFIX_HEADER_INCLUDE_PATH "${CMAKE_SOURCE_DIR}/libs")
-#cotire(unitTest)
+if (BUILD_TESTS EQUAL "ON")
+	# Include google test, our testing framework
+	include(gtest)
+
+	# === Target: unitTest ===
+
+	add_executable(unitTest ${UNIT_TEST_FILES})
+	target_link_libraries(unitTest
+		all_sources
+		ipasir_wrapper
+		gtest_main
+		gmock_main
+		libincplan_debugprint)
+	set_target_properties(unitTest PROPERTIES
+		COTIRE_PREFIX_HEADER_IGNORE_PATH "${CMAKE_SOURCE_DIR}"
+			_PREFIX_HEADER_INCLUDE_PATH "${CMAKE_SOURCE_DIR}/libs")
+	#cotire(unitTest)
+else()
+	add_custom_target(unitTest)
+endif()
+
+# === Target: runtest ===
+add_custom_target(runTest
+	COMMAND ./unitTest --gtest_color=yes
+	WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+	DEPENDS unitTest)
 
 # === Target: incplan-heuristical ===
 
@@ -92,9 +108,9 @@ endif()
 
 # This folder should contain the library of solvers to link aigainst. Each
 # incremental solver library should be named libipasir[solver-name].a
-set(ipasir_lib_dir "${CMAKE_SOURCE_DIR}/../lib/ipasir")
-file(GLOB ipasir_libs RELATIVE ${ipasir_lib_dir}
-	${ipasir_lib_dir}/*.a
+get_filename_component(IPASIR_DIR_ABS ${IPASIR_DIR} ABSOLUTE)
+file(GLOB ipasir_libs RELATIVE ${IPASIR_DIR_ABS}
+	${IPASIR_DIR_ABS}/libipasir*.a
 	)
 
 FOREACH(ipasir_lib ${ipasir_libs})
@@ -103,15 +119,9 @@ FOREACH(ipasir_lib ${ipasir_libs})
 	target_link_libraries(incplan-${libname}
 		all_sources
 		ipasir_wrapper
-		${CMAKE_SOURCE_DIR}/../lib/ipasir/${ipasir_lib}
+		${IPASIR_DIR_ABS}/${ipasir_lib}
 		)
 ENDFOREACH()
-
-# === Target: runtest ===
-add_custom_target(runTest
-	COMMAND ./unitTest --gtest_color=yes
-	WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-	DEPENDS unitTest)
 
 # === Target: core ===
 
