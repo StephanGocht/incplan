@@ -8,6 +8,8 @@
 INITIALIZE_EASYLOGGINGPP
 using json = nlohmann::json;
 
+const std::string carj::Carj::configPath = "carj.json";
+
 carj::Carj& carj::getCarj() {
 	static carj::Carj carj;
 	return carj;
@@ -41,21 +43,31 @@ void carj::init(int argc, const char **argv, TCLAP::CmdLine& cmd,
 		argv = argv_help.data();
 	}
 
+	TCLAP::UnlabeledValueArg<std::string> configPath("configPath",
+		/*description*/ "Path to configuartion file.",
+		/*necessary*/   false,
+		/*default*/     "carj.json",
+		/*type descr.*/ "path");
+	cmd.add(configPath);
+
 	TCLAP::SwitchArg useConfig("", "useConfig",
 		"Use configuration file 'carj.json'.",
 		/*default*/ false);
+	cmd.add(useConfig);
 
 	TCLAP::ValueArg<std::string> jsonParameterBase("", "jsonParameterBase",
 		"Json pointer to base of parameters.",
 		/*necessary*/   false,
 		/*default*/     parameterBase,
 		/*description*/ "");
-
-	cmd.add(useConfig);
 	cmd.add(jsonParameterBase);
+
 	cmd.parse( argc, argv );
 
-	carj::getCarj().init(useConfig.getValue(), jsonParameterBase.getValue());
+	carj::getCarj().init(
+		configPath.getValue(),
+		configPath.isSet() || useConfig.getValue(),
+		jsonParameterBase.getValue());
 	carj::CarjArgBase::writeAllToJson();
 
 

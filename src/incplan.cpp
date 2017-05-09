@@ -513,13 +513,16 @@ class Solver : public TimePointBasedSolver {
 		}
 };
 
+
+//bool defaultIsTrue = true;
+bool defaultIsFalse = false;
+bool neccessaryArgument = true;
+
+TCLAP::CmdLine cmd("This tool is does sat planing using an incremental sat solver.", ' ', "0.1");
+carj::MCarjArg<TCLAP::MultiArg, std::string> pathSearchPrefix("", "pathSearchPrefix", "If passed files are not found their path will be prefixed with values of this parameter.", !neccessaryArgument, "path", cmd);
 void parseOptions(int argc, const char **argv) {
 	try {
-		//bool defaultIsTrue = true;
-		bool defaultIsFalse = false;
-		bool neccessaryArgument = true;
-		TCLAP::CmdLine cmd("This tool is does sat planing using an incremental sat solver.", ' ', "0.1");
-		carj::TCarjArg<TCLAP::UnlabeledValueArg,std::string>  inputFile( "inputFile", "File containing the problem. Omit or use - for stdin.", !neccessaryArgument, "-", "inputFile", cmd);
+		carj::TCarjArg<TCLAP::ValueArg,std::string>  inputFile("f", "inputFile", "File containing the problem. Omit or use - for stdin.", !neccessaryArgument, "-", "inputFile", cmd);
 		carj::TCarjArg<TCLAP::ValueArg, double>  ratio("r", "ratio", "Ratio between states from start to state from end.", !neccessaryArgument, 1.0, "number between 0 and 1", cmd);
 		carj::TCarjArg<TCLAP::ValueArg, unsigned>  linearStepSize("l", "linearStepSize", "Linear step size.", !neccessaryArgument, 1, "natural number", cmd);
 		carj::TCarjArg<TCLAP::ValueArg, float> exponentialStepBasis("e", "exponentialStepBasis", "Basis of exponential step size. Combinable with options -l and -o (varibale names are equal to parameter): step size = l*n + floor(e ^ (n + o))", !neccessaryArgument, 0, "natural number", cmd);
@@ -583,7 +586,17 @@ int incplan_main(int argc, const char **argv) {
 		in = &std::cin;
 		LOG(INFO) << "Using standard input.";
 	} else {
-		is.open(options.inputFile);
+
+		std::vector<std::string> prefixes = pathSearchPrefix.getValue();
+		prefixes.insert(prefixes.begin(), "");
+
+		for (std::string prefix: prefixes) {
+			is.open(prefix + options.inputFile);
+			if (!is.fail()) {
+				break;
+			}
+		}
+
 		if (is.fail()){
 			LOG(FATAL) << "Input Error can't open file: " << options.inputFile;
 		}

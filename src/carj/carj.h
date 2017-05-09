@@ -10,6 +10,18 @@
 #include <string>
 #include <vector>
 
+template < class T >
+std::ostream& operator << (std::ostream& os, const std::vector<T>& v)
+{
+	os << "[";
+	for (typename std::vector<T>::const_iterator ii = v.begin(); ii != v.end(); ++ii)
+	{
+		os << " " << *ii;
+	}
+	os << "]";
+	return os;
+}
+
 namespace carj {
 	using json = nlohmann::json;
 
@@ -24,14 +36,16 @@ namespace carj {
 
 	class Carj {
 	public:
-		const std::string configPath = "carj.json";
+		static const std::string configPath;
 
 		Carj() {
 		}
 
-		void init(bool loadFromDefault = false, std::string base = "") {
+		void init(std::string inputPath = configPath,
+				bool loadFromDefault = false,
+				std::string base = "") {
 			if (loadFromDefault) {
-				std::ifstream inStream(configPath);
+				std::ifstream inStream(inputPath);
 				if (inStream) {
 					inStream >> data;
 				}
@@ -138,6 +152,15 @@ namespace carj {
 			template<typename ...Args>
 			TCarjArg(Args&&... params):
 				CarjArgImpl<TemplateType<ValueType>, ValueType>(std::forward<Args>(params)...) {
+			}
+	};
+
+	template<template <typename Type> class TemplateType, typename ValueType>
+	class MCarjArg: public CarjArgImpl<TemplateType<ValueType>, std::vector<ValueType>> {
+		public:
+			template<typename ...Args>
+			MCarjArg(Args&&... params):
+				CarjArgImpl<TemplateType<ValueType>, std::vector<ValueType>>(std::forward<Args>(params)...) {
 			}
 	};
 
