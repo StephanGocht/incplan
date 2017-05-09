@@ -43,7 +43,7 @@ void carj::init(int argc, const char **argv, TCLAP::CmdLine& cmd,
 		argv = argv_help.data();
 	}
 
-	TCLAP::UnlabeledValueArg<std::string> configPath("configPath",
+	TCLAP::ValueArg<std::string> configPath("", "configPath",
 		/*description*/ "Path to configuartion file.",
 		/*necessary*/   false,
 		/*default*/     "carj.json",
