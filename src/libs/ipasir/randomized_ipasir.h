@@ -35,10 +35,18 @@ public:
 	}
 
 	virtual int val(int lit) {
+		if (isLiteralUnused(lit)) {
+			return lit;
+		}
+
 		return unmap(solver->val(map(lit)));
 	};
 
 	virtual int failed (int lit) {
+		if (isLiteralUnused(lit)) {
+			return 0;
+		}
+
 		return solver->failed(map(lit));
 	};
 
@@ -168,6 +176,14 @@ private:
 		return std::abs(lit);
 	}
 
+	inline bool isLiteralUnused(int lit) {
+		unsigned var = litToVar(lit);
+		return (
+				(var >= toIpasir.size())
+			||
+				(toIpasir[var] == 0));
+	}
+
 	int unmap(int literal) {
 		return map(literal, true);
 	}
@@ -180,10 +196,12 @@ private:
 		unsigned variable = std::abs(literal);
 		int sign = (literal < 0)? -1 : 1;
 
+		//std::cout << "v: " << variable << std::endl;
 		if (!unMap) {
-			// Note that toIpasir is a permutation from [0,size())
+			assert(variable < toIpasir.size());
 			variable = toIpasir[variable];
 		} else {
+			assert(variable < fromIpasir.size());
 			variable = fromIpasir[variable];
 		}
 		assert(variable != 0);
