@@ -23,6 +23,10 @@
 #include "carj/logging.h"
 #include "carj/ScopedTimer.h"
 
+TCLAP::CmdLine cmd("This tool is does sat planing using an incremental sat solver.", ' ', "0.1");
+namespace option{
+	carj::CarjArg<TCLAP::SwitchArg, bool> exhaustive("", "exhaustiveSearch", "Solve problem for subsets of assumed literals.", cmd, /*default*/ false);
+}
 
 struct Options {
 	bool error;
@@ -45,7 +49,7 @@ public:
 	Problem(std::istream& in){
 		this->numberLiteralsPerTime = 0;
 		parse(in);
-		//inferAdditionalInformation();
+		inferAdditionalInformation();
 	}
 
 	std::vector<int> initial, invariant, goal , transfer;
@@ -64,6 +68,7 @@ private:
 			stateVariables.insert(std::abs(lit));
 		}
 		stateVariables.erase(0);
+		std::copy(stateVariables.begin(), stateVariables.end(), std::back_inserter(this->stateVariables));
 
 		// {
 		// 	std::stringstream ss;
@@ -75,66 +80,65 @@ private:
 		// }
 
 
-		// guess action variables from clauses containing states
-		std::set<int> actionVariablesHelper;
-		size_t clauseStart = 0;
-		bool clauseHasStateVar = false;
-		for (size_t i = 0; i < this->transfer.size(); i++) {
-			unsigned var = std::abs(this->transfer[i]);
-			var = var > this->numberLiteralsPerTime ? var - this->numberLiteralsPerTime: var;
-			if (this->transfer[i] != 0) {
-				if (stateVariables.find(var) != stateVariables.end()) {
-					clauseHasStateVar = true;
-				}
-			} else {
-				if (clauseHasStateVar) {
-					for (size_t j = clauseStart; j < i; j++) {
-						unsigned var = std::abs(this->transfer[j]);
-						var = var > this->numberLiteralsPerTime ? var - this->numberLiteralsPerTime: var;
-						actionVariablesHelper.insert(var);
-					}
-				}
+		// // guess action variables from clauses containing states
+		// std::set<int> actionVariablesHelper;
+		// size_t clauseStart = 0;
+		// bool clauseHasStateVar = false;
+		// for (size_t i = 0; i < this->transfer.size(); i++) {
+		// 	unsigned var = std::abs(this->transfer[i]);
+		// 	var = var > this->numberLiteralsPerTime ? var - this->numberLiteralsPerTime: var;
+		// 	if (this->transfer[i] != 0) {
+		// 		if (stateVariables.find(var) != stateVariables.end()) {
+		// 			clauseHasStateVar = true;
+		// 		}
+		// 	} else {
+		// 		if (clauseHasStateVar) {
+		// 			for (size_t j = clauseStart; j < i; j++) {
+		// 				unsigned var = std::abs(this->transfer[j]);
+		// 				var = var > this->numberLiteralsPerTime ? var - this->numberLiteralsPerTime: var;
+		// 				actionVariablesHelper.insert(var);
+		// 			}
+		// 		}
 
-				clauseStart = i + 1;
-				clauseHasStateVar = false;
-			}
-		}
+		// 		clauseStart = i + 1;
+		// 		clauseHasStateVar = false;
+		// 	}
+		// }
 
-		std::set<int> actionVariables;
-		std::set_difference(actionVariablesHelper.begin(), actionVariablesHelper.end(),
-							stateVariables.begin(), stateVariables.end(),
-							std::inserter(actionVariables, actionVariables.end()));
+		// std::set<int> actionVariables;
+		// std::set_difference(actionVariablesHelper.begin(), actionVariablesHelper.end(),
+		// 					stateVariables.begin(), stateVariables.end(),
+		// 					std::inserter(actionVariables, actionVariables.end()));
 
-		std::vector<int> currentClauseActions;
-		std::vector<int> currentClauseFutureState;
-		for (size_t i = 0; i < this->transfer.size(); i++) {
-			unsigned var = std::abs(this->transfer[i]);
-			if (var == 0) {
-				for (int stateVar: currentClauseFutureState) {
-					auto res = support.insert(std::make_pair(stateVar, std::vector<int>()));
-					std::copy(currentClauseActions.begin(), currentClauseActions.end(), std::back_inserter(res.first->second));
-				}
+		// std::vector<int> currentClauseActions;
+		// std::vector<int> currentClauseFutureState;
+		// for (size_t i = 0; i < this->transfer.size(); i++) {
+		// 	unsigned var = std::abs(this->transfer[i]);
+		// 	if (var == 0) {
+		// 		for (int stateVar: currentClauseFutureState) {
+		// 			auto res = support.insert(std::make_pair(stateVar, std::vector<int>()));
+		// 			std::copy(currentClauseActions.begin(), currentClauseActions.end(), std::back_inserter(res.first->second));
+		// 		}
 
-			} else {
-				bool isNextTime = false;
-				if (var > this->numberLiteralsPerTime) {
-					isNextTime = true;
-					var -= this->numberLiteralsPerTime;
-				}
+		// 	} else {
+		// 		bool isNextTime = false;
+		// 		if (var > this->numberLiteralsPerTime) {
+		// 			isNextTime = true;
+		// 			var -= this->numberLiteralsPerTime;
+		// 		}
 
-				if (stateVariables.find(var) != stateVariables.end() && isNextTime) {
-					currentClauseFutureState.push_back(var);
-				}
+		// 		if (stateVariables.find(var) != stateVariables.end() && isNextTime) {
+		// 			currentClauseFutureState.push_back(var);
+		// 		}
 
-				if (actionVariables.find(var) != actionVariables.end()) {
-					assert(!isNextTime);
-					currentClauseActions.push_back(var);
-				}
-			}
-		}
+		// 		if (actionVariables.find(var) != actionVariables.end()) {
+		// 			assert(!isNextTime);
+		// 			currentClauseActions.push_back(var);
+		// 		}
+		// 	}
+		// }
 
-		std::copy(actionVariables.begin(), actionVariables.end(), std::back_inserter(this->actionVariables));
-		std::copy(stateVariables.begin(), stateVariables.end(), std::back_inserter(this->stateVariables));
+		// std::copy(actionVariables.begin(), actionVariables.end(), std::back_inserter(this->actionVariables));
 
 		// {
 		// 	std::stringstream ss;
@@ -241,7 +245,7 @@ class Solver : public TimePointBasedSolver {
 				problem->numberLiteralsPerTime,
 				1,
 				//std::make_unique<ipasir::Solver>(),
-				std::make_unique<ipasir::RandomizedSolver>(std::make_unique<ipasir::Solver>()),
+				std::make_unique<ipasir::RandomizedSolver>(0, std::make_unique<ipasir::Solver>()),
 				options.icaps2017Version?
 					TimePointBasedSolver::HelperVariablePosition::AllBefore:
 					TimePointBasedSolver::HelperVariablePosition::SingleAfter){
@@ -413,6 +417,80 @@ class Solver : public TimePointBasedSolver {
 					result = solveSAT();
 				}
 
+				if (result != ipasir::SolveResult::SAT
+					&& option::exhaustive.getValue()) {
+					TIMED_SCOPE(blkScope, "exhaustive");
+					VLOG(1) << "runrun";
+
+					unsigned n = this->problem->stateVariables.size();
+					int k = 2;
+					std::vector<bool> v(n);
+					std::fill(v.begin(), v.begin() + k, true);
+
+					do {
+						std::vector<int> clause;
+						for (unsigned i = 0; i < n; ++i) {
+							if (v[i]) {
+								unsigned var = this->problem->stateVariables[i];
+								clause.push_back(var);
+								//assume stateVariable[i]
+								// std::cout << i << " ";
+							}
+						}
+
+						bool unsat;
+						for (int var:clause) {
+							assumeProblemLiteral(var, elementInsertedLast);
+						}
+
+						unsat = (solveSAT() == ipasir::SolveResult::UNSAT);
+						if (unsat) {
+							for (int var:clause) {
+								addProblemLiteral(-var, elementInsertedLast);
+							}
+							finalizeClause();
+						}
+
+						clause[0] = -clause[0];
+						for (int var:clause) {
+							assumeProblemLiteral(var, elementInsertedLast);
+						}
+						unsat = (solveSAT() == ipasir::SolveResult::UNSAT);
+						if (unsat) {
+							for (int var:clause) {
+								addProblemLiteral(-var, elementInsertedLast);
+							}
+							finalizeClause();
+						}
+
+						clause[1] = -clause[1];
+						for (int var:clause) {
+							assumeProblemLiteral(var, elementInsertedLast);
+						}
+						unsat = (solveSAT() == ipasir::SolveResult::UNSAT);
+						if (unsat) {
+							for (int var:clause) {
+								addProblemLiteral(-var, elementInsertedLast);
+							}
+							finalizeClause();
+						}
+
+						clause[0] = -clause[0];
+						for (int var:clause) {
+							assumeProblemLiteral(var, elementInsertedLast);
+						}
+						unsat = (solveSAT() == ipasir::SolveResult::UNSAT);
+						if (unsat) {
+							for (int var:clause) {
+								addProblemLiteral(-var, elementInsertedLast);
+							}
+							finalizeClause();
+						}
+
+					} while (std::prev_permutation(v.begin(), v.end()));
+
+				}
+
 				if (options.cleanLitearl) {
 					VLOG(1) << "Cleaning helper Literal.";
 					int activationLiteral = static_cast<int>(HelperVariables::ActivationLiteral);
@@ -423,6 +501,7 @@ class Solver : public TimePointBasedSolver {
 
 			carj::getCarj().data["/incplan/result/solves"_json_pointer] =
 				solves;
+			carj::getCarj().data["/incplan/result/finalMakeSpan"_json_pointer] = makeSpan;
 			this->solveResult = result;
 			return result == ipasir::SolveResult::SAT;
 		}
@@ -518,7 +597,6 @@ class Solver : public TimePointBasedSolver {
 bool defaultIsFalse = false;
 bool neccessaryArgument = true;
 
-TCLAP::CmdLine cmd("This tool is does sat planing using an incremental sat solver.", ' ', "0.1");
 carj::MCarjArg<TCLAP::MultiArg, std::string> pathSearchPrefix("", "pathSearchPrefix", "If passed files are not found their path will be prefixed with values of this parameter.", !neccessaryArgument, "path", cmd);
 void parseOptions(int argc, const char **argv) {
 	try {
