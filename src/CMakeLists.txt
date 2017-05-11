@@ -127,11 +127,11 @@ ENDFOREACH()
 
 # Dummy target which builds all targets but only for one solver
 add_custom_target(core DEPENDS incplan_debugprint unitTest runTest)
-if (TARGET incplan-cominisatps2sun_nopre)
-	add_dependencies(core incplan-cominisatps2sun_nopre)
+if (TARGET incplan-gmod)
+	add_dependencies(core incplan-gmod)
 
 	# Make sure the tool is build, even if tests fail.
-	add_dependencies(runTest incplan-cominisatps2sun_nopre)
+	add_dependencies(runTest incplan-gmod)
 endif()
 if (TARGET incplan-heuristical)
 	add_dependencies(core incplan-heuristical)
