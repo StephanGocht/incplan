@@ -27,6 +27,7 @@ set(SRC_FILES
 	incplan.cpp
 	TimeSlotMapping.cpp
 	carj/carj.cpp
+	TimePointBasedSolver.cpp
 	)
 
 
@@ -133,9 +134,9 @@ if (TARGET incplan-gmod)
 	# Make sure the tool is build, even if tests fail.
 	add_dependencies(runTest incplan-gmod)
 endif()
-if (TARGET incplan-heuristical)
-	add_dependencies(core incplan-heuristical)
+# if (TARGET incplan-heuristical)
+# 	add_dependencies(core incplan-heuristical)
 
-	# Make sure the tool is build, even if tests fail.
-	add_dependencies(runTest incplan-heuristical)
-endif()
+# 	# Make sure the tool is build, even if tests fail.
+# 	add_dependencies(runTest incplan-heuristical)
+# endif()

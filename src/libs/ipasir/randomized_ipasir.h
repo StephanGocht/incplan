@@ -3,6 +3,10 @@
 
 #include <algorithm>
 #include <random>
+#include <memory>
+#include <set>
+#include <iostream>
+#include <cassert>
 
 namespace ipasir {
 class RandomizedSolver : public Ipasir {

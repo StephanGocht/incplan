@@ -26,6 +26,8 @@
 TCLAP::CmdLine cmd("This tool is does sat planing using an incremental sat solver.", ' ', "0.1");
 namespace option{
 	carj::CarjArg<TCLAP::SwitchArg, bool> exhaustive("", "exhaustiveSearch", "Solve problem for subsets of assumed literals.", cmd, /*default*/ false);
+	carj::CarjArg<TCLAP::SwitchArg, bool> loose("", "loose", "Only assume init and goal.", cmd, /*default*/ false);
+	carj::CarjArg<TCLAP::SwitchArg, bool> transformLearned("", "transformLearned", "Transform learned clauses from privious solves to new time step.", cmd, /*default*/ false);
 }
 
 struct Options {
@@ -244,7 +246,7 @@ class Solver : public TimePointBasedSolver {
 			TimePointBasedSolver(
 				problem->numberLiteralsPerTime,
 				1,
-				//std::make_unique<ipasir::Solver>(),
+				// std::make_unique<ipasir::Solver>(),
 				std::make_unique<ipasir::RandomizedSolver>(0, std::make_unique<ipasir::Solver>()),
 				options.icaps2017Version?
 					TimePointBasedSolver::HelperVariablePosition::AllBefore:
@@ -309,9 +311,11 @@ class Solver : public TimePointBasedSolver {
 		int makeSpan;
 		ipasir::SolveResult solveResult;
 		std::unique_ptr<TimePointManager> timePointManager;
+		std::vector<int> learnedClauses;
 
 		TimePoint initialize() {
 			this->reset();
+			setLearnedCallback();
 
 			if (options.singleEnded) {
 				timePointManager = std::make_unique<SingleEndedTimePointManager>();
@@ -323,13 +327,17 @@ class Solver : public TimePointBasedSolver {
 
 			makeSpan = 0;
 			TimePoint t0 = timePointManager->aquireNext();
-			addInitialClauses(t0);
-			addInvariantClauses(t0);
+			if (!option::loose.getValue()) {
+				addInitialClauses(t0);
+				addInvariantClauses(t0);
+			}
 
 			if (!options.singleEnded) {
 				TimePoint tN = timePointManager->aquireNext();
-				addGoalClauses(tN);
-				addInvariantClauses(tN);
+				if (!option::loose.getValue()) {
+					addGoalClauses(tN);
+					addInvariantClauses(tN);
+				}
 
 				return tN;
 			}
@@ -338,8 +346,14 @@ class Solver : public TimePointBasedSolver {
 		}
 
 		void finalize(const TimePoint elementInsertedLast) {
+			if (option::loose.getValue()) {
+				assumeInitial(timePointManager->getFirst());
+				assumeGoal(timePointManager->getLast());
+			}
 			if (options.singleEnded) {
-				addGoalClauses(elementInsertedLast, true);
+				if (!option::loose.getValue()) {
+					addGoalClauses(elementInsertedLast, true);
+				}
 			} else {
 				TimePoint linkSource, linkDestination;
 				if (elementInsertedLast == timePointManager->getLast()) {
@@ -370,6 +384,97 @@ class Solver : public TimePointBasedSolver {
 			// 	assumeHelperLiteral(-activationLiteral, next);
 			// }
 		}
+
+		void rememberLearned(int* learned) {
+			for (;*learned != 0; learned++) {
+				learnedClauses.push_back(*learned);
+			}
+			learnedClauses.push_back(0);
+		}
+
+		void setLearnedCallback(){
+			using namespace std::placeholders;
+			std::function<void(int*)> f =
+				std::bind(&Solver::rememberLearned, this, _1);
+			solver->set_learn(10, f);
+		}
+
+		void exhaustiveInitialFixed() {
+			TIMED_SCOPE(blkScope, "initFixed");
+			for (int lit: problem->goal) {
+				assumeProblemLiteral(lit, timePointManager->getLast());
+				assumeInitial(timePointManager->getFirst());
+				solveSAT();
+			}
+		}
+
+		void exhaustiveGoalFixed() {
+			TIMED_SCOPE(blkScope, "goalFixed");
+			for (int lit: problem->initial) {
+				assumeProblemLiteral(lit, timePointManager->getFirst());
+				assumeGoal(timePointManager->getLast());
+				solveSAT();
+			}
+		}
+
+		// void exhaustiveSearch() {
+		// 	TIMED_SCOPE(blkScope, "exhaust");
+		// 	unsigned numGoalLiterals = 0;
+		// 	unsigned numUnreachabel = 0;
+
+		// 	// check which goal/init variables are unreachable
+		// 	const std::vector<int>* clauseSet;
+		// 	if (timePointManager->isOnForwardStack(elementInsertedLast)) {
+		// 		clauseSet = &problem->goal;
+		// 	} else {
+		// 		clauseSet = &problem->initial;
+		// 	}
+		// 	for (int lit: *clauseSet) {
+		// 		if (lit != 0) {
+		// 			numGoalLiterals++;
+		// 			assumeProblemLiteral(lit, elementInsertedLast);
+		// 			result = solveSAT();
+		// 			if (result == ipasir::SolveResult::UNSAT) {
+		// 				addProblemLiteral(-lit, elementInsertedLast);
+		// 				finalizeClause();
+		// 				numUnreachabel++;
+		// 			};
+		// 		}
+		// 	}
+
+		// 	LOG(INFO) << "Unreachable: " << numUnreachabel << "/" << numGoalLiterals;
+
+		// 	std::function<TimePoint(TimePoint)> next = [this](TimePoint t) {
+		// 		return timePointManager->getPredecessor(t);
+		// 	};
+		// 	TimePoint last = timePointManager->getFirst();
+		// 	if (!timePointManager->isOnForwardStack(elementInsertedLast)) {
+		// 		next = [this](TimePoint t) {
+		// 			return timePointManager->getSuccessor(t);
+		// 		};
+		// 		last = timePointManager->getLast();
+		// 	}
+
+		// 	// int blockedStates = 0;
+		// 	// for (int var: problem->stateVariables) {
+		// 	// 	TimePoint t = elementInsertedLast;
+		// 	// 	std::vector<TimePoint> timepoints;
+		// 	// 	while(t != last) {
+		// 	// 		assumeProblemLiteral(-var, t);
+		// 	// 		timepoints.push_back(t);
+		// 	// 		t = next(t);
+		// 	// 	}
+		// 	// 	result = solveSAT();
+		// 	// 	if (result == ipasir::SolveResult::UNSAT) {
+		// 	// 		blockedStates++;
+		// 	// 		for (TimePoint t: timepoints) {
+		// 	// 			addProblemLiteral(var, t);
+		// 	// 		}
+		// 	// 		finalizeClause();
+		// 	// 	}
+		// 	// }
+		// 	// LOG(INFO) << "BlockedStates: " << blockedStates << "/" << problem->stateVariables.size();
+		// }
 
 		bool slv(){
 			LOG(INFO) << "Start solving";
@@ -404,6 +509,32 @@ class Solver : public TimePointBasedSolver {
 					solveSAT();
 				}
 
+				if (option::transformLearned.getValue()) {
+					VLOG(1) << "learned " << learnedClauses.size();
+					// shift all learned clauses one up
+					for (int lit: learnedClauses) {
+						if (lit == 0) {
+							finalizeClause();
+						} else {
+							int timedLiteral;
+							TimePoint t;
+							bool isHelper;
+							getInfo(lit, timedLiteral, t, isHelper);
+							if (isHelper) {
+								addHelperLiteral(timedLiteral, timePointManager->getSuccessor(t));
+							} else {
+								addProblemLiteral(timedLiteral, timePointManager->getSuccessor(t));
+							}
+						}
+					}
+				}
+
+
+				if (option::exhaustive.getValue()) {
+					exhaustiveInitialFixed();
+					exhaustiveGoalFixed();
+				}
+
 				finalize(elementInsertedLast);
 
 				VLOG(1) << "Solving makespan " << makeSpan;
@@ -417,79 +548,79 @@ class Solver : public TimePointBasedSolver {
 					result = solveSAT();
 				}
 
-				if (result != ipasir::SolveResult::SAT
-					&& option::exhaustive.getValue()) {
-					TIMED_SCOPE(blkScope, "exhaustive");
-					VLOG(1) << "runrun";
+				// if (result != ipasir::SolveResult::SAT
+				// 	&& option::exhaustive.getValue()) {
+				// 	TIMED_SCOPE(blkScope, "exhaustive");
+				// 	VLOG(1) << "runrun";
 
-					unsigned n = this->problem->stateVariables.size();
-					int k = 2;
-					std::vector<bool> v(n);
-					std::fill(v.begin(), v.begin() + k, true);
+				// 	unsigned n = this->problem->stateVariables.size();
+				// 	int k = 2;
+				// 	std::vector<bool> v(n);
+				// 	std::fill(v.begin(), v.begin() + k, true);
 
-					do {
-						std::vector<int> clause;
-						for (unsigned i = 0; i < n; ++i) {
-							if (v[i]) {
-								unsigned var = this->problem->stateVariables[i];
-								clause.push_back(var);
-								//assume stateVariable[i]
-								// std::cout << i << " ";
-							}
-						}
+				// 	do {
+				// 		std::vector<int> clause;
+				// 		for (unsigned i = 0; i < n; ++i) {
+				// 			if (v[i]) {
+				// 				unsigned var = this->problem->stateVariables[i];
+				// 				clause.push_back(var);
+				// 				//assume stateVariable[i]
+				// 				// std::cout << i << " ";
+				// 			}
+				// 		}
 
-						bool unsat;
-						for (int var:clause) {
-							assumeProblemLiteral(var, elementInsertedLast);
-						}
+				// 		bool unsat;
+				// 		for (int var:clause) {
+				// 			assumeProblemLiteral(var, elementInsertedLast);
+				// 		}
 
-						unsat = (solveSAT() == ipasir::SolveResult::UNSAT);
-						if (unsat) {
-							for (int var:clause) {
-								addProblemLiteral(-var, elementInsertedLast);
-							}
-							finalizeClause();
-						}
+				// 		unsat = (solveSAT() == ipasir::SolveResult::UNSAT);
+				// 		if (unsat) {
+				// 			for (int var:clause) {
+				// 				addProblemLiteral(-var, elementInsertedLast);
+				// 			}
+				// 			finalizeClause();
+				// 		}
 
-						clause[0] = -clause[0];
-						for (int var:clause) {
-							assumeProblemLiteral(var, elementInsertedLast);
-						}
-						unsat = (solveSAT() == ipasir::SolveResult::UNSAT);
-						if (unsat) {
-							for (int var:clause) {
-								addProblemLiteral(-var, elementInsertedLast);
-							}
-							finalizeClause();
-						}
+				// 		clause[0] = -clause[0];
+				// 		for (int var:clause) {
+				// 			assumeProblemLiteral(var, elementInsertedLast);
+				// 		}
+				// 		unsat = (solveSAT() == ipasir::SolveResult::UNSAT);
+				// 		if (unsat) {
+				// 			for (int var:clause) {
+				// 				addProblemLiteral(-var, elementInsertedLast);
+				// 			}
+				// 			finalizeClause();
+				// 		}
 
-						clause[1] = -clause[1];
-						for (int var:clause) {
-							assumeProblemLiteral(var, elementInsertedLast);
-						}
-						unsat = (solveSAT() == ipasir::SolveResult::UNSAT);
-						if (unsat) {
-							for (int var:clause) {
-								addProblemLiteral(-var, elementInsertedLast);
-							}
-							finalizeClause();
-						}
+				// 		clause[1] = -clause[1];
+				// 		for (int var:clause) {
+				// 			assumeProblemLiteral(var, elementInsertedLast);
+				// 		}
+				// 		unsat = (solveSAT() == ipasir::SolveResult::UNSAT);
+				// 		if (unsat) {
+				// 			for (int var:clause) {
+				// 				addProblemLiteral(-var, elementInsertedLast);
+				// 			}
+				// 			finalizeClause();
+				// 		}
 
-						clause[0] = -clause[0];
-						for (int var:clause) {
-							assumeProblemLiteral(var, elementInsertedLast);
-						}
-						unsat = (solveSAT() == ipasir::SolveResult::UNSAT);
-						if (unsat) {
-							for (int var:clause) {
-								addProblemLiteral(-var, elementInsertedLast);
-							}
-							finalizeClause();
-						}
+				// 		clause[0] = -clause[0];
+				// 		for (int var:clause) {
+				// 			assumeProblemLiteral(var, elementInsertedLast);
+				// 		}
+				// 		unsat = (solveSAT() == ipasir::SolveResult::UNSAT);
+				// 		if (unsat) {
+				// 			for (int var:clause) {
+				// 				addProblemLiteral(-var, elementInsertedLast);
+				// 			}
+				// 			finalizeClause();
+				// 		}
 
-					} while (std::prev_permutation(v.begin(), v.end()));
+				// 	} while (std::prev_permutation(v.begin(), v.end()));
 
-				}
+				// }
 
 				if (options.cleanLitearl) {
 					VLOG(1) << "Cleaning helper Literal.";
@@ -537,6 +668,20 @@ class Solver : public TimePointBasedSolver {
 			}
 		}
 
+		void assumeGoal(TimePoint t) {
+			for (unsigned i = 0; i < problem->goal.size(); i += 2) {
+				assumeProblemLiteral(problem->goal[i], t);
+				assert(problem->goal[i + 1] == 0);
+			}
+		}
+
+		void assumeInitial(TimePoint t) {
+			for (unsigned i = 0; i < problem->initial.size(); i += 2) {
+				assumeProblemLiteral(problem->initial[i], t);
+				assert(problem->initial[i + 1] == 0);
+			}
+		}
+
 		/*
 		 * Returns true if problem->goal[i] is a literal in a unit clause
 		 *         false otherwise.
@@ -561,16 +706,16 @@ class Solver : public TimePointBasedSolver {
 		void addGoalClauses(TimePoint t, bool isGuarded = false) {
 			for (unsigned i = 0; i < problem->goal.size(); i++) {
 				int literal = problem->goal[i];
-				if (!isUnitGoal(i)) {
+				if (isUnitGoal(i) && isGuarded) {
+					assumeProblemLiteral(literal, t);
+					++i; // skip following 0
+					assert(problem->goal[i] == 0);
+				} else {
 					if (literal == 0 && isGuarded) {
 						int activationLiteral = static_cast<int>(HelperVariables::ActivationLiteral);
 						addHelperLiteral(-activationLiteral, t);
 					}
 					addProblemLiteral(literal, t);
-				} else {
-					assumeProblemLiteral(literal, t);
-					++i; // skip following 0
-					assert(problem->goal[i] == 0);
 				}
 			}
 		}

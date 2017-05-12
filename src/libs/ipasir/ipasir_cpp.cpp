@@ -1,4 +1,5 @@
 #include "ipasir_cpp.h"
+#include <iostream>
 
 namespace ipasir {
 	int ipasir_terminate_callback(void* state) {
@@ -64,9 +65,10 @@ namespace ipasir {
 
 	void Solver::set_learn (int max_length, std::function<void(int*)> callback) {
 		learnedClauseCallback = callback;
-		#ifdef IPASIR_LEARNED_CLAUSE_CALLBACK
+		//#ifdef IPASIR_LEARNED_CLAUSE_CALLBACK
+			std::cout << "ci setlearn" << std::endl;
 			ipasir_set_learn(this->solver, this, max_length, &ipasir_learn_callback);
-		#endif
+		//#endif
 	}
 
 	void Solver::reset() {

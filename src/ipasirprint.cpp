@@ -76,4 +76,11 @@ extern "C" {
 		UNUSED(state);
 		UNUSED(terminate);
 	}
+
+	void ipasir_set_learn (void * solver, void * state, int max_length, void (*learn)(void * state, int * clause)) {
+		UNUSED(solver);
+		UNUSED(state);
+		UNUSED(max_length);
+		UNUSED(learn);
+	}
 }

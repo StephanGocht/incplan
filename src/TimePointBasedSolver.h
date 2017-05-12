@@ -19,11 +19,11 @@ private:
 	int helperPerTime;
 
 	std::map<TimePoint, int> timePoints;
-	std::unique_ptr<ipasir::Ipasir> solver;
-
-	HelperVariablePosition helperVariablePosition;
 
 public:
+	std::unique_ptr<ipasir::Ipasir> solver;
+	const HelperVariablePosition helperVariablePosition;
+
 	void addProblemLiteral(int lit, TimePoint t) {
 		solver->add(problemLiteral2Ipasir(lit, t));
 	}
@@ -43,6 +43,8 @@ public:
 	void finalizeClause() {
 		solver->add(0);
 	}
+
+	void getInfo(int ipasir_lit, int& literal, TimePoint& t, bool& isHelper);
 
 	int valueProblemLiteral(int lit, TimePoint t) {
 		int value = solver->val(problemLiteral2Ipasir(lit, t));
@@ -117,42 +119,8 @@ private:
 		return getOffset(literal, t, true);
 	}
 
-	int getOffset(int literal, TimePoint t, bool isHelper = false) {
-		if (literal == 0) {
-			return 0;
-		}
+	int getOffset(int literal, TimePoint t, bool isHelper = false);
 
-		int offset = 0;
-		switch (helperVariablePosition) {
-		case HelperVariablePosition::SingleBefore:
-			offset = getIndex(t) * (varsPerTime + helperPerTime);
-			if (!isHelper) {
-				offset += helperPerTime;
-			}
-			break;
-
-		case HelperVariablePosition::SingleAfter:
-			offset = getIndex(t) * (varsPerTime + helperPerTime);
-			if (isHelper) {
-				offset += varsPerTime;
-			}
-			break;
-
-		case HelperVariablePosition::AllBefore:
-			if (isHelper) {
-				offset = getIndex(t) * helperPerTime;
-			} else {
-				offset = getIndex(t) * varsPerTime + 1000;
-			}
-			break;
-		}
-
-		if (literal < 0) {
-			offset = -offset;
-		}
-
-		return offset;
-	}
 
 	int problemLiteral2Ipasir(int literal, TimePoint t) {
 		return getOffset(literal, t) + literal;
