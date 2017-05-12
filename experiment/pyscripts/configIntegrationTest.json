@@ -1,0 +1,94 @@
+{
+    "tools": [
+        "experimentrun.tools.ResolveLinks()"
+        , "experimentrun.tools.RunShell('rm *')"
+        , "extractProblems.Extract('${/zipFile}', '${/problem/path}', 'problem.pddl')"
+        , "extractProblems.Extract('${/zipFile}', '${/problem/domainDescription}', 'domain.pddl')"
+        , {"%link": "/madagascar/encode/run"}
+        , {"%link": "/incplan/run"}
+        , "experimentrun.tools.RunShell('grep -E \"^[0-9\\-]\" incplanOutput > solution')"
+        , {"%link": "/madagascar/verifySolution/run"}
+        , "experimentrun.tools.WriteConfigToFile('result.json')"
+        , "experimentrun.tools.RunShell('echo ${/madagascar/verifySolution/result/returnCode}')"
+    ],
+    "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            // "problem": {
+            //     "domainDescription": "TESTING/seq-agl/CaveDiving/domain.pddl",
+            //     "name": "testing01_easy",
+            //     "path": "TESTING/seq-agl/CaveDiving/testing01_easy.pddl",
+            //     "domain": "CaveDiving"
+            // },
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Thoughtful/domain.pddl",
+                "name": "bootstrap-typed-01",
+                "path": "TESTING/seq-agl/Thoughtful/bootstrap-typed-01.pddl",
+                "domain": "Thoughtful"
+            },
+            // "problem": {
+            //     "domainDescription": "TESTING/seq-agl/Childsnack/domain.pddl",
+            //     "name": "child-snack_pfile08",
+            //     "path": "TESTING/seq-agl/Childsnack/child-snack_pfile08.pddl",
+            //     "domain": "Childsnack"
+            // },
+            // "problem": {
+            //     "domainDescription": "TESTING/seq-agl/Barman/domain.pddl",
+            //     "name": "p5-11-5-16",
+            //     "path": "TESTING/seq-agl/Barman/p5-11-5-16.pddl",
+            //     "domain": "Barman"
+            // },
+
+    "incplan":{
+        "config":{
+            "solver":"gmod"
+        },
+        "bin":"~/ma/tools/incplan/bin/incplan-${/incplan/config/solver}",
+        "run":{
+            "name":"experimentrun.tools.RunShell",
+            "parameters": {
+                "command":"${/incplan/bin} --useConfig | tee incplanOutput",
+                "runInfoTo":"/incplan/result",
+                "externalUsedConfig":"carj.json"
+            }
+        },
+        "parameters": {
+            "cleanLitearl": false,
+            "exponentialStepBasis": 0.0,
+            "exponentialStepOffset": 0.0,
+            "icaps2017": false,
+            "inputFile": "dimspec.cnf",
+            "intermediateSolveStep": false,
+            "linearStepSize": 1,
+            "nonIncrementalSolving": false,
+            "outputSolverLike": true,
+            "pathSearchPrefix": [],
+            "ratio": 0.5,
+            "unitInGoal2Assume": true,
+            "singleEnded": true,
+            "exhaustiveSearch": false,
+            "loose": false,
+            "transformLearned": false
+        }
+    },
+
+    "madagascar": {
+        "bin":"~/ma/tools/incplan/bin/MpC",
+        "encode":{
+            "run":{
+                "name":"experimentrun.tools.RunShell",
+                "parameters": {
+                    "command":"${/madagascar/bin} domain.pddl problem.pddl -b dimspec -L &> out_encoding",
+                    "runInfoTo":"/madagascar/encode/result"
+                }
+            }
+        },
+        "verifySolution":{
+            "run":{
+                "name":"experimentrun.tools.RunShell",
+                "parameters": {
+                    "command":"${/madagascar/bin} domain.pddl problem.pddl -s solution -T ${/incplan/result/finalMakeSpan} &> out_plan",
+                    "runInfoTo":"/madagascar/verifySolution/result"
+                }
+            }
+        }
+    }
+}

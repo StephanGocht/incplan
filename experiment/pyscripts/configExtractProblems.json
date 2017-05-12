@@ -1,0 +1,40 @@
+{
+    "tools":[
+        "extractProblems.ListIPC14('${/configurations/0/zipFile}', '/configurations/0/problem/%explode')",
+        "experimentrun.tools.ExplodeNBootstrap()"
+    ],
+
+    "configurations":[
+        {
+            "zipFile" : "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+
+            "tools":[
+                "experimentrun.tools.ResolveLinks()",
+                "extractProblems.Extract('${/zipFile}', '${/problem/path}', 'problem.pddl')",
+                "extractProblems.Extract('${/zipFile}', '${/problem/domainDescription}', 'domain.pddl')",
+                //"experimentrun.tools.PrintCurrentJson()",
+                {"%link": "/madagascar/run"}
+            ],
+
+            "%limits": {
+                // limit to processor time in seconds [softlimit,hardlimit]
+                "RLIMIT_CPU":[900,950],
+                // Memory limit in byte
+                "RLIMIT_VMEM":[8589934592,8589934592],
+                // limit to wall clock time
+                "timeout": 180
+            },
+
+            "madagascar": {
+                "bin":"~/ma/tools/incplan/bin/MpC",
+                "run":{
+                    "name":"experimentrun.tools.RunShell",
+                    "parameters": {
+                        "command":"${/madagascar/bin} domain.pddl problem.pddl -b ${/problem/domain}_${/problem/name}.dimspec -L",
+                        "runInfoTo":"/incphp/result/executionTime"
+                    }
+                }
+            }
+        }
+    ]
+}

@@ -1,0 +1,14 @@
+{
+    "tools":[
+        "extractProblems.ListIPC14('${/configurations/0/zipFile}', '/configurations/0/problem/%explode')",
+        "experimentrun.tools.ExplodeNBootstrap()",
+        "experimentrun.tools.WriteConfigToFile('problemList.json')"
+    ],
+    "configurations":[
+        {
+            "zipFile" : "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "tools":[
+            ]
+        }
+    ]
+}

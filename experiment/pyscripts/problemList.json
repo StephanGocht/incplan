@@ -1,0 +1,2804 @@
+{
+    "runResults": [
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Visitall/domain.pddl",
+                "name": "pfile65",
+                "path": "TESTING/seq-agl/Visitall/pfile65.pddl",
+                "domain": "Visitall"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Visitall/domain.pddl",
+                "name": "pfile64",
+                "path": "TESTING/seq-agl/Visitall/pfile64.pddl",
+                "domain": "Visitall"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Visitall/domain.pddl",
+                "name": "pfile63",
+                "path": "TESTING/seq-agl/Visitall/pfile63.pddl",
+                "domain": "Visitall"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Visitall/domain.pddl",
+                "name": "pfile62",
+                "path": "TESTING/seq-agl/Visitall/pfile62.pddl",
+                "domain": "Visitall"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Visitall/domain.pddl",
+                "name": "pfile61",
+                "path": "TESTING/seq-agl/Visitall/pfile61.pddl",
+                "domain": "Visitall"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Visitall/domain.pddl",
+                "name": "pfile60",
+                "path": "TESTING/seq-agl/Visitall/pfile60.pddl",
+                "domain": "Visitall"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Visitall/domain.pddl",
+                "name": "pfile59",
+                "path": "TESTING/seq-agl/Visitall/pfile59.pddl",
+                "domain": "Visitall"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Visitall/domain.pddl",
+                "name": "pfile58",
+                "path": "TESTING/seq-agl/Visitall/pfile58.pddl",
+                "domain": "Visitall"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Visitall/domain.pddl",
+                "name": "pfile57",
+                "path": "TESTING/seq-agl/Visitall/pfile57.pddl",
+                "domain": "Visitall"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Visitall/domain.pddl",
+                "name": "pfile56",
+                "path": "TESTING/seq-agl/Visitall/pfile56.pddl",
+                "domain": "Visitall"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Visitall/domain.pddl",
+                "name": "pfile55",
+                "path": "TESTING/seq-agl/Visitall/pfile55.pddl",
+                "domain": "Visitall"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Visitall/domain.pddl",
+                "name": "pfile54",
+                "path": "TESTING/seq-agl/Visitall/pfile54.pddl",
+                "domain": "Visitall"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Visitall/domain.pddl",
+                "name": "pfile53",
+                "path": "TESTING/seq-agl/Visitall/pfile53.pddl",
+                "domain": "Visitall"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Visitall/domain.pddl",
+                "name": "pfile52",
+                "path": "TESTING/seq-agl/Visitall/pfile52.pddl",
+                "domain": "Visitall"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Visitall/domain.pddl",
+                "name": "pfile51",
+                "path": "TESTING/seq-agl/Visitall/pfile51.pddl",
+                "domain": "Visitall"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Visitall/domain.pddl",
+                "name": "pfile50",
+                "path": "TESTING/seq-agl/Visitall/pfile50.pddl",
+                "domain": "Visitall"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Visitall/domain.pddl",
+                "name": "pfile33",
+                "path": "TESTING/seq-agl/Visitall/pfile33.pddl",
+                "domain": "Visitall"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Visitall/domain.pddl",
+                "name": "pfile32",
+                "path": "TESTING/seq-agl/Visitall/pfile32.pddl",
+                "domain": "Visitall"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Visitall/domain.pddl",
+                "name": "pfile31",
+                "path": "TESTING/seq-agl/Visitall/pfile31.pddl",
+                "domain": "Visitall"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Visitall/domain.pddl",
+                "name": "pfile30",
+                "path": "TESTING/seq-agl/Visitall/pfile30.pddl",
+                "domain": "Visitall"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Transport/domain.pddl",
+                "name": "p20",
+                "path": "TESTING/seq-agl/Transport/p20.pddl",
+                "domain": "Transport"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Transport/domain.pddl",
+                "name": "p19",
+                "path": "TESTING/seq-agl/Transport/p19.pddl",
+                "domain": "Transport"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Transport/domain.pddl",
+                "name": "p18",
+                "path": "TESTING/seq-agl/Transport/p18.pddl",
+                "domain": "Transport"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Transport/domain.pddl",
+                "name": "p17",
+                "path": "TESTING/seq-agl/Transport/p17.pddl",
+                "domain": "Transport"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Transport/domain.pddl",
+                "name": "p16",
+                "path": "TESTING/seq-agl/Transport/p16.pddl",
+                "domain": "Transport"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Transport/domain.pddl",
+                "name": "p15",
+                "path": "TESTING/seq-agl/Transport/p15.pddl",
+                "domain": "Transport"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Transport/domain.pddl",
+                "name": "p14",
+                "path": "TESTING/seq-agl/Transport/p14.pddl",
+                "domain": "Transport"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Transport/domain.pddl",
+                "name": "p13",
+                "path": "TESTING/seq-agl/Transport/p13.pddl",
+                "domain": "Transport"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Transport/domain.pddl",
+                "name": "p12",
+                "path": "TESTING/seq-agl/Transport/p12.pddl",
+                "domain": "Transport"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Transport/domain.pddl",
+                "name": "p11",
+                "path": "TESTING/seq-agl/Transport/p11.pddl",
+                "domain": "Transport"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Transport/domain.pddl",
+                "name": "p10",
+                "path": "TESTING/seq-agl/Transport/p10.pddl",
+                "domain": "Transport"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Transport/domain.pddl",
+                "name": "p09",
+                "path": "TESTING/seq-agl/Transport/p09.pddl",
+                "domain": "Transport"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Transport/domain.pddl",
+                "name": "p08",
+                "path": "TESTING/seq-agl/Transport/p08.pddl",
+                "domain": "Transport"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Transport/domain.pddl",
+                "name": "p07",
+                "path": "TESTING/seq-agl/Transport/p07.pddl",
+                "domain": "Transport"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Transport/domain.pddl",
+                "name": "p06",
+                "path": "TESTING/seq-agl/Transport/p06.pddl",
+                "domain": "Transport"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Transport/domain.pddl",
+                "name": "p05",
+                "path": "TESTING/seq-agl/Transport/p05.pddl",
+                "domain": "Transport"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Transport/domain.pddl",
+                "name": "p04",
+                "path": "TESTING/seq-agl/Transport/p04.pddl",
+                "domain": "Transport"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Transport/domain.pddl",
+                "name": "p03",
+                "path": "TESTING/seq-agl/Transport/p03.pddl",
+                "domain": "Transport"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Transport/domain.pddl",
+                "name": "p02",
+                "path": "TESTING/seq-agl/Transport/p02.pddl",
+                "domain": "Transport"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Transport/domain.pddl",
+                "name": "p01",
+                "path": "TESTING/seq-agl/Transport/p01.pddl",
+                "domain": "Transport"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Thoughtful/domain.pddl",
+                "name": "target-typed-28",
+                "path": "TESTING/seq-agl/Thoughtful/target-typed-28.pddl",
+                "domain": "Thoughtful"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Thoughtful/domain.pddl",
+                "name": "target-typed-27",
+                "path": "TESTING/seq-agl/Thoughtful/target-typed-27.pddl",
+                "domain": "Thoughtful"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Thoughtful/domain.pddl",
+                "name": "target-typed-26",
+                "path": "TESTING/seq-agl/Thoughtful/target-typed-26.pddl",
+                "domain": "Thoughtful"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Thoughtful/domain.pddl",
+                "name": "target-typed-25",
+                "path": "TESTING/seq-agl/Thoughtful/target-typed-25.pddl",
+                "domain": "Thoughtful"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Thoughtful/domain.pddl",
+                "name": "target-typed-24",
+                "path": "TESTING/seq-agl/Thoughtful/target-typed-24.pddl",
+                "domain": "Thoughtful"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Thoughtful/domain.pddl",
+                "name": "target-typed-23",
+                "path": "TESTING/seq-agl/Thoughtful/target-typed-23.pddl",
+                "domain": "Thoughtful"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Thoughtful/domain.pddl",
+                "name": "target-typed-22",
+                "path": "TESTING/seq-agl/Thoughtful/target-typed-22.pddl",
+                "domain": "Thoughtful"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Thoughtful/domain.pddl",
+                "name": "target-typed-21",
+                "path": "TESTING/seq-agl/Thoughtful/target-typed-21.pddl",
+                "domain": "Thoughtful"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Thoughtful/domain.pddl",
+                "name": "target-typed-20",
+                "path": "TESTING/seq-agl/Thoughtful/target-typed-20.pddl",
+                "domain": "Thoughtful"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Thoughtful/domain.pddl",
+                "name": "p13_7_86-typed",
+                "path": "TESTING/seq-agl/Thoughtful/p13_7_86-typed.pddl",
+                "domain": "Thoughtful"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Thoughtful/domain.pddl",
+                "name": "p13_7_79-typed",
+                "path": "TESTING/seq-agl/Thoughtful/p13_7_79-typed.pddl",
+                "domain": "Thoughtful"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Thoughtful/domain.pddl",
+                "name": "p13_7_78-typed",
+                "path": "TESTING/seq-agl/Thoughtful/p13_7_78-typed.pddl",
+                "domain": "Thoughtful"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Thoughtful/domain.pddl",
+                "name": "p11_6_62-typed",
+                "path": "TESTING/seq-agl/Thoughtful/p11_6_62-typed.pddl",
+                "domain": "Thoughtful"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Thoughtful/domain.pddl",
+                "name": "p11_6_59-typed",
+                "path": "TESTING/seq-agl/Thoughtful/p11_6_59-typed.pddl",
+                "domain": "Thoughtful"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Thoughtful/domain.pddl",
+                "name": "p11_6_53-typed",
+                "path": "TESTING/seq-agl/Thoughtful/p11_6_53-typed.pddl",
+                "domain": "Thoughtful"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Thoughtful/domain.pddl",
+                "name": "bootstrap-typed-05",
+                "path": "TESTING/seq-agl/Thoughtful/bootstrap-typed-05.pddl",
+                "domain": "Thoughtful"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Thoughtful/domain.pddl",
+                "name": "bootstrap-typed-04",
+                "path": "TESTING/seq-agl/Thoughtful/bootstrap-typed-04.pddl",
+                "domain": "Thoughtful"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Thoughtful/domain.pddl",
+                "name": "bootstrap-typed-03",
+                "path": "TESTING/seq-agl/Thoughtful/bootstrap-typed-03.pddl",
+                "domain": "Thoughtful"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Thoughtful/domain.pddl",
+                "name": "bootstrap-typed-02",
+                "path": "TESTING/seq-agl/Thoughtful/bootstrap-typed-02.pddl",
+                "domain": "Thoughtful"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Thoughtful/domain.pddl",
+                "name": "bootstrap-typed-01",
+                "path": "TESTING/seq-agl/Thoughtful/bootstrap-typed-01.pddl",
+                "domain": "Thoughtful"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Tetris/domain.pddl",
+                "name": "p040",
+                "path": "TESTING/seq-agl/Tetris/p040.pddl",
+                "domain": "Tetris"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Tetris/domain.pddl",
+                "name": "p039",
+                "path": "TESTING/seq-agl/Tetris/p039.pddl",
+                "domain": "Tetris"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Tetris/domain.pddl",
+                "name": "p038",
+                "path": "TESTING/seq-agl/Tetris/p038.pddl",
+                "domain": "Tetris"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Tetris/domain.pddl",
+                "name": "p037",
+                "path": "TESTING/seq-agl/Tetris/p037.pddl",
+                "domain": "Tetris"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Tetris/domain.pddl",
+                "name": "p036",
+                "path": "TESTING/seq-agl/Tetris/p036.pddl",
+                "domain": "Tetris"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Tetris/domain.pddl",
+                "name": "p035",
+                "path": "TESTING/seq-agl/Tetris/p035.pddl",
+                "domain": "Tetris"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Tetris/domain.pddl",
+                "name": "p034",
+                "path": "TESTING/seq-agl/Tetris/p034.pddl",
+                "domain": "Tetris"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Tetris/domain.pddl",
+                "name": "p033",
+                "path": "TESTING/seq-agl/Tetris/p033.pddl",
+                "domain": "Tetris"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Tetris/domain.pddl",
+                "name": "p032",
+                "path": "TESTING/seq-agl/Tetris/p032.pddl",
+                "domain": "Tetris"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Tetris/domain.pddl",
+                "name": "p031",
+                "path": "TESTING/seq-agl/Tetris/p031.pddl",
+                "domain": "Tetris"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Tetris/domain.pddl",
+                "name": "p029",
+                "path": "TESTING/seq-agl/Tetris/p029.pddl",
+                "domain": "Tetris"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Tetris/domain.pddl",
+                "name": "p028",
+                "path": "TESTING/seq-agl/Tetris/p028.pddl",
+                "domain": "Tetris"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Tetris/domain.pddl",
+                "name": "p027",
+                "path": "TESTING/seq-agl/Tetris/p027.pddl",
+                "domain": "Tetris"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Tetris/domain.pddl",
+                "name": "p026",
+                "path": "TESTING/seq-agl/Tetris/p026.pddl",
+                "domain": "Tetris"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Tetris/domain.pddl",
+                "name": "p025",
+                "path": "TESTING/seq-agl/Tetris/p025.pddl",
+                "domain": "Tetris"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Tetris/domain.pddl",
+                "name": "p024",
+                "path": "TESTING/seq-agl/Tetris/p024.pddl",
+                "domain": "Tetris"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Tetris/domain.pddl",
+                "name": "p023",
+                "path": "TESTING/seq-agl/Tetris/p023.pddl",
+                "domain": "Tetris"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Tetris/domain.pddl",
+                "name": "p022",
+                "path": "TESTING/seq-agl/Tetris/p022.pddl",
+                "domain": "Tetris"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Tetris/domain.pddl",
+                "name": "p021",
+                "path": "TESTING/seq-agl/Tetris/p021.pddl",
+                "domain": "Tetris"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Tetris/domain.pddl",
+                "name": "p020",
+                "path": "TESTING/seq-agl/Tetris/p020.pddl",
+                "domain": "Tetris"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Parking/domain.pddl",
+                "name": "p_40_3",
+                "path": "TESTING/seq-agl/Parking/p_40_3.pddl",
+                "domain": "Parking"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Parking/domain.pddl",
+                "name": "p_40_2",
+                "path": "TESTING/seq-agl/Parking/p_40_2.pddl",
+                "domain": "Parking"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Parking/domain.pddl",
+                "name": "p_40_1",
+                "path": "TESTING/seq-agl/Parking/p_40_1.pddl",
+                "domain": "Parking"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Parking/domain.pddl",
+                "name": "p_38_3",
+                "path": "TESTING/seq-agl/Parking/p_38_3.pddl",
+                "domain": "Parking"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Parking/domain.pddl",
+                "name": "p_38_2",
+                "path": "TESTING/seq-agl/Parking/p_38_2.pddl",
+                "domain": "Parking"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Parking/domain.pddl",
+                "name": "p_38_1",
+                "path": "TESTING/seq-agl/Parking/p_38_1.pddl",
+                "domain": "Parking"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Parking/domain.pddl",
+                "name": "p_36_3",
+                "path": "TESTING/seq-agl/Parking/p_36_3.pddl",
+                "domain": "Parking"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Parking/domain.pddl",
+                "name": "p_36_2",
+                "path": "TESTING/seq-agl/Parking/p_36_2.pddl",
+                "domain": "Parking"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Parking/domain.pddl",
+                "name": "p_36_1",
+                "path": "TESTING/seq-agl/Parking/p_36_1.pddl",
+                "domain": "Parking"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Parking/domain.pddl",
+                "name": "p_34_3",
+                "path": "TESTING/seq-agl/Parking/p_34_3.pddl",
+                "domain": "Parking"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Parking/domain.pddl",
+                "name": "p_34_2",
+                "path": "TESTING/seq-agl/Parking/p_34_2.pddl",
+                "domain": "Parking"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Parking/domain.pddl",
+                "name": "p_34_1",
+                "path": "TESTING/seq-agl/Parking/p_34_1.pddl",
+                "domain": "Parking"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Parking/domain.pddl",
+                "name": "p_32_3",
+                "path": "TESTING/seq-agl/Parking/p_32_3.pddl",
+                "domain": "Parking"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Parking/domain.pddl",
+                "name": "p_32_2",
+                "path": "TESTING/seq-agl/Parking/p_32_2.pddl",
+                "domain": "Parking"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Parking/domain.pddl",
+                "name": "p_32_1",
+                "path": "TESTING/seq-agl/Parking/p_32_1.pddl",
+                "domain": "Parking"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Parking/domain.pddl",
+                "name": "p_30_3",
+                "path": "TESTING/seq-agl/Parking/p_30_3.pddl",
+                "domain": "Parking"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Parking/domain.pddl",
+                "name": "p_30_2",
+                "path": "TESTING/seq-agl/Parking/p_30_2.pddl",
+                "domain": "Parking"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Parking/domain.pddl",
+                "name": "p_30_1",
+                "path": "TESTING/seq-agl/Parking/p_30_1.pddl",
+                "domain": "Parking"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Parking/domain.pddl",
+                "name": "p_28_3",
+                "path": "TESTING/seq-agl/Parking/p_28_3.pddl",
+                "domain": "Parking"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Parking/domain.pddl",
+                "name": "p_28_2",
+                "path": "TESTING/seq-agl/Parking/p_28_2.pddl",
+                "domain": "Parking"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Openstacks/domain_p290_2.pddl",
+                "name": "p290_2",
+                "path": "TESTING/seq-agl/Openstacks/p290_2.pddl",
+                "domain": "Openstacks"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Openstacks/domain_p290_1.pddl",
+                "name": "p290_1",
+                "path": "TESTING/seq-agl/Openstacks/p290_1.pddl",
+                "domain": "Openstacks"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Openstacks/domain_p270_2.pddl",
+                "name": "p270_2",
+                "path": "TESTING/seq-agl/Openstacks/p270_2.pddl",
+                "domain": "Openstacks"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Openstacks/domain_p270_1.pddl",
+                "name": "p270_1",
+                "path": "TESTING/seq-agl/Openstacks/p270_1.pddl",
+                "domain": "Openstacks"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Openstacks/domain_p250_2.pddl",
+                "name": "p250_2",
+                "path": "TESTING/seq-agl/Openstacks/p250_2.pddl",
+                "domain": "Openstacks"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Openstacks/domain_p250_1.pddl",
+                "name": "p250_1",
+                "path": "TESTING/seq-agl/Openstacks/p250_1.pddl",
+                "domain": "Openstacks"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Openstacks/domain_p230_2.pddl",
+                "name": "p230_2",
+                "path": "TESTING/seq-agl/Openstacks/p230_2.pddl",
+                "domain": "Openstacks"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Openstacks/domain_p230_1.pddl",
+                "name": "p230_1",
+                "path": "TESTING/seq-agl/Openstacks/p230_1.pddl",
+                "domain": "Openstacks"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Openstacks/domain_p210_2.pddl",
+                "name": "p210_2",
+                "path": "TESTING/seq-agl/Openstacks/p210_2.pddl",
+                "domain": "Openstacks"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Openstacks/domain_p210_1.pddl",
+                "name": "p210_1",
+                "path": "TESTING/seq-agl/Openstacks/p210_1.pddl",
+                "domain": "Openstacks"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Openstacks/domain_p190_3.pddl",
+                "name": "p190_3",
+                "path": "TESTING/seq-agl/Openstacks/p190_3.pddl",
+                "domain": "Openstacks"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Openstacks/domain_p190_2.pddl",
+                "name": "p190_2",
+                "path": "TESTING/seq-agl/Openstacks/p190_2.pddl",
+                "domain": "Openstacks"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Openstacks/domain_p190_1.pddl",
+                "name": "p190_1",
+                "path": "TESTING/seq-agl/Openstacks/p190_1.pddl",
+                "domain": "Openstacks"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Openstacks/domain_p170_3.pddl",
+                "name": "p170_3",
+                "path": "TESTING/seq-agl/Openstacks/p170_3.pddl",
+                "domain": "Openstacks"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Openstacks/domain_p170_2.pddl",
+                "name": "p170_2",
+                "path": "TESTING/seq-agl/Openstacks/p170_2.pddl",
+                "domain": "Openstacks"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Openstacks/domain_p170_1.pddl",
+                "name": "p170_1",
+                "path": "TESTING/seq-agl/Openstacks/p170_1.pddl",
+                "domain": "Openstacks"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Openstacks/domain_p150_3.pddl",
+                "name": "p150_3",
+                "path": "TESTING/seq-agl/Openstacks/p150_3.pddl",
+                "domain": "Openstacks"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Openstacks/domain_p150_2.pddl",
+                "name": "p150_2",
+                "path": "TESTING/seq-agl/Openstacks/p150_2.pddl",
+                "domain": "Openstacks"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Openstacks/domain_p130_3.pddl",
+                "name": "p130_3",
+                "path": "TESTING/seq-agl/Openstacks/p130_3.pddl",
+                "domain": "Openstacks"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Openstacks/domain_p130_2.pddl",
+                "name": "p130_2",
+                "path": "TESTING/seq-agl/Openstacks/p130_2.pddl",
+                "domain": "Openstacks"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Maintenance/domain.pddl",
+                "name": "maintenance.1.3.200.900.8-002",
+                "path": "TESTING/seq-agl/Maintenance/maintenance.1.3.200.900.8-002.pddl",
+                "domain": "Maintenance"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Maintenance/domain.pddl",
+                "name": "maintenance.1.3.200.900.8-001",
+                "path": "TESTING/seq-agl/Maintenance/maintenance.1.3.200.900.8-001.pddl",
+                "domain": "Maintenance"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Maintenance/domain.pddl",
+                "name": "maintenance.1.3.200.900.8-000",
+                "path": "TESTING/seq-agl/Maintenance/maintenance.1.3.200.900.8-000.pddl",
+                "domain": "Maintenance"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Maintenance/domain.pddl",
+                "name": "maintenance.1.3.200.900.5-002",
+                "path": "TESTING/seq-agl/Maintenance/maintenance.1.3.200.900.5-002.pddl",
+                "domain": "Maintenance"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Maintenance/domain.pddl",
+                "name": "maintenance.1.3.200.900.5-001",
+                "path": "TESTING/seq-agl/Maintenance/maintenance.1.3.200.900.5-001.pddl",
+                "domain": "Maintenance"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Maintenance/domain.pddl",
+                "name": "maintenance.1.3.200.900.5-000",
+                "path": "TESTING/seq-agl/Maintenance/maintenance.1.3.200.900.5-000.pddl",
+                "domain": "Maintenance"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Maintenance/domain.pddl",
+                "name": "maintenance.1.3.200.700.7-002",
+                "path": "TESTING/seq-agl/Maintenance/maintenance.1.3.200.700.7-002.pddl",
+                "domain": "Maintenance"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Maintenance/domain.pddl",
+                "name": "maintenance.1.3.200.700.7-001",
+                "path": "TESTING/seq-agl/Maintenance/maintenance.1.3.200.700.7-001.pddl",
+                "domain": "Maintenance"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Maintenance/domain.pddl",
+                "name": "maintenance.1.3.200.700.7-000",
+                "path": "TESTING/seq-agl/Maintenance/maintenance.1.3.200.700.7-000.pddl",
+                "domain": "Maintenance"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Maintenance/domain.pddl",
+                "name": "maintenance.1.3.200.500.5-002",
+                "path": "TESTING/seq-agl/Maintenance/maintenance.1.3.200.500.5-002.pddl",
+                "domain": "Maintenance"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Maintenance/domain.pddl",
+                "name": "maintenance.1.3.200.500.5-001",
+                "path": "TESTING/seq-agl/Maintenance/maintenance.1.3.200.500.5-001.pddl",
+                "domain": "Maintenance"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Maintenance/domain.pddl",
+                "name": "maintenance.1.3.150.500.6-001",
+                "path": "TESTING/seq-agl/Maintenance/maintenance.1.3.150.500.6-001.pddl",
+                "domain": "Maintenance"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Maintenance/domain.pddl",
+                "name": "maintenance.1.3.100.300.7-002",
+                "path": "TESTING/seq-agl/Maintenance/maintenance.1.3.100.300.7-002.pddl",
+                "domain": "Maintenance"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Maintenance/domain.pddl",
+                "name": "maintenance.1.3.100.300.7-001",
+                "path": "TESTING/seq-agl/Maintenance/maintenance.1.3.100.300.7-001.pddl",
+                "domain": "Maintenance"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Maintenance/domain.pddl",
+                "name": "maintenance.1.3.100.300.7-000",
+                "path": "TESTING/seq-agl/Maintenance/maintenance.1.3.100.300.7-000.pddl",
+                "domain": "Maintenance"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Maintenance/domain.pddl",
+                "name": "maintenance.1.3.100.300.5-001",
+                "path": "TESTING/seq-agl/Maintenance/maintenance.1.3.100.300.5-001.pddl",
+                "domain": "Maintenance"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Maintenance/domain.pddl",
+                "name": "maintenance.1.3.100.300.5-000",
+                "path": "TESTING/seq-agl/Maintenance/maintenance.1.3.100.300.5-000.pddl",
+                "domain": "Maintenance"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Maintenance/domain.pddl",
+                "name": "maintenance.1.3.060.180.5-002",
+                "path": "TESTING/seq-agl/Maintenance/maintenance.1.3.060.180.5-002.pddl",
+                "domain": "Maintenance"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Maintenance/domain.pddl",
+                "name": "maintenance.1.3.060.180.5-001",
+                "path": "TESTING/seq-agl/Maintenance/maintenance.1.3.060.180.5-001.pddl",
+                "domain": "Maintenance"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Maintenance/domain.pddl",
+                "name": "maintenance.1.3.060.180.5-000",
+                "path": "TESTING/seq-agl/Maintenance/maintenance.1.3.060.180.5-000.pddl",
+                "domain": "Maintenance"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Hiking/domain.pddl",
+                "name": "testing-5-6-8",
+                "path": "TESTING/seq-agl/Hiking/testing-5-6-8.pddl",
+                "domain": "Hiking"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Hiking/domain.pddl",
+                "name": "testing-5-6-7",
+                "path": "TESTING/seq-agl/Hiking/testing-5-6-7.pddl",
+                "domain": "Hiking"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Hiking/domain.pddl",
+                "name": "testing-5-6-6",
+                "path": "TESTING/seq-agl/Hiking/testing-5-6-6.pddl",
+                "domain": "Hiking"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Hiking/domain.pddl",
+                "name": "testing-5-6-5",
+                "path": "TESTING/seq-agl/Hiking/testing-5-6-5.pddl",
+                "domain": "Hiking"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Hiking/domain.pddl",
+                "name": "testing-5-6-4",
+                "path": "TESTING/seq-agl/Hiking/testing-5-6-4.pddl",
+                "domain": "Hiking"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Hiking/domain.pddl",
+                "name": "testing-5-6-3",
+                "path": "TESTING/seq-agl/Hiking/testing-5-6-3.pddl",
+                "domain": "Hiking"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Hiking/domain.pddl",
+                "name": "testing-4-5-9",
+                "path": "TESTING/seq-agl/Hiking/testing-4-5-9.pddl",
+                "domain": "Hiking"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Hiking/domain.pddl",
+                "name": "testing-4-5-8",
+                "path": "TESTING/seq-agl/Hiking/testing-4-5-8.pddl",
+                "domain": "Hiking"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Hiking/domain.pddl",
+                "name": "testing-4-5-7",
+                "path": "TESTING/seq-agl/Hiking/testing-4-5-7.pddl",
+                "domain": "Hiking"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Hiking/domain.pddl",
+                "name": "testing-4-5-6",
+                "path": "TESTING/seq-agl/Hiking/testing-4-5-6.pddl",
+                "domain": "Hiking"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Hiking/domain.pddl",
+                "name": "testing-4-5-5",
+                "path": "TESTING/seq-agl/Hiking/testing-4-5-5.pddl",
+                "domain": "Hiking"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Hiking/domain.pddl",
+                "name": "testing-4-5-4",
+                "path": "TESTING/seq-agl/Hiking/testing-4-5-4.pddl",
+                "domain": "Hiking"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Hiking/domain.pddl",
+                "name": "testing-4-5-3",
+                "path": "TESTING/seq-agl/Hiking/testing-4-5-3.pddl",
+                "domain": "Hiking"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Hiking/domain.pddl",
+                "name": "testing-3-4-9",
+                "path": "TESTING/seq-agl/Hiking/testing-3-4-9.pddl",
+                "domain": "Hiking"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Hiking/domain.pddl",
+                "name": "testing-3-4-8",
+                "path": "TESTING/seq-agl/Hiking/testing-3-4-8.pddl",
+                "domain": "Hiking"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Hiking/domain.pddl",
+                "name": "testing-3-4-7",
+                "path": "TESTING/seq-agl/Hiking/testing-3-4-7.pddl",
+                "domain": "Hiking"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Hiking/domain.pddl",
+                "name": "testing-3-4-6",
+                "path": "TESTING/seq-agl/Hiking/testing-3-4-6.pddl",
+                "domain": "Hiking"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Hiking/domain.pddl",
+                "name": "testing-3-4-5",
+                "path": "TESTING/seq-agl/Hiking/testing-3-4-5.pddl",
+                "domain": "Hiking"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Hiking/domain.pddl",
+                "name": "testing-3-4-4",
+                "path": "TESTING/seq-agl/Hiking/testing-3-4-4.pddl",
+                "domain": "Hiking"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Hiking/domain.pddl",
+                "name": "testing-3-4-3",
+                "path": "TESTING/seq-agl/Hiking/testing-3-4-3.pddl",
+                "domain": "Hiking"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/GED/domain.pddl",
+                "name": "d-9-5",
+                "path": "TESTING/seq-agl/GED/d-9-5.pddl",
+                "domain": "GED"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/GED/domain.pddl",
+                "name": "d-3-6",
+                "path": "TESTING/seq-agl/GED/d-3-6.pddl",
+                "domain": "GED"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/GED/domain.pddl",
+                "name": "d-12-9",
+                "path": "TESTING/seq-agl/GED/d-12-9.pddl",
+                "domain": "GED"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/GED/domain.pddl",
+                "name": "d-12-8",
+                "path": "TESTING/seq-agl/GED/d-12-8.pddl",
+                "domain": "GED"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/GED/domain.pddl",
+                "name": "d-12-7",
+                "path": "TESTING/seq-agl/GED/d-12-7.pddl",
+                "domain": "GED"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/GED/domain.pddl",
+                "name": "d-12-6",
+                "path": "TESTING/seq-agl/GED/d-12-6.pddl",
+                "domain": "GED"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/GED/domain.pddl",
+                "name": "d-12-5",
+                "path": "TESTING/seq-agl/GED/d-12-5.pddl",
+                "domain": "GED"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/GED/domain.pddl",
+                "name": "d-12-3",
+                "path": "TESTING/seq-agl/GED/d-12-3.pddl",
+                "domain": "GED"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/GED/domain.pddl",
+                "name": "d-12-2",
+                "path": "TESTING/seq-agl/GED/d-12-2.pddl",
+                "domain": "GED"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/GED/domain.pddl",
+                "name": "d-12-11",
+                "path": "TESTING/seq-agl/GED/d-12-11.pddl",
+                "domain": "GED"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/GED/domain.pddl",
+                "name": "d-11-6",
+                "path": "TESTING/seq-agl/GED/d-11-6.pddl",
+                "domain": "GED"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/GED/domain.pddl",
+                "name": "d-11-5",
+                "path": "TESTING/seq-agl/GED/d-11-5.pddl",
+                "domain": "GED"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/GED/domain.pddl",
+                "name": "d-11-3",
+                "path": "TESTING/seq-agl/GED/d-11-3.pddl",
+                "domain": "GED"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/GED/domain.pddl",
+                "name": "d-11-1",
+                "path": "TESTING/seq-agl/GED/d-11-1.pddl",
+                "domain": "GED"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/GED/domain.pddl",
+                "name": "d-10-6",
+                "path": "TESTING/seq-agl/GED/d-10-6.pddl",
+                "domain": "GED"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/GED/domain.pddl",
+                "name": "d-10-5",
+                "path": "TESTING/seq-agl/GED/d-10-5.pddl",
+                "domain": "GED"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/GED/domain.pddl",
+                "name": "d-10-4",
+                "path": "TESTING/seq-agl/GED/d-10-4.pddl",
+                "domain": "GED"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/GED/domain.pddl",
+                "name": "d-10-3",
+                "path": "TESTING/seq-agl/GED/d-10-3.pddl",
+                "domain": "GED"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/GED/domain.pddl",
+                "name": "d-10-2",
+                "path": "TESTING/seq-agl/GED/d-10-2.pddl",
+                "domain": "GED"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/GED/domain.pddl",
+                "name": "d-10-1",
+                "path": "TESTING/seq-agl/GED/d-10-1.pddl",
+                "domain": "GED"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Floortile/domain.pddl",
+                "name": "p05-6-5-3",
+                "path": "TESTING/seq-agl/Floortile/p05-6-5-3.pddl",
+                "domain": "Floortile"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Floortile/domain.pddl",
+                "name": "p05-6-5-2",
+                "path": "TESTING/seq-agl/Floortile/p05-6-5-2.pddl",
+                "domain": "Floortile"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Floortile/domain.pddl",
+                "name": "p05-4-3-2",
+                "path": "TESTING/seq-agl/Floortile/p05-4-3-2.pddl",
+                "domain": "Floortile"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Floortile/domain.pddl",
+                "name": "p04-6-5-3",
+                "path": "TESTING/seq-agl/Floortile/p04-6-5-3.pddl",
+                "domain": "Floortile"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Floortile/domain.pddl",
+                "name": "p04-6-5-2",
+                "path": "TESTING/seq-agl/Floortile/p04-6-5-2.pddl",
+                "domain": "Floortile"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Floortile/domain.pddl",
+                "name": "p04-5-5-2",
+                "path": "TESTING/seq-agl/Floortile/p04-5-5-2.pddl",
+                "domain": "Floortile"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Floortile/domain.pddl",
+                "name": "p04-5-4-2",
+                "path": "TESTING/seq-agl/Floortile/p04-5-4-2.pddl",
+                "domain": "Floortile"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Floortile/domain.pddl",
+                "name": "p03-6-5-3",
+                "path": "TESTING/seq-agl/Floortile/p03-6-5-3.pddl",
+                "domain": "Floortile"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Floortile/domain.pddl",
+                "name": "p03-6-5-2",
+                "path": "TESTING/seq-agl/Floortile/p03-6-5-2.pddl",
+                "domain": "Floortile"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Floortile/domain.pddl",
+                "name": "p03-6-4-2",
+                "path": "TESTING/seq-agl/Floortile/p03-6-4-2.pddl",
+                "domain": "Floortile"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Floortile/domain.pddl",
+                "name": "p02-6-5-3",
+                "path": "TESTING/seq-agl/Floortile/p02-6-5-3.pddl",
+                "domain": "Floortile"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Floortile/domain.pddl",
+                "name": "p02-6-5-2",
+                "path": "TESTING/seq-agl/Floortile/p02-6-5-2.pddl",
+                "domain": "Floortile"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Floortile/domain.pddl",
+                "name": "p02-6-4-2",
+                "path": "TESTING/seq-agl/Floortile/p02-6-4-2.pddl",
+                "domain": "Floortile"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Floortile/domain.pddl",
+                "name": "p02-5-4-2",
+                "path": "TESTING/seq-agl/Floortile/p02-5-4-2.pddl",
+                "domain": "Floortile"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Floortile/domain.pddl",
+                "name": "p01-6-5-3",
+                "path": "TESTING/seq-agl/Floortile/p01-6-5-3.pddl",
+                "domain": "Floortile"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Floortile/domain.pddl",
+                "name": "p01-6-5-2",
+                "path": "TESTING/seq-agl/Floortile/p01-6-5-2.pddl",
+                "domain": "Floortile"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Floortile/domain.pddl",
+                "name": "p01-6-4-2",
+                "path": "TESTING/seq-agl/Floortile/p01-6-4-2.pddl",
+                "domain": "Floortile"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Floortile/domain.pddl",
+                "name": "p01-5-5-2",
+                "path": "TESTING/seq-agl/Floortile/p01-5-5-2.pddl",
+                "domain": "Floortile"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Floortile/domain.pddl",
+                "name": "p01-5-4-2",
+                "path": "TESTING/seq-agl/Floortile/p01-5-4-2.pddl",
+                "domain": "Floortile"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Floortile/domain.pddl",
+                "name": "p01-4-3-2",
+                "path": "TESTING/seq-agl/Floortile/p01-4-3-2.pddl",
+                "domain": "Floortile"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/CityCar/domain.pddl",
+                "name": "p4-5-3-0-2",
+                "path": "TESTING/seq-agl/CityCar/p4-5-3-0-2.pddl",
+                "domain": "CityCar"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/CityCar/domain.pddl",
+                "name": "p4-5-3-0-1",
+                "path": "TESTING/seq-agl/CityCar/p4-5-3-0-1.pddl",
+                "domain": "CityCar"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/CityCar/domain.pddl",
+                "name": "p4-5-2-0-2",
+                "path": "TESTING/seq-agl/CityCar/p4-5-2-0-2.pddl",
+                "domain": "CityCar"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/CityCar/domain.pddl",
+                "name": "p4-5-2-0-1",
+                "path": "TESTING/seq-agl/CityCar/p4-5-2-0-1.pddl",
+                "domain": "CityCar"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/CityCar/domain.pddl",
+                "name": "p4-4-3-0-2",
+                "path": "TESTING/seq-agl/CityCar/p4-4-3-0-2.pddl",
+                "domain": "CityCar"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/CityCar/domain.pddl",
+                "name": "p4-4-3-0-1",
+                "path": "TESTING/seq-agl/CityCar/p4-4-3-0-1.pddl",
+                "domain": "CityCar"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/CityCar/domain.pddl",
+                "name": "p4-4-2-0-2",
+                "path": "TESTING/seq-agl/CityCar/p4-4-2-0-2.pddl",
+                "domain": "CityCar"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/CityCar/domain.pddl",
+                "name": "p4-4-2-0-1",
+                "path": "TESTING/seq-agl/CityCar/p4-4-2-0-1.pddl",
+                "domain": "CityCar"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/CityCar/domain.pddl",
+                "name": "p4-3-3-0-2",
+                "path": "TESTING/seq-agl/CityCar/p4-3-3-0-2.pddl",
+                "domain": "CityCar"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/CityCar/domain.pddl",
+                "name": "p4-3-3-0-1",
+                "path": "TESTING/seq-agl/CityCar/p4-3-3-0-1.pddl",
+                "domain": "CityCar"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/CityCar/domain.pddl",
+                "name": "p4-3-2-0-2",
+                "path": "TESTING/seq-agl/CityCar/p4-3-2-0-2.pddl",
+                "domain": "CityCar"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/CityCar/domain.pddl",
+                "name": "p4-3-2-0-1",
+                "path": "TESTING/seq-agl/CityCar/p4-3-2-0-1.pddl",
+                "domain": "CityCar"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/CityCar/domain.pddl",
+                "name": "p4-2-3-0-2",
+                "path": "TESTING/seq-agl/CityCar/p4-2-3-0-2.pddl",
+                "domain": "CityCar"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/CityCar/domain.pddl",
+                "name": "p4-2-3-0-1",
+                "path": "TESTING/seq-agl/CityCar/p4-2-3-0-1.pddl",
+                "domain": "CityCar"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/CityCar/domain.pddl",
+                "name": "p4-2-2-0-1",
+                "path": "TESTING/seq-agl/CityCar/p4-2-2-0-1.pddl",
+                "domain": "CityCar"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/CityCar/domain.pddl",
+                "name": "p3-5-2-0-2",
+                "path": "TESTING/seq-agl/CityCar/p3-5-2-0-2.pddl",
+                "domain": "CityCar"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/CityCar/domain.pddl",
+                "name": "p3-5-2-0-1",
+                "path": "TESTING/seq-agl/CityCar/p3-5-2-0-1.pddl",
+                "domain": "CityCar"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/CityCar/domain.pddl",
+                "name": "p3-4-2-0-1",
+                "path": "TESTING/seq-agl/CityCar/p3-4-2-0-1.pddl",
+                "domain": "CityCar"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/CityCar/domain.pddl",
+                "name": "p3-3-2-0-1",
+                "path": "TESTING/seq-agl/CityCar/p3-3-2-0-1.pddl",
+                "domain": "CityCar"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/CityCar/domain.pddl",
+                "name": "p3-2-2-0-1",
+                "path": "TESTING/seq-agl/CityCar/p3-2-2-0-1.pddl",
+                "domain": "CityCar"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Childsnack/domain.pddl",
+                "name": "child-snack_pfile19",
+                "path": "TESTING/seq-agl/Childsnack/child-snack_pfile19.pddl",
+                "domain": "Childsnack"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Childsnack/domain.pddl",
+                "name": "child-snack_pfile19-2",
+                "path": "TESTING/seq-agl/Childsnack/child-snack_pfile19-2.pddl",
+                "domain": "Childsnack"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Childsnack/domain.pddl",
+                "name": "child-snack_pfile16-2",
+                "path": "TESTING/seq-agl/Childsnack/child-snack_pfile16-2.pddl",
+                "domain": "Childsnack"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Childsnack/domain.pddl",
+                "name": "child-snack_pfile15-2",
+                "path": "TESTING/seq-agl/Childsnack/child-snack_pfile15-2.pddl",
+                "domain": "Childsnack"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Childsnack/domain.pddl",
+                "name": "child-snack_pfile14",
+                "path": "TESTING/seq-agl/Childsnack/child-snack_pfile14.pddl",
+                "domain": "Childsnack"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Childsnack/domain.pddl",
+                "name": "child-snack_pfile13",
+                "path": "TESTING/seq-agl/Childsnack/child-snack_pfile13.pddl",
+                "domain": "Childsnack"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Childsnack/domain.pddl",
+                "name": "child-snack_pfile13-2",
+                "path": "TESTING/seq-agl/Childsnack/child-snack_pfile13-2.pddl",
+                "domain": "Childsnack"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Childsnack/domain.pddl",
+                "name": "child-snack_pfile12",
+                "path": "TESTING/seq-agl/Childsnack/child-snack_pfile12.pddl",
+                "domain": "Childsnack"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Childsnack/domain.pddl",
+                "name": "child-snack_pfile11",
+                "path": "TESTING/seq-agl/Childsnack/child-snack_pfile11.pddl",
+                "domain": "Childsnack"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Childsnack/domain.pddl",
+                "name": "child-snack_pfile11-2",
+                "path": "TESTING/seq-agl/Childsnack/child-snack_pfile11-2.pddl",
+                "domain": "Childsnack"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Childsnack/domain.pddl",
+                "name": "child-snack_pfile10",
+                "path": "TESTING/seq-agl/Childsnack/child-snack_pfile10.pddl",
+                "domain": "Childsnack"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Childsnack/domain.pddl",
+                "name": "child-snack_pfile10-2",
+                "path": "TESTING/seq-agl/Childsnack/child-snack_pfile10-2.pddl",
+                "domain": "Childsnack"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Childsnack/domain.pddl",
+                "name": "child-snack_pfile09",
+                "path": "TESTING/seq-agl/Childsnack/child-snack_pfile09.pddl",
+                "domain": "Childsnack"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Childsnack/domain.pddl",
+                "name": "child-snack_pfile09-2",
+                "path": "TESTING/seq-agl/Childsnack/child-snack_pfile09-2.pddl",
+                "domain": "Childsnack"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Childsnack/domain.pddl",
+                "name": "child-snack_pfile08",
+                "path": "TESTING/seq-agl/Childsnack/child-snack_pfile08.pddl",
+                "domain": "Childsnack"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Childsnack/domain.pddl",
+                "name": "child-snack_pfile08-2",
+                "path": "TESTING/seq-agl/Childsnack/child-snack_pfile08-2.pddl",
+                "domain": "Childsnack"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Childsnack/domain.pddl",
+                "name": "child-snack_pfile07-2",
+                "path": "TESTING/seq-agl/Childsnack/child-snack_pfile07-2.pddl",
+                "domain": "Childsnack"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Childsnack/domain.pddl",
+                "name": "child-snack_pfile06-2",
+                "path": "TESTING/seq-agl/Childsnack/child-snack_pfile06-2.pddl",
+                "domain": "Childsnack"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Childsnack/domain.pddl",
+                "name": "child-snack_pfile05",
+                "path": "TESTING/seq-agl/Childsnack/child-snack_pfile05.pddl",
+                "domain": "Childsnack"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Childsnack/domain.pddl",
+                "name": "child-snack_pfile05-2",
+                "path": "TESTING/seq-agl/Childsnack/child-snack_pfile05-2.pddl",
+                "domain": "Childsnack"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/CaveDiving/domain.pddl",
+                "name": "testing20A_easy",
+                "path": "TESTING/seq-agl/CaveDiving/testing20A_easy.pddl",
+                "domain": "CaveDiving"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/CaveDiving/domain.pddl",
+                "name": "testing18_easy",
+                "path": "TESTING/seq-agl/CaveDiving/testing18_easy.pddl",
+                "domain": "CaveDiving"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/CaveDiving/domain.pddl",
+                "name": "testing18A_easy",
+                "path": "TESTING/seq-agl/CaveDiving/testing18A_easy.pddl",
+                "domain": "CaveDiving"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/CaveDiving/domain.pddl",
+                "name": "testing16_easy",
+                "path": "TESTING/seq-agl/CaveDiving/testing16_easy.pddl",
+                "domain": "CaveDiving"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/CaveDiving/domain.pddl",
+                "name": "testing15_easy",
+                "path": "TESTING/seq-agl/CaveDiving/testing15_easy.pddl",
+                "domain": "CaveDiving"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/CaveDiving/domain.pddl",
+                "name": "testing14_easy",
+                "path": "TESTING/seq-agl/CaveDiving/testing14_easy.pddl",
+                "domain": "CaveDiving"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/CaveDiving/domain.pddl",
+                "name": "testing13_easy",
+                "path": "TESTING/seq-agl/CaveDiving/testing13_easy.pddl",
+                "domain": "CaveDiving"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/CaveDiving/domain.pddl",
+                "name": "testing12_easy",
+                "path": "TESTING/seq-agl/CaveDiving/testing12_easy.pddl",
+                "domain": "CaveDiving"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/CaveDiving/domain.pddl",
+                "name": "testing11_easy",
+                "path": "TESTING/seq-agl/CaveDiving/testing11_easy.pddl",
+                "domain": "CaveDiving"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/CaveDiving/domain.pddl",
+                "name": "testing10_easy",
+                "path": "TESTING/seq-agl/CaveDiving/testing10_easy.pddl",
+                "domain": "CaveDiving"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/CaveDiving/domain.pddl",
+                "name": "testing09_easy",
+                "path": "TESTING/seq-agl/CaveDiving/testing09_easy.pddl",
+                "domain": "CaveDiving"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/CaveDiving/domain.pddl",
+                "name": "testing08_easy",
+                "path": "TESTING/seq-agl/CaveDiving/testing08_easy.pddl",
+                "domain": "CaveDiving"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/CaveDiving/domain.pddl",
+                "name": "testing07_easy",
+                "path": "TESTING/seq-agl/CaveDiving/testing07_easy.pddl",
+                "domain": "CaveDiving"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/CaveDiving/domain.pddl",
+                "name": "testing06A_easy",
+                "path": "TESTING/seq-agl/CaveDiving/testing06A_easy.pddl",
+                "domain": "CaveDiving"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/CaveDiving/domain.pddl",
+                "name": "testing05A_easy",
+                "path": "TESTING/seq-agl/CaveDiving/testing05A_easy.pddl",
+                "domain": "CaveDiving"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/CaveDiving/domain.pddl",
+                "name": "testing04_easy",
+                "path": "TESTING/seq-agl/CaveDiving/testing04_easy.pddl",
+                "domain": "CaveDiving"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/CaveDiving/domain.pddl",
+                "name": "testing03_easy",
+                "path": "TESTING/seq-agl/CaveDiving/testing03_easy.pddl",
+                "domain": "CaveDiving"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/CaveDiving/domain.pddl",
+                "name": "testing02_easy",
+                "path": "TESTING/seq-agl/CaveDiving/testing02_easy.pddl",
+                "domain": "CaveDiving"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/CaveDiving/domain.pddl",
+                "name": "testing01_easy",
+                "path": "TESTING/seq-agl/CaveDiving/testing01_easy.pddl",
+                "domain": "CaveDiving"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/CaveDiving/domain.pddl",
+                "name": "testing01",
+                "path": "TESTING/seq-agl/CaveDiving/testing01.pddl",
+                "domain": "CaveDiving"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Barman/domain.pddl",
+                "name": "p5-11-5-16",
+                "path": "TESTING/seq-agl/Barman/p5-11-5-16.pddl",
+                "domain": "Barman"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Barman/domain.pddl",
+                "name": "p5-11-5-15",
+                "path": "TESTING/seq-agl/Barman/p5-11-5-15.pddl",
+                "domain": "Barman"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Barman/domain.pddl",
+                "name": "p5-11-4-15",
+                "path": "TESTING/seq-agl/Barman/p5-11-4-15.pddl",
+                "domain": "Barman"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Barman/domain.pddl",
+                "name": "p5-10-4-13",
+                "path": "TESTING/seq-agl/Barman/p5-10-4-13.pddl",
+                "domain": "Barman"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Barman/domain.pddl",
+                "name": "p4-11-5-15",
+                "path": "TESTING/seq-agl/Barman/p4-11-5-15.pddl",
+                "domain": "Barman"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Barman/domain.pddl",
+                "name": "p4-11-4-15",
+                "path": "TESTING/seq-agl/Barman/p4-11-4-15.pddl",
+                "domain": "Barman"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Barman/domain.pddl",
+                "name": "p4-11-4-14",
+                "path": "TESTING/seq-agl/Barman/p4-11-4-14.pddl",
+                "domain": "Barman"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Barman/domain.pddl",
+                "name": "p3-11-5-17",
+                "path": "TESTING/seq-agl/Barman/p3-11-5-17.pddl",
+                "domain": "Barman"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Barman/domain.pddl",
+                "name": "p3-11-5-16",
+                "path": "TESTING/seq-agl/Barman/p3-11-5-16.pddl",
+                "domain": "Barman"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Barman/domain.pddl",
+                "name": "p3-11-5-15",
+                "path": "TESTING/seq-agl/Barman/p3-11-5-15.pddl",
+                "domain": "Barman"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Barman/domain.pddl",
+                "name": "p3-11-4-15",
+                "path": "TESTING/seq-agl/Barman/p3-11-4-15.pddl",
+                "domain": "Barman"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Barman/domain.pddl",
+                "name": "p3-10-4-13",
+                "path": "TESTING/seq-agl/Barman/p3-10-4-13.pddl",
+                "domain": "Barman"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Barman/domain.pddl",
+                "name": "p2-11-5-17",
+                "path": "TESTING/seq-agl/Barman/p2-11-5-17.pddl",
+                "domain": "Barman"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Barman/domain.pddl",
+                "name": "p2-11-5-16",
+                "path": "TESTING/seq-agl/Barman/p2-11-5-16.pddl",
+                "domain": "Barman"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Barman/domain.pddl",
+                "name": "p2-11-5-15",
+                "path": "TESTING/seq-agl/Barman/p2-11-5-15.pddl",
+                "domain": "Barman"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Barman/domain.pddl",
+                "name": "p2-11-4-15",
+                "path": "TESTING/seq-agl/Barman/p2-11-4-15.pddl",
+                "domain": "Barman"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Barman/domain.pddl",
+                "name": "p2-10-4-13",
+                "path": "TESTING/seq-agl/Barman/p2-10-4-13.pddl",
+                "domain": "Barman"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Barman/domain.pddl",
+                "name": "p1-11-5-16",
+                "path": "TESTING/seq-agl/Barman/p1-11-5-16.pddl",
+                "domain": "Barman"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Barman/domain.pddl",
+                "name": "p1-11-5-15",
+                "path": "TESTING/seq-agl/Barman/p1-11-5-15.pddl",
+                "domain": "Barman"
+            }
+        },
+        {
+            "tools": [],
+            "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Barman/domain.pddl",
+                "name": "p1-11-4-15",
+                "path": "TESTING/seq-agl/Barman/p1-11-4-15.pddl",
+                "domain": "Barman"
+            }
+        }
+    ]
+}
