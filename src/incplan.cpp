@@ -28,6 +28,7 @@ namespace option{
 	carj::CarjArg<TCLAP::SwitchArg, bool> exhaustive("", "exhaustiveSearch", "Solve problem for subsets of assumed literals.", cmd, /*default*/ false);
 	carj::CarjArg<TCLAP::SwitchArg, bool> loose("", "loose", "Only assume init and goal.", cmd, /*default*/ false);
 	carj::CarjArg<TCLAP::SwitchArg, bool> transformLearned("", "transformLearned", "Transform learned clauses from privious solves to new time step.", cmd, /*default*/ false);
+	carj::TCarjArg<TCLAP::ValueArg,int> maxSizeLearnedClause("", "maxSizeLearnedClause", "Maximum number of literals in a learned clause that will be transformed to future time steps.", /* necessary */ false, /*default*/ 2, /* type description */ "positive number", cmd);
 }
 
 struct Options {
@@ -311,7 +312,8 @@ class Solver : public TimePointBasedSolver {
 		int makeSpan;
 		ipasir::SolveResult solveResult;
 		std::unique_ptr<TimePointManager> timePointManager;
-		std::vector<int> learnedClauses;
+		std::vector<std::vector<int>> learnedClauses;
+		std::vector<int> learnedClausesShift;
 
 		TimePoint initialize() {
 			this->reset();
@@ -386,17 +388,18 @@ class Solver : public TimePointBasedSolver {
 		}
 
 		void rememberLearned(int* learned) {
+			learnedClauses.push_back(std::vector<int>());
 			for (;*learned != 0; learned++) {
-				learnedClauses.push_back(*learned);
+				learnedClauses.back().push_back(*learned);
 			}
-			learnedClauses.push_back(0);
+			learnedClausesShift.push_back(0);
 		}
 
 		void setLearnedCallback(){
 			using namespace std::placeholders;
 			std::function<void(int*)> f =
 				std::bind(&Solver::rememberLearned, this, _1);
-			solver->set_learn(10, f);
+			solver->set_learn(option::maxSizeLearnedClause.getValue(), f);
 		}
 
 		void exhaustiveInitialFixed() {
@@ -512,21 +515,27 @@ class Solver : public TimePointBasedSolver {
 				if (option::transformLearned.getValue()) {
 					VLOG(1) << "learned " << learnedClauses.size();
 					// shift all learned clauses one up
-					for (int lit: learnedClauses) {
-						if (lit == 0) {
-							finalizeClause();
-						} else {
+					for (size_t i = 0; i < learnedClauses.size(); i++) {
+						std::vector<int>& clause = learnedClauses[i];
+						learnedClausesShift[i] += 1;
+						for (int lit: clause) {
 							int timedLiteral;
 							TimePoint t;
 							bool isHelper;
 							getInfo(lit, timedLiteral, t, isHelper);
+
+							for (int k = 0; k < learnedClausesShift[i]; k++) {
+								t = timePointManager->getSuccessor(t);
+							}
 							if (isHelper) {
-								addHelperLiteral(timedLiteral, timePointManager->getSuccessor(t));
+								addHelperLiteral(timedLiteral, t);
 							} else {
-								addProblemLiteral(timedLiteral, timePointManager->getSuccessor(t));
+								addProblemLiteral(timedLiteral, t);
 							}
 						}
+						finalizeClause();
 					}
+
 				}
 
 
