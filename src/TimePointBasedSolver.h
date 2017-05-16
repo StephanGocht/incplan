@@ -105,7 +105,7 @@ public:
 
 	}
 
-	void reset() {
+	virtual void reset() {
 		solver->reset();
 	}
 

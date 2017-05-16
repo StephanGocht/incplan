@@ -28,6 +28,7 @@ set(SRC_FILES
 	TimeSlotMapping.cpp
 	carj/carj.cpp
 	TimePointBasedSolver.cpp
+	DimspecProblem.cpp
 	)
 
 
