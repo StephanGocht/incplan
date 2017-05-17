@@ -27,27 +27,11 @@
 
 TCLAP::CmdLine cmd("This tool is does sat planing using an incremental sat solver.", ' ', "0.1");
 namespace option{
-	carj::CarjArg<TCLAP::SwitchArg, bool> exhaustive("", "exhaustiveSearch", "Solve problem for subsets of assumed literals.", cmd, /*default*/ false);
-	carj::CarjArg<TCLAP::SwitchArg, bool> loose("", "loose", "Only assume init and goal.", cmd, /*default*/ false);
-	carj::CarjArg<TCLAP::SwitchArg, bool> transformLearned("", "transformLearned", "Transform learned clauses from privious solves to new time step.", cmd, /*default*/ false);
 	carj::TCarjArg<TCLAP::ValueArg,int> maxSizeLearnedClause("", "maxSizeLearnedClause", "Maximum number of literals in a learned clause that will be transformed to future time steps.", /* necessary */ false, /*default*/ 2, /* type description */ "positive number", cmd);
-	carj::CarjArg<TCLAP::SwitchArg, bool> outputSolverLike("", "outputSolverLike", "Output result like a normal solver is used. The literals for each time point t are in range t * [literalsPerTime] < lit <= (t + 1) * [literalsPerTime]", cmd, /*default*/ false);
+	//TCLAP::SwitchArg outputLinePerStep("", "outputLinePerStep", "Output each time point in a new line. Each time point will use the same literals.", /*default*/ false);
+	carj::CarjArg<TCLAP::SwitchArg, bool> icaps2017Version("", "icaps2017", "Use this option to use encoding as used in the icaps paper.", cmd, /*default*/ false);
+	carj::CarjArg<TCLAP::SwitchArg, bool> unitInGoal2Assume("u", "unitInGoal2Assume", "Add units in goal clauses using assume instead of add. (singleEnded only)", cmd, /*default*/ false);
 }
-
-struct Options {
-	bool error;
-	std::string inputFile;
-	bool unitInGoal2Assume;
-	bool solveBeforeGoalClauses;
-	bool nonIncrementalSolving;
-	bool singleEnded;
-	bool cleanLitearl;
-	bool icaps2017Version;
-	double ratio;
-	std::function<int(int)> stepToMakespan;
-};
-
-Options options;
 
 enum class HelperVariables { ZeroVariableIsNotAllowed_DoNotRemoveThis,
 	ActivationLiteral };
@@ -115,19 +99,36 @@ private:
 class Solver : public TimePointBasedSolver {
 public:
 	std::unique_ptr<ISolverStrategy> strategy;
+	std::function<int(int)> stepToMakespan;
 	TimePoint elementInsertedLast;
+	const DimspecProblem& problem;
+
+	int finalMakeSpan;
+	int makeSpan;
+	ipasir::SolveResult solveResult;
+	std::unique_ptr<TimePointManager> timePointManager;
 
 	public:
-		Solver(const DimspecProblem& _problem):
+		Solver(
+			const DimspecProblem& _problem,
+			std::unique_ptr<ISolverStrategy> _strategy,
+			std::function<int(int)> _stepToMakespan):
+
 			TimePointBasedSolver(
 				problem.numberLiteralsPerTime,
 				1,
 				// std::make_unique<ipasir::Solver>(),
-				std::make_unique<ipasir::RandomizedSolver>(0, std::make_unique<ipasir::Solver>()),
-				options.icaps2017Version?
+				std::make_unique<ipasir::RandomizedSolver>(std::make_unique<ipasir::Solver>()),
+				option::icaps2017Version.getValue()?
 					TimePointBasedSolver::HelperVariablePosition::AllBefore:
 					TimePointBasedSolver::HelperVariablePosition::SingleAfter),
-			problem(_problem){
+			strategy(std::move(_strategy)),
+			stepToMakespan(_stepToMakespan),
+			problem(_problem),
+			finalMakeSpan(0),
+			makeSpan(0),
+			timePointManager(nullptr)
+		{
 
 			strategy->setSolver(this);
 		}
@@ -226,13 +227,6 @@ public:
 		}
 
 	public:
-		const DimspecProblem& problem;
-
-		int finalMakeSpan;
-		int makeSpan;
-		ipasir::SolveResult solveResult;
-		std::unique_ptr<TimePointManager> timePointManager;
-
 		virtual void reset(){
 			TimePointBasedSolver::reset();
 			makeSpan = 0;
@@ -318,7 +312,7 @@ public:
 
 		std::unique_ptr<TimePoint> addNewTimePoints(unsigned step) {
 			std::unique_ptr<TimePoint> tNew = nullptr;
-			int targetMakeSpan = options.stepToMakespan(step);
+			int targetMakeSpan = stepToMakespan(step);
 
 			for (; this->makeSpan < targetMakeSpan; this->makeSpan++) {
 				tNew = std::make_unique<TimePoint>(timePointManager->aquireNext());
@@ -387,7 +381,7 @@ public:
 		 *         false otherwise.
 		 */
 		bool isUnitGoal(unsigned i) {
-			if (!options.unitInGoal2Assume) {
+			if (!option::unitInGoal2Assume.getValue()) {
 				return false;
 			}
 
@@ -421,17 +415,13 @@ public:
 		}
 };
 
-class NonIncrementalStrategy: public ISolverStrategyDecorator {
-public:
-	virtual void preStepHook(){
-		getSolver().reset();
-		doInitialize();
-		ISolverStrategyDecorator::preStepHook();
-	}
-};
-
 class PreFinalizationSolveStrategy: public ISolverStrategyDecorator {
 public:
+	PreFinalizationSolveStrategy(std::unique_ptr<ISolverStrategy> _strategy):
+		ISolverStrategyDecorator(std::move(_strategy))
+	{
+	}
+
 	virtual void preSolveHook(){
 		ISolverStrategyDecorator::preSolveHook();
 		getSolver().solveSAT();
@@ -440,6 +430,11 @@ public:
 
 class CleanAktivationLiteralStrategy: public ISolverStrategyDecorator {
 public:
+	CleanAktivationLiteralStrategy(std::unique_ptr<ISolverStrategy> _strategy):
+		ISolverStrategyDecorator(std::move(_strategy))
+	{
+	}
+
 	virtual void postStepHook(){
 		ISolverStrategyDecorator::postStepHook();
 		int activationLiteral = static_cast<int>(HelperVariables::ActivationLiteral);
@@ -470,13 +465,46 @@ public:
 	};
 };
 
+class NonIncrementalStrategy: public SingleEndedStrategy {
+	virtual void preStepHook(){
+		getSolver().reset();
+		doInitialize();
+	}
+
+	virtual void doFinalize(){
+		TimePoint elementInsertedLast = getSolver().elementInsertedLast;
+		getSolver().addGoalClauses(elementInsertedLast);
+	};
+};
+// class NonIncrementalStrategy: public ISolverStrategyDecorator {
+// public:
+// 	NonIncrementalStrategy(std::unique_ptr<ISolverStrategy> _strategy):
+// 		ISolverStrategyDecorator(std::move(_strategy))
+// 	{
+// 	}
+
+// 	virtual void preStepHook(){
+// 		getSolver().reset();
+// 		doInitialize();
+// 		ISolverStrategyDecorator::preStepHook();
+// 	}
+// };
 
 class DoubleEndedStrategy: public ISolverStrategy {
+private:
+	float ratio;
+
 public:
+	DoubleEndedStrategy(float _ratio):
+		ratio(_ratio)
+	{
+
+	}
+
 	virtual void doInitialize(){
 		getSolver().timePointManager =
 			std::make_unique<DoubleEndedTimePointManager>(
-				options.ratio,
+				ratio,
 				DoubleEndedTimePointManager::TopElementOption::Dublicated);
 		TimePoint t0 = getSolver().timePointManager->aquireNext();
 		getSolver().addInitialClauses(t0);
@@ -604,67 +632,48 @@ private:
 	std::vector<int> learnedClausesShift;
 };
 
+namespace option {
+namespace setup {
+	carj::CarjArg<TCLAP::SwitchArg, bool> exhaustive("", "exhaustiveSearch", "Solve problem for subsets of assumed literals.", cmd, /*default*/ false);
+	carj::CarjArg<TCLAP::SwitchArg, bool> loose("", "loose", "Only assume init and goal.", cmd, /*default*/ false);
+	carj::CarjArg<TCLAP::SwitchArg, bool> transformLearned("", "transformLearned", "Transform learned clauses from privious solves to new time step.", cmd, /*default*/ false);
 
-//bool defaultIsTrue = true;
-bool defaultIsFalse = false;
-bool neccessaryArgument = true;
+	carj::CarjArg<TCLAP::SwitchArg, bool> solveBeforeGoalClauses("i", "intermediateSolveStep", "Add an additional solve step before adding the goal or linking clauses.", cmd, /*default*/ false);
+	carj::CarjArg<TCLAP::SwitchArg, bool> cleanLitearl("c", "cleanLitearl", "Add a literal to remove linking or goal clauses.", cmd, /*default*/ false);
 
+	carj::TCarjArg<TCLAP::ValueArg, unsigned>  linearStepSize("l", "linearStepSize", "Linear step size.", /*neccessary*/ false, 1, "natural number", cmd);
+	carj::TCarjArg<TCLAP::ValueArg, float> exponentialStepBasis("e", "exponentialStepBasis", "Basis of exponential step size. Combinable with options -l and -o (varibale names are equal to parameter): step size = l*n + floor(e ^ (n + o))", /*neccessary*/ false, 0, "natural number", cmd);
+	carj::TCarjArg<TCLAP::ValueArg, float> exponentialStepOffset("o", "exponentialStepOffset", "Basis of exponential step size.", /*neccessary*/ false, 0, "natural number", cmd);
 
+	carj::CarjArg<TCLAP::SwitchArg, bool> outputSolverLike("", "outputSolverLike", "Output result like a normal solver is used. The literals for each time point t are in range t * [literalsPerTime] < lit <= (t + 1) * [literalsPerTime]", cmd, /*default*/ false);
 
-carj::MCarjArg<TCLAP::MultiArg, std::string> pathSearchPrefix("", "pathSearchPrefix", "If passed files are not found their path will be prefixed with values of this parameter.", !neccessaryArgument, "path", cmd);
+	carj::CarjArg<TCLAP::SwitchArg, bool> singleEnded("s", "singleEnded", "Use naive incremental encoding.", cmd, /*default*/ false);
+	carj::TCarjArg<TCLAP::ValueArg, double> ratio("r", "ratio", "Ratio between states from start to state from end.", /*neccessary*/ false, /*default*/ 0.5, "number between 0 and 1", cmd);
+	carj::CarjArg<TCLAP::SwitchArg, bool> nonIncrementalSolving("n", "nonIncrementalSolving", "Do not use incremental solving.", cmd, /*default*/ false);
+
+	carj::TCarjArg<TCLAP::UnlabeledValueArg,std::string>  inputFile("inputFile", "File containing the problem. Omit or use - for stdin.", /*neccessary*/ false, "-", "inputFile", cmd);
+	carj::MCarjArg<TCLAP::MultiArg, std::string> pathSearchPrefix("", "pathSearchPrefix", "If passed files are not found their path will be prefixed with values of this parameter.", /*neccessary*/ false, "path", cmd);
+}}
+
 void parseOptions(int argc, const char **argv) {
 	try {
-		carj::TCarjArg<TCLAP::UnlabeledValueArg,std::string>  inputFile("inputFile", "File containing the problem. Omit or use - for stdin.", !neccessaryArgument, "-", "inputFile", cmd);
-		carj::TCarjArg<TCLAP::ValueArg, double>  ratio("r", "ratio", "Ratio between states from start to state from end.", !neccessaryArgument, 0.5, "number between 0 and 1", cmd);
-		carj::TCarjArg<TCLAP::ValueArg, unsigned>  linearStepSize("l", "linearStepSize", "Linear step size.", !neccessaryArgument, 1, "natural number", cmd);
-		carj::TCarjArg<TCLAP::ValueArg, float> exponentialStepBasis("e", "exponentialStepBasis", "Basis of exponential step size. Combinable with options -l and -o (varibale names are equal to parameter): step size = l*n + floor(e ^ (n + o))", !neccessaryArgument, 0, "natural number", cmd);
-		carj::TCarjArg<TCLAP::ValueArg, float> exponentialStepOffset("o", "exponentialStepOffset", "Basis of exponential step size.", !neccessaryArgument, 0, "natural number", cmd);
-		carj::CarjArg<TCLAP::SwitchArg, bool> unitInGoal2Assume("u", "unitInGoal2Assume", "Add units in goal clauses using assume instead of add. (singleEnded only)", cmd, defaultIsFalse);
-		carj::CarjArg<TCLAP::SwitchArg, bool> solveBeforeGoalClauses("i", "intermediateSolveStep", "Add an additional solve step before adding the goal or linking clauses.", cmd, defaultIsFalse);
-		carj::CarjArg<TCLAP::SwitchArg, bool> nonIncrementalSolving("n", "nonIncrementalSolving", "Do not use incremental solving.", cmd, defaultIsFalse);
-		carj::CarjArg<TCLAP::SwitchArg, bool> cleanLitearl("c", "cleanLitearl", "Add a literal to remove linking or goal clauses.", cmd, defaultIsFalse);
-
-		carj::CarjArg<TCLAP::SwitchArg, bool> singleEnded("s", "singleEnded", "Use naive incremental encoding.", cmd, defaultIsFalse);
-		//TCLAP::SwitchArg outputLinePerStep("", "outputLinePerStep", "Output each time point in a new line. Each time point will use the same literals.", defaultIsFalse);
-
-		carj::CarjArg<TCLAP::SwitchArg, bool> icaps2017Version("", "icaps2017", "Use this option to use encoding as used in the icaps paper.", cmd, defaultIsFalse);
-
 		carj::init(argc, argv, cmd, "/incplan/parameters");
-
-		options.error = false;
-		options.inputFile = inputFile.getValue();
-		options.unitInGoal2Assume = unitInGoal2Assume.getValue();
-		options.solveBeforeGoalClauses = solveBeforeGoalClauses.getValue();
-		options.nonIncrementalSolving = nonIncrementalSolving.getValue();
-		options.ratio = ratio.getValue();
-		options.singleEnded = singleEnded.getValue();
-		options.cleanLitearl = cleanLitearl.getValue();
-		options.icaps2017Version = icaps2017Version.getValue();
-		{
-			int l = linearStepSize.getValue();
-			float e = exponentialStepBasis.getValue();
-			float o = exponentialStepOffset.getValue();
-			if (e != 0) {
-				options.stepToMakespan =
-					[l,e,o](int n){return l * n + std::floor(pow(e,(n + o)));};
-			} else {
-				options.stepToMakespan =
-					[l,e,o](int n){return l * n;};
-			}
-
-		}
-
-
-		if (options.nonIncrementalSolving) {
-			options.singleEnded = true;
-		}
-
 	} catch (TCLAP::ArgException &e) {
-		options.error = true;
-		std::cerr << "error: " << e.error() << " for arg " << e.argId() << std::endl;
+		LOG(FATAL) << e.error() << " for arg " << e.argId() << std::endl;
 	}
 }
 
+std::function<int(int)> getStepFunction(){
+	using namespace option::setup;
+	int l = linearStepSize.getValue();
+	float e = exponentialStepBasis.getValue();
+	float o = exponentialStepOffset.getValue();
+	if (e != 0) {
+		return [l,e,o](int n){return l * n + std::floor(pow(e,(n + o)));};
+	} else {
+		return [l,e,o](int n){return l * n;};
+	}
+}
 
 int incplan_main(int argc, const char **argv) {
 	parseOptions(argc, argv);
@@ -673,23 +682,24 @@ int incplan_main(int argc, const char **argv) {
 
 	std::istream* in;
 	std::ifstream is;
-	if (options.inputFile == "-") {
+	std::string inputFileName = option::setup::inputFile.getValue();
+	if (inputFileName == "-") {
 		in = &std::cin;
 		LOG(INFO) << "Using standard input.";
 	} else {
 
-		std::vector<std::string> prefixes = pathSearchPrefix.getValue();
+		std::vector<std::string> prefixes = option::setup::pathSearchPrefix.getValue();
 		prefixes.insert(prefixes.begin(), "");
 
 		for (std::string prefix: prefixes) {
-			is.open(prefix + options.inputFile);
+			is.open(prefix + inputFileName);
 			if (!is.fail()) {
 				break;
 			}
 		}
 
 		if (is.fail()){
-			LOG(FATAL) << "Input Error can't open file: " << options.inputFile;
+			LOG(FATAL) << "Input Error can't open file: " << inputFileName;
 		}
 		in = &is;
 	}
@@ -697,9 +707,38 @@ int incplan_main(int argc, const char **argv) {
 	bool solved;
 	{
 		DimspecProblem problem(*in);
-		Solver solver(problem);
+		std::unique_ptr<ISolverStrategy> strategy = nullptr;
+
+		if (option::setup::nonIncrementalSolving.getValue()) {
+			strategy = std::make_unique<NonIncrementalStrategy>();
+		} else if (option::setup::loose.getValue()){
+			if (option::setup::transformLearned.getValue()) {
+				strategy = std::make_unique<TransfereLearnedStrategy>();
+			} else {
+				strategy = std::make_unique<LooseEndedStrategy>();
+			}
+		} else {
+			if (option::setup::singleEnded.getValue()) {
+				strategy = std::make_unique<SingleEndedStrategy>();
+			} else {
+				strategy = std::make_unique<DoubleEndedStrategy>(
+					option::setup::ratio.getValue());
+			}
+		}
+
+		if (option::setup::solveBeforeGoalClauses.getValue()) {
+			strategy = std::make_unique<PreFinalizationSolveStrategy>(std::move(strategy));
+		}
+		if (option::setup::cleanLitearl.getValue()) {
+			strategy = std::make_unique<CleanAktivationLiteralStrategy>(std::move(strategy));
+		}
+
+		Solver solver(
+			problem,
+			std::move(strategy),
+			getStepFunction());
 		solved = solver.solve();
-		solver.printSolution(option::outputSolverLike.getValue());
+		solver.printSolution(option::setup::outputSolverLike.getValue());
 	}
 
 	if (!solved) {
