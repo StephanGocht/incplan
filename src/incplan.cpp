@@ -587,7 +587,59 @@ public:
 		setLearnedCallback();
 	}
 
-	virtual void postStepHook() {
+	/* b -> -a
+	 * -b or -a
+	*/
+	virtual void learnBlockedStates() {
+		unsigned counter = 0;
+		TimePoint t0 = getSolver().timePointManager->getFirst();
+		TimePoint tN = getSolver().timePointManager->getLast();
+
+		for (int a:getSolver().problem.stateVariables) {
+			for (int b:getSolver().problem.stateVariables) {
+				getSolver().assumeProblemLiteral(a, t0);
+				getSolver().assumeProblemLiteral(b, tN);
+				auto result = getSolver().solveSAT();
+				if (result == ipasir::SolveResult::UNSAT) {
+					getSolver().addProblemLiteral(-a, t0);
+					getSolver().addProblemLiteral(-b, tN);
+					getSolver().finalizeClause();
+					counter++;
+				}
+			}
+		}
+
+		VLOG(1) << "blocked: " << counter;
+	}
+
+	/* b -> a
+	 * -b or a
+	*/
+	virtual void learnForcedStates() {
+		unsigned counter = 0;
+		TimePoint t0 = getSolver().timePointManager->getFirst();
+		TimePoint tN = getSolver().timePointManager->getLast();
+
+		for (int a:getSolver().problem.stateVariables) {
+			for (int b:getSolver().problem.stateVariables) {
+				getSolver().assumeProblemLiteral(-a, t0);
+				getSolver().assumeProblemLiteral(b, tN);
+				auto result = getSolver().solveSAT();
+				if (result == ipasir::SolveResult::UNSAT) {
+					getSolver().addProblemLiteral(a, t0);
+					getSolver().addProblemLiteral(-b, tN);
+					getSolver().finalizeClause();
+					counter++;
+				}
+			}
+		}
+		VLOG(1) << "forced: " << counter;
+	}
+
+	virtual void preSolveHook() {
+		learnBlockedStates();
+		learnForcedStates();
+
 		VLOG(1) << "learned " << learnedClauses.size();
 		// shift all learned clauses one up
 		for (size_t i = 0; i < learnedClauses.size(); i++) {
