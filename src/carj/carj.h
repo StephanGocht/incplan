@@ -5,22 +5,10 @@
 #include "tclap/CmdLine.h"
 #include "json.hpp"
 
-#include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
 
-template < class T >
-std::ostream& operator << (std::ostream& os, const std::vector<T>& v)
-{
-	os << "[";
-	for (typename std::vector<T>::const_iterator ii = v.begin(); ii != v.end(); ++ii)
-	{
-		os << " " << *ii;
-	}
-	os << "]";
-	return os;
-}
 
 namespace carj {
 	using json = nlohmann::json;

@@ -1,3 +1,4 @@
+#pragma once
 /**
  * Usage:
  * Log(Level) << "message";
@@ -12,4 +13,19 @@
 #define ELPP_FRESH_LOG_FILE
 #define ELPP_NO_DEFAULT_LOG_FILE
 #define ELPP_DISABLE_DEFAULT_CRASH_HANDLING
+
+#include <vector>
+#include <iostream>
+template < class T >
+std::ostream& operator << (std::ostream& os, const std::vector<T>& v)
+{
+    os << "[";
+    for (typename std::vector<T>::const_iterator ii = v.begin(); ii != v.end(); ++ii)
+    {
+        os << " " << *ii;
+    }
+    os << "]";
+    return os;
+}
+
 #include "easylogging++.h"
