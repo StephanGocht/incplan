@@ -10,6 +10,18 @@
 #include <map>
 #include <memory>
 
+struct TimedLiteral {
+	int literal;
+	TimePoint t;
+	bool isHelper;
+
+	TimedLiteral operator-(){
+		TimedLiteral result = *this;
+		result.literal = -result.literal;
+		return result;
+	}
+};
+
 class TimePointBasedSolver {
 public:
 	enum class HelperVariablePosition {AllBefore, SingleBefore, SingleAfter};
@@ -23,6 +35,35 @@ private:
 public:
 	std::unique_ptr<ipasir::Ipasir> solver;
 	const HelperVariablePosition helperVariablePosition;
+
+	void add(const TimedLiteral& lit) {
+		if (lit.isHelper) {
+			addHelperLiteral(lit.literal, lit.t);
+		} else {
+			addProblemLiteral(lit.literal, lit.t);
+		}
+	}
+
+	void addClause(const std::vector<TimedLiteral> clause) {
+		for (const TimedLiteral& lit: clause) {
+			add(lit);
+		}
+		finalizeClause();
+	}
+
+	void assume(const TimedLiteral &lit) {
+		if (lit.isHelper) {
+			assumeHelperLiteral(lit.literal, lit.t);
+		} else {
+			assumeProblemLiteral(lit.literal, lit.t);
+		}
+	}
+
+	void assume(const std::vector<TimedLiteral> clause) {
+		for (const TimedLiteral &lit: clause) {
+			assume(lit);
+		}
+	}
 
 	void addProblemLiteral(int lit, TimePoint t) {
 		solver->add(problemLiteral2Ipasir(lit, t));
@@ -44,7 +85,17 @@ public:
 		solver->add(0);
 	}
 
-	void getInfo(int ipasir_lit, int& literal, TimePoint& t, bool& isHelper);
+	TimedLiteral getInfo(int ipasir_lit);
+
+	bool failed(const TimedLiteral& lit) {
+		int l;
+		if (lit.isHelper) {
+			l = helperLiteral2Ipasir(lit.literal, lit.t);
+		} else {
+			l = problemLiteral2Ipasir(lit.literal, lit.t);
+		}
+		return 1 == solver->failed(l);
+	}
 
 	int valueProblemLiteral(int lit, TimePoint t) {
 		int value = solver->val(problemLiteral2Ipasir(lit, t));
@@ -109,6 +160,14 @@ public:
 		solver->reset();
 	}
 
+	int problemLiteral2Ipasir(int literal, TimePoint t) {
+		return getOffset(literal, t) + literal;
+	}
+
+	int helperLiteral2Ipasir(int literal, TimePoint t) {
+		return getOffsetHelper(literal, t) + literal;
+	}
+
 private:
 	int getIndex(TimePoint t) {
 		auto insertResult = timePoints.insert(std::make_pair(t, timePoints.size()));
@@ -121,14 +180,6 @@ private:
 
 	int getOffset(int literal, TimePoint t, bool isHelper = false);
 
-
-	int problemLiteral2Ipasir(int literal, TimePoint t) {
-		return getOffset(literal, t) + literal;
-	}
-
-	int helperLiteral2Ipasir(int literal, TimePoint t) {
-		return getOffsetHelper(literal, t) + literal;
-	}
 
 	int selectLiteralCallback() {
 		// Return Values:

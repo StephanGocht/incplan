@@ -2,10 +2,11 @@
 
 #include <cassert>
 
-void TimePointBasedSolver::getInfo(int ipasir_lit, int& literal, TimePoint& t, bool& isHelper) {
+TimedLiteral TimePointBasedSolver::getInfo(int ipasir_lit) {
+	TimedLiteral result;
 	if (ipasir_lit == 0) {
-		literal = 0;
-		return;
+		result.literal = 0;
+		return result;
 	}
 
 	assert(helperVariablePosition == HelperVariablePosition::SingleAfter);
@@ -22,9 +23,9 @@ void TimePointBasedSolver::getInfo(int ipasir_lit, int& literal, TimePoint& t, b
 		assert(false && "Internal Error");
 	}
 
-	t = it->first;
-	literal = var % allVarsPerTime;
-	isHelper = false;
+	TimePoint t = it->first;
+	int literal = var % allVarsPerTime;
+	bool isHelper = false;
 	if (literal > varsPerTime) {
 		isHelper = true;
 		literal -= varsPerTime;
@@ -33,6 +34,12 @@ void TimePointBasedSolver::getInfo(int ipasir_lit, int& literal, TimePoint& t, b
 	if (ipasir_lit < 0) {
 		literal = -literal;
 	}
+
+	result.literal = literal;
+	result.isHelper = isHelper;
+	result.t = t;
+
+	return result;
 }
 
 int TimePointBasedSolver::getOffset(int literal, TimePoint t, bool isHelper) {

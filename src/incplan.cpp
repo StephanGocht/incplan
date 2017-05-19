@@ -29,6 +29,9 @@
 TCLAP::CmdLine cmd("This tool is does sat planing using an incremental sat solver.", ' ', "0.1");
 namespace option{
 	carj::TCarjArg<TCLAP::ValueArg,int> maxSizeLearnedClause("", "maxSizeLearnedClause", "Maximum number of literals in a learned clause that will be transformed to future time steps.", /* necessary */ false, /*default*/ 2, /* type description */ "positive number", cmd);
+
+	carj::TCarjArg<TCLAP::ValueArg,int> exhaustMakeSpan("", "exhaustMakeSpan", "Maximum makespan to exhaust learn new transfer clauses.", /* necessary */ false, /*default*/ 2, /* type description */ "positive number", cmd);
+	carj::TCarjArg<TCLAP::ValueArg,int> learnMakeSpan("", "learnMakeSpan", "Maximum makespan to learn new transfer clauses.", /* necessary */ false, /*default*/ 2, /* type description */ "positive number", cmd);
 	//TCLAP::SwitchArg outputLinePerStep("", "outputLinePerStep", "Output each time point in a new line. Each time point will use the same literals.", /*default*/ false);
 	carj::CarjArg<TCLAP::SwitchArg, bool> icaps2017Version("", "icaps2017", "Use this option to use encoding as used in the icaps paper.", cmd, /*default*/ false);
 	carj::CarjArg<TCLAP::SwitchArg, bool> unitInGoal2Assume("u", "unitInGoal2Assume", "Add units in goal clauses using assume instead of add. (singleEnded only)", cmd, /*default*/ false);
@@ -581,39 +584,41 @@ public:
 	};
 };
 
-struct VariableInfo {
-	int literal;
-	int timepoint;
-	bool isHelper;
-};
-
 class TransfereLearnedStrategy: public LooseEndedStrategy {
 private:
-	std::vector<std::vector<VariableInfo>> learnedClauses;
-	std::vector<std::vector<int>> newLearnedClauses;
+	std::vector<std::vector<TimedLiteral>> learnedClauses;
+	std::vector<std::vector<TimedLiteral>> newLearnedClauses;
 	std::vector<unsigned> timeShift;
+
+	bool isLearingStopped = false;
 public:
 	virtual void doInitialize(){
 		LooseEndedStrategy::doInitialize();
 		setLearnedCallback();
 	}
 
-	/* b -> -a
-	 * -b or -a
+	void initEndLiterals(TimedLiteral &at0, TimedLiteral &atN) {
+		at0.t = getSolver().timePointManager->getFirst();
+		at0.isHelper = false;
+		atN.t = getSolver().timePointManager->getLast();
+		atN.isHelper = false;
+	}
+
+	/* b@N -> -a@0
+	 * -b@N or -a@0
 	*/
 	virtual void learnBlockedStates() {
 		unsigned counter = 0;
-		TimePoint t0 = getSolver().timePointManager->getFirst();
-		TimePoint tN = getSolver().timePointManager->getLast();
 
-		for (int a:getSolver().problem.stateVariables) {
-			for (int b:getSolver().problem.stateVariables) {
-				getSolver().assumeProblemLiteral(a, t0);
-				getSolver().assumeProblemLiteral(b, tN);
-				auto result = getSolver().solveSAT();
-				if (result == ipasir::SolveResult::UNSAT) {
-					newLearnedClauses.push_back({-a, -b});
-					counter++;
+		TimedLiteral at0, atN;
+		initEndLiterals(at0, atN);
+
+		for (int aLit:getSolver().problem.stateVariables) {
+			at0.literal = aLit;
+			for (int bLit:getSolver().problem.stateVariables) {
+				atN.literal = bLit;
+				if (testAndLearn({-atN, -at0})) {
+					++counter;
 				}
 			}
 		}
@@ -621,26 +626,75 @@ public:
 		VLOG(1) << "blocked: " << counter;
 	}
 
-	/* b -> a
+	/* b@N -> a@0
 	 * -b or a
 	*/
 	virtual void learnForcedStates() {
 		unsigned counter = 0;
-		TimePoint t0 = getSolver().timePointManager->getFirst();
-		TimePoint tN = getSolver().timePointManager->getLast();
 
-		for (int a:getSolver().problem.stateVariables) {
-			for (int b:getSolver().problem.stateVariables) {
-				getSolver().assumeProblemLiteral(-a, t0);
-				getSolver().assumeProblemLiteral(b, tN);
-				auto result = getSolver().solveSAT();
-				if (result == ipasir::SolveResult::UNSAT) {
-					newLearnedClauses.push_back({a, -b});
-					counter++;
+		TimedLiteral at0, atN;
+		initEndLiterals(at0, atN);
+
+		for (int aLit:getSolver().problem.stateVariables) {
+			at0.literal = aLit;
+			for (int bLit:getSolver().problem.stateVariables) {
+				atN.literal = bLit;
+				if (testAndLearn({-atN, at0})){
+					++counter;
 				}
 			}
 		}
+
 		VLOG(1) << "forced: " << counter;
+	}
+
+	/**
+	 * Tests whether the clause is universally valid
+	 */
+	bool testAndLearn(const std::vector<TimedLiteral>& clause) {
+		for (TimedLiteral lit: clause) {
+			getSolver().assume(-lit);
+		}
+
+		auto result = getSolver().solveSAT();
+		if (result == ipasir::SolveResult::UNSAT) {
+			std::vector<TimedLiteral> failed;
+			for (TimedLiteral lit: clause) {
+				if (getSolver().failed(-lit)) {
+					failed.push_back(lit);
+				}
+			}
+			newLearnedClauses.push_back(failed);
+
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/*
+	 * Test a@tN -> b1@t0 or b2 @t0 or ... for a,bi in state variables
+	 */
+	virtual void learnNeccessary() {
+		unsigned counter = 0;
+
+		TimedLiteral at0, atN;
+		initEndLiterals(at0, atN);
+
+		for (int aLit:getSolver().problem.stateVariables) {
+			std::vector<TimedLiteral> clause;
+
+			atN.literal = aLit;
+			clause.push_back(-atN);
+			for (int bLit:getSolver().problem.stateVariables) {
+				at0.literal = bLit;
+				clause.push_back(at0);
+			}
+			if (testAndLearn(clause)) {
+				++counter;
+			}
+		}
+		VLOG(1) << "necessary: " << counter;
 	}
 
 	/**
@@ -661,58 +715,57 @@ public:
 	}
 
 	void adeptLearned() {
-		for (std::vector<int>& clause: newLearnedClauses) {
+		for (std::vector<TimedLiteral>& clause: newLearnedClauses) {
 			int tMin;
 			int tMax;
 			bool init = false;
 
-			learnedClauses.push_back({});
-
-			auto& learnedClause = learnedClauses.back();
-			for (int lit:clause) {
-				VariableInfo info;
-				TimePoint t;
-				getSolver().getInfo(lit, info.literal, t, info.isHelper);
-				info.timepoint = toInt(t);
-				learnedClause.push_back(info);
+			for (TimedLiteral& lit:clause) {
+				int timepoint = toInt(lit.t);
 
 				if (!init) {
 					init = true;
-					tMin = info.timepoint;
-					tMax = info.timepoint;
+					tMin = timepoint;
+					tMax = timepoint;
 				}
 
-				tMin = std::min(info.timepoint, tMin);
-				tMax = std::max(info.timepoint, tMax);
+				tMin = std::min(timepoint, tMin);
+				tMax = std::max(timepoint, tMax);
 			}
 
 			/* Learned clauses are universal valid, so we normalize them such
 			 * that they stat at the first timepoint.
 			 */
-			for (VariableInfo& info: learnedClauses.back()) {
-				info.timepoint -= tMin;
+			for (TimedLiteral& lit: clause) {
+				lit.t = fromInt(toInt(lit.t) - tMin);
 			}
 
 			int tN = toInt(getSolver().timePointManager->getLast());
 			int shift = tN - (tMax - tMin);
 			timeShift.push_back(shift);
+
+			learnedClauses.push_back(clause);
 			for (int i = 0; i <= shift; i++) {
-				addLearnedClause(learnedClause, i);
+				addLearnedClause(clause, i);
 			}
 		}
 
 		newLearnedClauses.clear();
 	}
 
-	void addLearnedClause(const std::vector<VariableInfo>& clause, int shift) {
-		for (const VariableInfo& info: clause) {
-			if (info.isHelper) {
-				getSolver().addHelperLiteral(info.literal, fromInt(info.timepoint + shift));
-			} else {
-				getSolver().addProblemLiteral(info.literal, fromInt(info.timepoint + shift));
-			}
+	void addLearnedClause(const std::vector<TimedLiteral> &clause, int shift) {
+		for (TimedLiteral lit: clause) {
+			lit.t = fromInt(toInt(lit.t) + shift);
+			getSolver().add(lit);
 		}
 		getSolver().finalizeClause();
+	}
+
+	void stopLearning() {
+		TimePoint t0 = getSolver().timePointManager->getFirst();
+		getSolver().addInitialClauses(t0);
+		getSolver().solver->set_learn(0, nullptr);
+		isLearingStopped = true;
 	}
 
 	virtual void preSolveHook() {
@@ -722,10 +775,17 @@ public:
 			addLearnedClause(learnedClauses[i], timeShift[i]);
 		}
 
-		// VLOG(1) << "learned pre blocked/ forced " << learnedClauses.size();
-		// learnBlockedStates();
-		// learnForcedStates();
-		// adeptLearned();
+		if (!isLearingStopped && getSolver().makeSpan >= option::learnMakeSpan.getValue()) {
+			stopLearning();
+		}
+
+		if (!isLearingStopped && getSolver().makeSpan <= option::exhaustMakeSpan.getValue()) {
+			learnNeccessary();
+		// // 	// VLOG(1) << "learned pre blocked/ forced " << learnedClauses.size();
+			learnBlockedStates();
+			learnForcedStates();
+			adeptLearned();
+		}
 	}
 
 	virtual void postStepHook(){
@@ -733,17 +793,18 @@ public:
 		VLOG(1) << "learned " << learnedClauses.size();
 	};
 
-	void rememberLearned(int* learned) {
-		newLearnedClauses.push_back(std::vector<int>());
+	void learnedCallback(int* learned) {
+		newLearnedClauses.push_back(std::vector<TimedLiteral>());
 		for (;*learned != 0; learned++) {
-			newLearnedClauses.back().push_back(*learned);
+			TimedLiteral lit = getSolver().getInfo(*learned);
+			newLearnedClauses.back().push_back(lit);
 		}
 	}
 
 	void setLearnedCallback(){
 		using namespace std::placeholders;
 		std::function<void(int*)> f =
-			std::bind(&TransfereLearnedStrategy::rememberLearned, this, _1);
+			std::bind(&TransfereLearnedStrategy::learnedCallback, this, _1);
 		getSolver().solver->set_learn(option::maxSizeLearnedClause.getValue(), f);
 	}
 };
