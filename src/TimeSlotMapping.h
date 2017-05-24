@@ -63,10 +63,11 @@ private:
 	int currentEndTop = -1;
 	float ratio;
 	TopElementOption topElementOption;
+
+public:
 	static const int FROM_BEGIN;
 	static const int FROM_END;
 
-public:
 	/**
 	 * There are two top elements. They represent either the same
 	 * timepoint (Dublicated) or are two different timepoints (Unique)
@@ -193,10 +194,10 @@ public:
 	};
 
 	TimePoint getBeginTop() {
-		return std::make_pair(0, currentBeginTop);
+		return std::make_pair(FROM_BEGIN, currentBeginTop);
 	}
 
 	TimePoint getEndTop() {
-		return std::make_pair(0, currentEndTop);
+		return std::make_pair(FROM_END, currentEndTop);
 	}
 };

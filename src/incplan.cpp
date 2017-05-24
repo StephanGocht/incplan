@@ -28,6 +28,8 @@
 
 TCLAP::CmdLine cmd("This tool is does sat planing using an incremental sat solver.", ' ', "0.1");
 namespace option{
+	carj::TCarjArg<TCLAP::ValueArg,int> seed("", "seed", "Random Seed.", /* necessary */ false, /*default*/ 0, /* type description */ "positive number", cmd);
+
 	carj::TCarjArg<TCLAP::ValueArg,int> maxSizeLearnedClause("", "maxSizeLearnedClause", "Maximum number of literals in a learned clause that will be transformed to future time steps.", /* necessary */ false, /*default*/ 2, /* type description */ "positive number", cmd);
 
 	carj::TCarjArg<TCLAP::ValueArg,int> exhaustMakeSpan("", "exhaustMakeSpan", "Maximum makespan to exhaust learn new transfer clauses.", /* necessary */ false, /*default*/ 2, /* type description */ "positive number", cmd);
@@ -38,7 +40,7 @@ namespace option{
 }
 
 enum class HelperVariables { ZeroVariableIsNotAllowed_DoNotRemoveThis,
-	ActivationLiteral };
+	ActivationLiteral, MarkerLiteral };
 
 class Solver;
 
@@ -111,6 +113,7 @@ public:
 	int makeSpan;
 	ipasir::SolveResult solveResult;
 	std::unique_ptr<TimePointManager> timePointManager;
+	std::vector<TimePoint> newTimepoints;
 
 	public:
 		Solver(
@@ -120,9 +123,9 @@ public:
 
 			TimePointBasedSolver(
 				_problem.numberLiteralsPerTime,
-				1,
-				// std::make_unique<ipasir::Solver>(),
-				std::make_unique<ipasir::RandomizedSolver>(std::make_unique<ipasir::Solver>()),
+				/* Number of Helper Variables */ 2,
+				//std::make_unique<ipasir::Solver>(),
+				std::make_unique<ipasir::RandomizedSolver>(option::seed.getValue(), std::make_unique<ipasir::Solver>()),
 				option::icaps2017Version.getValue()?
 					TimePointBasedSolver::HelperVariablePosition::AllBefore:
 					TimePointBasedSolver::HelperVariablePosition::SingleAfter),
@@ -171,6 +174,7 @@ public:
 				}
 
 				strategy->postStepHook();
+				newTimepoints.clear();
 			}
 
 			LOG(INFO) << "Final Makespan: " << this->makeSpan;
@@ -211,11 +215,14 @@ public:
 					if (!outputSolverLike) {
 						std::cout << std::endl;
 					}
-					if (t == timePointManager->getLast()) {
+
+					try {
+						// todo improve with propper itterator
+						t = timePointManager->getSuccessor(t);
+					} catch (std::out_of_range& e){
 						break;
 					}
 
-					t = timePointManager->getSuccessor(t);
 					time++;
 				} while (true);
 
@@ -314,12 +321,16 @@ public:
 		// 	// LOG(INFO) << "BlockedStates: " << blockedStates << "/" << problem.stateVariables.size();
 		// }
 
+		/*
+		 * Returns the TimePoint added last or null if no Timepoint was added.
+		 */
 		std::unique_ptr<TimePoint> addNewTimePoints(unsigned step) {
 			std::unique_ptr<TimePoint> tNew = nullptr;
 			int targetMakeSpan = stepToMakespan(step);
 
 			for (; this->makeSpan < targetMakeSpan; this->makeSpan++) {
 				tNew = std::make_unique<TimePoint>(timePointManager->aquireNext());
+				newTimepoints.push_back(*tNew);
 				addInvariantClauses(*tNew);
 
 				if (timePointManager->isOnForwardStack(*tNew)) {
@@ -563,6 +574,203 @@ public:
 	}
 };
 
+class LooseDoubleEndedStrategy: public DoubleEndedStrategy {
+private:
+	float ratio;
+
+public:
+	LooseDoubleEndedStrategy(float _ratio):
+		DoubleEndedStrategy(_ratio),
+		ratio(_ratio)
+	{
+
+	}
+
+	virtual void doInitialize(){
+		getSolver().timePointManager =
+			std::make_unique<DoubleEndedTimePointManager>(
+				ratio,
+				DoubleEndedTimePointManager::TopElementOption::Dublicated);
+		TimePoint t0 = getSolver().timePointManager->aquireNext();
+		getSolver().addInvariantClauses(t0);
+		addMarkedClauses(getSolver().problem.initial, t0);
+
+		TimePoint tN = getSolver().timePointManager->aquireNext();
+		getSolver().addInvariantClauses(tN);
+		addMarkedClauses(getSolver().problem.goal, tN);
+
+		getSolver().elementInsertedLast = tN;
+	};
+
+	virtual void doFinalize(){
+		DoubleEndedStrategy::doFinalize();
+		int markerLiteral = static_cast<int>(HelperVariables::MarkerLiteral);
+		TimePoint t0 = getSolver().timePointManager->getFirst();
+		TimePoint tN = getSolver().timePointManager->getLast();
+		getSolver().assumeHelperLiteral(markerLiteral, t0);
+		getSolver().assumeHelperLiteral(markerLiteral, tN);
+	}
+
+	void addMarkedClauses(const std::vector<int> &clauses, TimePoint t) {
+		for (int literal:clauses) {
+			if (literal == 0) {
+				int markerLiteral = static_cast<int>(HelperVariables::MarkerLiteral);
+				getSolver().addHelperLiteral(-markerLiteral, t);
+			}
+			getSolver().addProblemLiteral(literal, t);
+		}
+	}
+};
+
+class UltimateDoubleEndedStrategy: public LooseDoubleEndedStrategy {
+private:
+	std::vector<std::vector<TimedLiteral>> learnedClauses;
+	std::vector<std::vector<TimedLiteral>> newLearnedClauses;
+	std::vector<unsigned> numNeccessaryTransferes;
+
+public:
+	UltimateDoubleEndedStrategy(float _ratio):
+			LooseDoubleEndedStrategy(_ratio)
+	{
+
+	}
+
+	virtual void doInitialize(){
+		setLearnedCallback();
+		LooseDoubleEndedStrategy::doInitialize();
+	}
+
+	bool hasMarkerLiteral(const std::vector<TimedLiteral>& clause) {
+		int markerLiteral = static_cast<int>(HelperVariables::MarkerLiteral);
+		int activationLiteral = static_cast<int>(HelperVariables::ActivationLiteral);
+		for (const TimedLiteral &lit:clause) {
+			if (lit.isHelper) {
+				if ((lit.literal == -markerLiteral)
+					|| lit.literal == -activationLiteral) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	bool isOneSided(const std::vector<TimedLiteral>& clause) {
+		if (clause.size() > 0) {
+			int sideIdentifier = clause.front().t.first;
+			for (const TimedLiteral &lit:clause) {
+				if (lit.t.first != sideIdentifier) {
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	void normalizeClause(std::vector<TimedLiteral>& clause){
+		if (!isOneSided(clause)) {
+			for (TimedLiteral lit: clause) {
+				std::cout << lit.literal << "@" << lit.t.first << ":" << lit.t.second << " - "<< lit.isHelper << std::endl;
+			}
+			LOG(FATAL) << "Logic error, this should not happen.";
+		}
+
+		if (clause.front().t.first == DoubleEndedTimePointManager::FROM_END){
+			int numTransferes = numNeccessaryTransferes.back();
+			for (TimedLiteral& lit:clause){
+				lit.t.first = DoubleEndedTimePointManager::FROM_BEGIN;
+				lit.t.second = numTransferes - lit.t.second;
+			}
+		}
+	}
+
+	void adeptLearned() {
+		DoubleEndedTimePointManager* tpm =
+			dynamic_cast<DoubleEndedTimePointManager*>(
+				getSolver().timePointManager.get());
+
+		for (std::vector<TimedLiteral>& clause: newLearnedClauses) {
+			if (clause.size() > 0 && !hasMarkerLiteral(clause)) {
+				if (tpm->isOnForwardStack(clause.front().t)) {
+					numNeccessaryTransferes.push_back(tpm->getBeginTop().second);
+				} else {
+					numNeccessaryTransferes.push_back(tpm->getEndTop().second);
+				}
+				normalizeClause(clause);
+				learnedClauses.push_back(clause);
+			}
+		}
+
+		VLOG(1) << "learned " << newLearnedClauses.size()
+			<< " transformable: " << learnedClauses.size();
+		newLearnedClauses.clear();
+	}
+
+	bool isApplicable(unsigned clauseIdx, const TimePoint& timePoint){
+		DoubleEndedTimePointManager* tpm =
+			dynamic_cast<DoubleEndedTimePointManager*>(
+				getSolver().timePointManager.get());
+
+		if (timePoint.first == DoubleEndedTimePointManager::FROM_BEGIN) {
+			if (tpm->getBeginTop().second >= numNeccessaryTransferes[clauseIdx]) {
+				return true;
+			} else {
+				return false;
+			}
+		} else {
+			if (tpm->getEndTop().second >= numNeccessaryTransferes[clauseIdx]) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+	}
+
+	void addLearnedClause(unsigned clauseIdx, const TimePoint& timePoint) {
+		if (isApplicable(clauseIdx, timePoint)) {
+			unsigned nt = numNeccessaryTransferes[clauseIdx];
+			for (TimedLiteral lit: learnedClauses[clauseIdx]) {
+				if (timePoint.first == DoubleEndedTimePointManager::FROM_BEGIN) {
+					lit.t.second += timePoint.second - nt;
+				} else {
+					lit.t.second = timePoint.second - lit.t.second;
+				}
+				lit.t.first = timePoint.first;
+				getSolver().add(lit);
+			}
+			getSolver().finalizeClause();
+		}
+	}
+
+	virtual void preSolveHook() {
+		// shift all learned clauses accordingly
+		for (size_t i = 0; i < learnedClauses.size(); i++) {
+			for (const TimePoint& timePoint: getSolver().newTimepoints) {
+				addLearnedClause(i, timePoint);
+			}
+		}
+	}
+
+	virtual void postStepHook(){
+		adeptLearned();
+	};
+
+	void learnedCallback(int* learned) {
+		newLearnedClauses.push_back(std::vector<TimedLiteral>());
+		for (;*learned != 0; learned++) {
+			TimedLiteral lit = getSolver().getInfo(*learned);
+			newLearnedClauses.back().push_back(lit);
+		}
+	}
+
+	void setLearnedCallback(){
+		using namespace std::placeholders;
+		std::function<void(int*)> f =
+			std::bind(&UltimateDoubleEndedStrategy::learnedCallback, this, _1);
+		getSolver().solver->set_learn(option::maxSizeLearnedClause.getValue(), f);
+	}
+};
+
 class LooseEndedStrategy: public ISolverStrategy {
 public:
 	virtual void doInitialize(){
@@ -697,23 +905,6 @@ public:
 		VLOG(1) << "necessary: " << counter;
 	}
 
-	/**
-	 * This part is a bit hacky, as we do not use the abstraction but use
-	 * the fact that timepoints are only touples and for single ended
-	 * the first will always be zero, allowing us to use the second as meaningfull
-	 * value.
-	 *
-	 * This will return values [0, numTimepoints) where i + 1 is successor of i.
-	 */
-	static int toInt(TimePoint timepoint) {
-		assert(timepoint.first == 0);
-		return timepoint.second;
-	}
-
-	static TimePoint fromInt(int t) {
-		return std::make_pair(0, t);
-	}
-
 	void adeptLearned() {
 		for (std::vector<TimedLiteral>& clause: newLearnedClauses) {
 			int tMin;
@@ -721,7 +912,8 @@ public:
 			bool init = false;
 
 			for (TimedLiteral& lit:clause) {
-				int timepoint = toInt(lit.t);
+				assert(lit.t.first == 0);
+				int timepoint = lit.t.second;
 
 				if (!init) {
 					init = true;
@@ -737,28 +929,49 @@ public:
 			 * that they stat at the first timepoint.
 			 */
 			for (TimedLiteral& lit: clause) {
-				lit.t = fromInt(toInt(lit.t) - tMin);
+				lit.t.first  = 0;
+				lit.t.second = lit.t.second - tMin;
 			}
 
-			int tN = toInt(getSolver().timePointManager->getLast());
+			TimePoint last = getSolver().timePointManager->getLast();
+			assert(last.first == 0);
+			int tN = last.second;
 			int shift = tN - (tMax - tMin);
-			timeShift.push_back(shift);
 
 			learnedClauses.push_back(clause);
 			for (int i = 0; i <= shift; i++) {
-				addLearnedClause(clause, i);
+				TimePoint t;
+				t.first = 0;
+				t.second = i;
+				addLearnedClause(clause, t);
 			}
 		}
 
 		newLearnedClauses.clear();
 	}
 
-	void addLearnedClause(const std::vector<TimedLiteral> &clause, int shift) {
-		for (TimedLiteral lit: clause) {
-			lit.t = fromInt(toInt(lit.t) + shift);
-			getSolver().add(lit);
+	void addLearnedClause(const std::vector<TimedLiteral> &clause,
+			const TimePoint& timePoint) {
+		if (getSolver().timePointManager->isOnForwardStack(timePoint)) {
+			assert(timePoint.first == 0);
+			int shift = timePoint.second;
+			for (TimedLiteral lit: clause) {
+				assert(lit.t.first == 0);
+				lit.t.second = lit.t.second + shift;
+				getSolver().add(lit);
+			}
+			getSolver().finalizeClause();
+		} else {
+			assert(timePoint.first == 1);
+			int shift = timePoint.second;
+			for (TimedLiteral lit: clause) {
+				lit.t.first = 1;
+				lit.t.second = shift - lit.t.second;
+				assert(lit.t.second >= 0);
+				getSolver().add(lit);
+			}
+			getSolver().finalizeClause();
 		}
-		getSolver().finalizeClause();
 	}
 
 	void stopLearning() {
@@ -771,8 +984,9 @@ public:
 	virtual void preSolveHook() {
 		// shift all learned clauses one up
 		for (size_t i = 0; i < learnedClauses.size(); i++) {
-			timeShift[i] += 1;
-			addLearnedClause(learnedClauses[i], timeShift[i]);
+			for (const TimePoint& timePoint: getSolver().newTimepoints) {
+				addLearnedClause(learnedClauses[i], timePoint);
+			}
 		}
 
 		if (!isLearingStopped && getSolver().makeSpan >= option::learnMakeSpan.getValue()) {
@@ -808,6 +1022,8 @@ public:
 		getSolver().solver->set_learn(option::maxSizeLearnedClause.getValue(), f);
 	}
 };
+
+
 
 namespace option {
 namespace setup {
@@ -888,15 +1104,21 @@ int incplan_main(int argc, const char **argv) {
 
 		if (option::setup::nonIncrementalSolving.getValue()) {
 			strategy = std::make_unique<NonIncrementalStrategy>();
-		} else if (option::setup::loose.getValue()){
+		} else if (option::setup::singleEnded.getValue()) {
 			if (option::setup::transformLearned.getValue()) {
 				strategy = std::make_unique<TransfereLearnedStrategy>();
-			} else {
+			} else if (option::setup::loose.getValue()){
 				strategy = std::make_unique<LooseEndedStrategy>();
+			} else {
+				strategy = std::make_unique<SingleEndedStrategy>();
 			}
 		} else {
-			if (option::setup::singleEnded.getValue()) {
-				strategy = std::make_unique<SingleEndedStrategy>();
+			if (option::setup::transformLearned.getValue()) {
+				strategy = std::make_unique<UltimateDoubleEndedStrategy>(
+					option::setup::ratio.getValue());
+			} else if (option::setup::loose.getValue()){
+				strategy = std::make_unique<LooseDoubleEndedStrategy>(
+					option::setup::ratio.getValue());
 			} else {
 				strategy = std::make_unique<DoubleEndedStrategy>(
 					option::setup::ratio.getValue());

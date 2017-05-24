@@ -62,7 +62,7 @@ target_link_libraries(incplan_debugprint
 	libincplan_debugprint)
 
 
-if (BUILD_TESTS EQUAL "ON")
+if (${BUILD_TESTS} STREQUAL "ON")
 	# Include google test, our testing framework
 	include(gtest)
 
@@ -79,15 +79,17 @@ if (BUILD_TESTS EQUAL "ON")
 		COTIRE_PREFIX_HEADER_IGNORE_PATH "${CMAKE_SOURCE_DIR}"
 			_PREFIX_HEADER_INCLUDE_PATH "${CMAKE_SOURCE_DIR}/libs")
 	#cotire(unitTest)
+
+	# === Target: runtest ===
+	add_custom_target(runTest
+		COMMAND ./unitTest --gtest_color=yes
+		WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+		DEPENDS unitTest)
 else()
-	add_custom_target(unitTest)
+	add_custom_target(runTest)
 endif()
 
-# === Target: runtest ===
-add_custom_target(runTest
-	COMMAND ./unitTest --gtest_color=yes
-	WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-	DEPENDS unitTest)
+
 
 # === Target: incplan-heuristical ===
 
@@ -128,7 +130,7 @@ ENDFOREACH()
 # === Target: core ===
 
 # Dummy target which builds all targets but only for one solver
-add_custom_target(core DEPENDS incplan_debugprint unitTest runTest)
+add_custom_target(core DEPENDS incplan_debugprint runTest)
 if (TARGET incplan-gmod)
 	add_dependencies(core incplan-gmod)
 

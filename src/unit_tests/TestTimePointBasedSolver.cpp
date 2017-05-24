@@ -19,7 +19,7 @@ TimePointBasedSolver_mini() {
 		ipasir = ipasirPtr.get();
 
 		int varsPerTime = 2;
-		int helperPerTime = 1;
+		int helperPerTime = 2;
 		solver = std::make_unique<TimePointBasedSolver>(varsPerTime,
 			helperPerTime, std::move(ipasirPtr));
 	}
@@ -35,7 +35,7 @@ TEST_F( TimePointBasedSolver_mini, addPositive) {
 	InSequence dummy;
 
 	EXPECT_CALL(*ipasir, add(1));
-	EXPECT_CALL(*ipasir, add(4));
+	EXPECT_CALL(*ipasir, add(5));
 
 	solver->addProblemLiteral(1, t0);
 	solver->addProblemLiteral(1, t1);
@@ -45,7 +45,7 @@ TEST_F( TimePointBasedSolver_mini, addNegative) {
 	InSequence dummy;
 
 	EXPECT_CALL(*ipasir, add(-1));
-	EXPECT_CALL(*ipasir, add(-4));
+	EXPECT_CALL(*ipasir, add(-5));
 
 	solver->addProblemLiteral(-1, t0);
 	solver->addProblemLiteral(-1, t1);
@@ -55,7 +55,7 @@ TEST_F( TimePointBasedSolver_mini, addPositiveHelper) {
 	InSequence dummy;
 
 	EXPECT_CALL(*ipasir, add(3));
-	EXPECT_CALL(*ipasir, add(6));
+	EXPECT_CALL(*ipasir, add(7));
 
 	solver->addHelperLiteral(1, t0);
 	solver->addHelperLiteral(1, t1);
@@ -65,7 +65,7 @@ TEST_F( TimePointBasedSolver_mini, addNegativeHelper) {
 	InSequence dummy;
 
 	EXPECT_CALL(*ipasir, add(-3));
-	EXPECT_CALL(*ipasir, add(-6));
+	EXPECT_CALL(*ipasir, add(-7));
 
 	solver->addHelperLiteral(-1, t0);
 	solver->addHelperLiteral(-1, t1);
@@ -79,12 +79,14 @@ TEST_F( TimePointBasedSolver_mini, inteferences) {
 		.Times(1);
 	EXPECT_CALL(*ipasir, add(3))
 		.Times(1);
-
 	EXPECT_CALL(*ipasir, add(4))
-		.Times(2);
-	EXPECT_CALL(*ipasir, add(-5))
 		.Times(1);
+
+	EXPECT_CALL(*ipasir, add(5))
+		.Times(2);
 	EXPECT_CALL(*ipasir, add(-6))
+		.Times(1);
+	EXPECT_CALL(*ipasir, add(-7))
 		.Times(1);
 
 	EXPECT_CALL(*ipasir, add(1))
@@ -94,6 +96,7 @@ TEST_F( TimePointBasedSolver_mini, inteferences) {
 	solver->addProblemLiteral(1, t0);
 	solver->addProblemLiteral(2, t0);
 	solver->addHelperLiteral(1, t0);
+	solver->addHelperLiteral(2, t0);
 
 	solver->addProblemLiteral(1, t1);
 	solver->addProblemLiteral(1, t1);
