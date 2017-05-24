@@ -125,7 +125,7 @@ public:
 				_problem.numberLiteralsPerTime,
 				/* Number of Helper Variables */ 2,
 				//std::make_unique<ipasir::Solver>(),
-				std::make_unique<ipasir::RandomizedSolver>(option::seed.getValue(), std::make_unique<ipasir::Solver>()),
+				std::make_unique<ipasir::RandomizedSolver>(std::make_unique<ipasir::Solver>()),
 				option::icaps2017Version.getValue()?
 					TimePointBasedSolver::HelperVariablePosition::AllBefore:
 					TimePointBasedSolver::HelperVariablePosition::SingleAfter),
@@ -626,8 +626,9 @@ class UltimateDoubleEndedStrategy: public LooseDoubleEndedStrategy {
 private:
 	std::vector<std::vector<TimedLiteral>> learnedClauses;
 	std::vector<std::vector<TimedLiteral>> newLearnedClauses;
-	std::vector<unsigned> numNeccessaryTransferes;
+	std::vector<int> numNeccessaryTransferes;
 
+	bool learning;
 public:
 	UltimateDoubleEndedStrategy(float _ratio):
 			LooseDoubleEndedStrategy(_ratio)
@@ -637,6 +638,7 @@ public:
 
 	virtual void doInitialize(){
 		setLearnedCallback();
+		learning = true;
 		LooseDoubleEndedStrategy::doInitialize();
 	}
 
@@ -668,12 +670,7 @@ public:
 	}
 
 	void normalizeClause(std::vector<TimedLiteral>& clause){
-		if (!isOneSided(clause)) {
-			for (TimedLiteral lit: clause) {
-				std::cout << lit.literal << "@" << lit.t.first << ":" << lit.t.second << " - "<< lit.isHelper << std::endl;
-			}
-			LOG(FATAL) << "Logic error, this should not happen.";
-		}
+		assert(isOneSided(clause));
 
 		if (clause.front().t.first == DoubleEndedTimePointManager::FROM_END){
 			int numTransferes = numNeccessaryTransferes.back();
@@ -748,6 +745,20 @@ public:
 			for (const TimePoint& timePoint: getSolver().newTimepoints) {
 				addLearnedClause(i, timePoint);
 			}
+		}
+
+		if (learning && getSolver().makeSpan >= option::learnMakeSpan.getValue()) {
+			LOG(INFO) << "stopped learning";
+			learning = false;
+			getSolver().solver->set_learn(0, nullptr);
+
+			int markerLiteral = static_cast<int>(HelperVariables::MarkerLiteral);
+			TimePoint t0 = getSolver().timePointManager->getFirst();
+			TimePoint tN = getSolver().timePointManager->getLast();
+			getSolver().addHelperLiteral(markerLiteral, t0);
+			getSolver().finalizeClause();
+			getSolver().addHelperLiteral(markerLiteral, tN);
+			getSolver().finalizeClause();
 		}
 	}
 
