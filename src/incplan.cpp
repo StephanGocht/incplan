@@ -24,6 +24,7 @@
 #include "carj/logging.h"
 #include "carj/ScopedTimer.h"
 
+#include "TimeoutClock.h"
 #include "DimspecProblem.h"
 
 TCLAP::CmdLine cmd("This tool is does sat planing using an incremental sat solver.", ' ', "0.1");
@@ -34,6 +35,7 @@ namespace option{
 
 	carj::TCarjArg<TCLAP::ValueArg,int> exhaustMakeSpan("", "exhaustMakeSpan", "Maximum makespan to exhaust learn new transfer clauses.", /* necessary */ false, /*default*/ 2, /* type description */ "positive number", cmd);
 	carj::TCarjArg<TCLAP::ValueArg,int> learnMakeSpan("", "learnMakeSpan", "Maximum makespan to learn new transfer clauses.", /* necessary */ false, /*default*/ 2, /* type description */ "positive number", cmd);
+	carj::TCarjArg<TCLAP::ValueArg,float> timeout("", "timeout", "Timeout in seconds to switch strategies.", /* necessary */ false, /*default*/ 2, /* type description */ "positive float", cmd);
 	//TCLAP::SwitchArg outputLinePerStep("", "outputLinePerStep", "Output each time point in a new line. Each time point will use the same literals.", /*default*/ false);
 	carj::CarjArg<TCLAP::SwitchArg, bool> icaps2017Version("", "icaps2017", "Use this option to use encoding as used in the icaps paper.", cmd, /*default*/ false);
 	carj::CarjArg<TCLAP::SwitchArg, bool> unitInGoal2Assume("u", "unitInGoal2Assume", "Add units in goal clauses using assume instead of add. (singleEnded only)", cmd, /*default*/ false);
@@ -54,12 +56,18 @@ public:
 	/**
 	 * Finalize the formula after one or more time points have been added.
 	 * This will be executed immedeatly before the call to solve of the
-	 * SAT solver, so it is the place to make neccessary assumptions.
+	 * SAT solver, so it is the place to make necessary assumptions.
 	 */
 	virtual void doFinalize() = 0;
 
 	virtual void preSolveHook(){};
 	virtual void preStepHook(){};
+
+	/**
+	 * This hook is called after a timeout occurs. Set the necessary assumptions
+	 * for the next solve call here.
+	 */
+	virtual void timeoutHook(){};
 	virtual void postStepHook(){};
 
 	virtual Solver& getSolver(){return *this->solver;};
@@ -92,6 +100,9 @@ public:
 	virtual void postStepHook(){
 		strategy->postStepHook();
 	};
+	virtual void timeoutHook(){
+		strategy->timeoutHook();
+	}
 
 	virtual void setSolver(Solver* solver) {
 		ISolverStrategy::setSolver(solver);
@@ -144,8 +155,6 @@ public:
 		 * Solve the problem. Return true if a solution was found.
 		 */
 		bool solve(){
-			nlohmann::json solves;
-
 			int step = 0;
 			strategy->doInitialize();
 
@@ -163,6 +172,7 @@ public:
 				strategy->doFinalize();
 
 				VLOG(1) << "Solving makespan " << makeSpan;
+				auto& solves = carj::getCarj().data["/incplan/result/solves"_json_pointer];
 				solves.push_back({
 					{"makespan", makeSpan},
 					{"time", -1}
@@ -170,7 +180,16 @@ public:
 				{
 					carj::ScopedTimer timer((*solves.rbegin())["time"]);
 					TIMED_SCOPE(blkScope, "solve");
-					result = solveSAT();
+					bool done = false;
+					while (!done) {
+						result = solveSAT();
+						if (result == ipasir::SolveResult::TIMEOUT) {
+							strategy->timeoutHook();
+						} else {
+							done = true;
+						}
+
+					}
 				}
 
 				strategy->postStepHook();
@@ -180,8 +199,6 @@ public:
 			LOG(INFO) << "Final Makespan: " << this->makeSpan;
 			this->finalMakeSpan = this->makeSpan;
 
-			carj::getCarj().data["/incplan/result/solves"_json_pointer] =
-				solves;
 			carj::getCarj().data["/incplan/result/finalMakeSpan"_json_pointer] = makeSpan;
 			this->solveResult = result;
 
@@ -627,16 +644,18 @@ private:
 	std::vector<std::vector<TimedLiteral>> learnedClauses;
 	std::vector<std::vector<TimedLiteral>> newLearnedClauses;
 	std::vector<int> numNeccessaryTransferes;
+	TimeoutClock timeOutClock;
 
 	bool learning;
 public:
 	UltimateDoubleEndedStrategy(float _ratio):
 			LooseDoubleEndedStrategy(_ratio)
 	{
-
+		timeOutClock.setTimeout(option::timeout.getValue());
 	}
 
 	virtual void doInitialize(){
+		getSolver().solver->set_terminate(timeOutClock.getTimeoutCallback());
 		setLearnedCallback();
 		learning = true;
 		LooseDoubleEndedStrategy::doInitialize();
@@ -739,6 +758,20 @@ public:
 		}
 	}
 
+	void stopLearning() {
+		LOG(INFO) << "stopped learning";
+		learning = false;
+		getSolver().solver->set_learn(0, nullptr);
+
+		int markerLiteral = static_cast<int>(HelperVariables::MarkerLiteral);
+		TimePoint t0 = getSolver().timePointManager->getFirst();
+		TimePoint tN = getSolver().timePointManager->getLast();
+		getSolver().addHelperLiteral(markerLiteral, t0);
+		getSolver().finalizeClause();
+		getSolver().addHelperLiteral(markerLiteral, tN);
+		getSolver().finalizeClause();
+	}
+
 	virtual void preSolveHook() {
 		// shift all learned clauses accordingly
 		for (size_t i = 0; i < learnedClauses.size(); i++) {
@@ -748,18 +781,18 @@ public:
 		}
 
 		if (learning && getSolver().makeSpan >= option::learnMakeSpan.getValue()) {
-			LOG(INFO) << "stopped learning";
-			learning = false;
-			getSolver().solver->set_learn(0, nullptr);
-
-			int markerLiteral = static_cast<int>(HelperVariables::MarkerLiteral);
-			TimePoint t0 = getSolver().timePointManager->getFirst();
-			TimePoint tN = getSolver().timePointManager->getLast();
-			getSolver().addHelperLiteral(markerLiteral, t0);
-			getSolver().finalizeClause();
-			getSolver().addHelperLiteral(markerLiteral, tN);
-			getSolver().finalizeClause();
+			stopLearning();
 		}
+
+		timeOutClock.resetTimeout();
+	}
+
+	virtual void timeoutHook(){
+		getSolver().solver->set_terminate([]{return 0;});
+
+		int activationLiteral = static_cast<int>(HelperVariables::ActivationLiteral);
+		getSolver().assumeHelperLiteral(activationLiteral, getSolver().elementInsertedLast);
+		stopLearning();
 	}
 
 	virtual void postStepHook(){

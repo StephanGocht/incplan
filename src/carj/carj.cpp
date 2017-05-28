@@ -32,6 +32,25 @@ void initLogger(){
 	el::Loggers::setVerboseLevel(2);
 }
 
+void signalHandler(int signo) {
+	static bool first = true;
+	if (!first) {
+		std::abort();
+	}
+	first = false;
+
+	switch(signo) {
+		case SIGINT:
+		case SIGXCPU:
+			/*lets introduce some undefined behaviour */
+			LOG(WARNING) << "Program terminated.";
+			std::ofstream o(carj::getCarj().configPath);
+			o << std::setw(4) << carj::getCarj().data << std::endl;
+			std::abort();
+		break;
+	}
+}
+
 void carj::init(int argc, const char **argv, TCLAP::CmdLine& cmd,
 	std::string parameterBase) {
 	START_EASYLOGGINGPP(argc, argv);
@@ -70,5 +89,6 @@ void carj::init(int argc, const char **argv, TCLAP::CmdLine& cmd,
 		jsonParameterBase.getValue());
 	carj::CarjArgBase::writeAllToJson();
 
-
+	signal(SIGINT, signalHandler);
+	signal(SIGXCPU, signalHandler);
 }
