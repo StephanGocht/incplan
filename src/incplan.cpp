@@ -29,7 +29,7 @@
 
 TCLAP::CmdLine cmd("This tool is does sat planing using an incremental sat solver.", ' ', "0.1");
 namespace option{
-	carj::TCarjArg<TCLAP::ValueArg,int> seed("", "seed", "Random Seed.", /* necessary */ false, /*default*/ 0, /* type description */ "positive number", cmd);
+	carj::TCarjArg<TCLAP::ValueArg,int> seed("", "seed", "Use a positive number to choose a seed for randomization, -1 to use a random seed or -2 to deactivate randomization.", /* necessary */ false, /*default*/ -1, /* type description */ "number", cmd);
 
 	carj::TCarjArg<TCLAP::ValueArg,int> maxSizeLearnedClause("", "maxSizeLearnedClause", "Maximum number of literals in a learned clause that will be transformed to future time steps.", /* necessary */ false, /*default*/ 2, /* type description */ "positive number", cmd);
 
@@ -113,6 +113,20 @@ private:
 	std::unique_ptr<ISolverStrategy> strategy;
 };
 
+std::unique_ptr<ipasir::Ipasir> solverWithRandomizedOptions() {
+	std::unique_ptr<ipasir::Ipasir> result;
+	result = std::make_unique<ipasir::Solver>();
+
+	if (option::seed.getValue() == -1) {
+		result = std::make_unique<ipasir::RandomizedSolver>(std::move(result));
+	} else if (option::seed.getValue() >= 0) {
+		result = std::make_unique<ipasir::RandomizedSolver>(
+			option::seed.getValue(),
+			std::move(result));
+	}
+	return result;
+}
+
 class Solver : public TimePointBasedSolver {
 public:
 	std::unique_ptr<ISolverStrategy> strategy;
@@ -136,7 +150,7 @@ public:
 				_problem.numberLiteralsPerTime,
 				/* Number of Helper Variables */ 2,
 				//std::make_unique<ipasir::Solver>(),
-				std::make_unique<ipasir::RandomizedSolver>(std::make_unique<ipasir::Solver>()),
+				solverWithRandomizedOptions(),
 				option::icaps2017Version.getValue()?
 					TimePointBasedSolver::HelperVariablePosition::AllBefore:
 					TimePointBasedSolver::HelperVariablePosition::SingleAfter),
@@ -233,8 +247,13 @@ public:
 						std::cout << std::endl;
 					}
 
+					if (t == timePointManager->getLast()) {
+						break;
+					}
 					try {
-						// todo improve with propper itterator
+						// todo improve with propper itterator, as t == last
+						// fails for double ended encoding, if no transition
+						// was added
 						t = timePointManager->getSuccessor(t);
 					} catch (std::out_of_range& e){
 						break;
@@ -655,10 +674,11 @@ public:
 	}
 
 	virtual void doInitialize(){
-		getSolver().solver->set_terminate(timeOutClock.getTimeoutCallback());
-		setLearnedCallback();
 		learning = true;
 		LooseDoubleEndedStrategy::doInitialize();
+
+		getSolver().solver->set_terminate(timeOutClock.getTimeoutCallback());
+		setLearnedCallback();
 	}
 
 	bool hasMarkerLiteral(const std::vector<TimedLiteral>& clause) {
@@ -717,6 +737,9 @@ public:
 			}
 		}
 
+		auto& solve = carj::getCarj().data["/incplan/result/solves"_json_pointer].back();
+		solve["learned"] =  newLearnedClauses.size();
+		solve["transformable"] =  learnedClauses.size();
 		VLOG(1) << "learned " << newLearnedClauses.size()
 			<< " transformable: " << learnedClauses.size();
 		newLearnedClauses.clear();
@@ -759,7 +782,8 @@ public:
 	}
 
 	void stopLearning() {
-		LOG(INFO) << "stopped learning";
+		auto& solve = carj::getCarj().data["/incplan/result/solves"_json_pointer].back();
+		solve["stopped learning"] = true;
 		learning = false;
 		getSolver().solver->set_learn(0, nullptr);
 
@@ -789,10 +813,10 @@ public:
 
 	virtual void timeoutHook(){
 		getSolver().solver->set_terminate([]{return 0;});
+		stopLearning();
 
 		int activationLiteral = static_cast<int>(HelperVariables::ActivationLiteral);
 		getSolver().assumeHelperLiteral(activationLiteral, getSolver().elementInsertedLast);
-		stopLearning();
 	}
 
 	virtual void postStepHook(){
@@ -841,11 +865,20 @@ private:
 	std::vector<std::vector<TimedLiteral>> learnedClauses;
 	std::vector<std::vector<TimedLiteral>> newLearnedClauses;
 	std::vector<unsigned> timeShift;
+	TimeoutClock timeOutClock;
 
-	bool isLearingStopped = false;
+	bool learning;
 public:
+	TransfereLearnedStrategy(){
+		timeOutClock.setTimeout(option::timeout.getValue());
+	}
+
+
 	virtual void doInitialize(){
+		learning = true;
 		LooseEndedStrategy::doInitialize();
+
+		getSolver().solver->set_terminate(timeOutClock.getTimeoutCallback());
 		setLearnedCallback();
 	}
 
@@ -970,7 +1003,7 @@ public:
 			}
 
 			/* Learned clauses are universal valid, so we normalize them such
-			 * that they stat at the first timepoint.
+			 * that they start at the first timepoint.
 			 */
 			for (TimedLiteral& lit: clause) {
 				lit.t.first  = 0;
@@ -1019,10 +1052,13 @@ public:
 	}
 
 	void stopLearning() {
+		auto& solve = carj::getCarj().data["/incplan/result/solves"_json_pointer].back();
+		solve["stopped learning"] = true;
+
 		TimePoint t0 = getSolver().timePointManager->getFirst();
 		getSolver().addInitialClauses(t0);
 		getSolver().solver->set_learn(0, nullptr);
-		isLearingStopped = true;
+		learning = false;
 	}
 
 	virtual void preSolveHook() {
@@ -1033,21 +1069,32 @@ public:
 			}
 		}
 
-		if (!isLearingStopped && getSolver().makeSpan >= option::learnMakeSpan.getValue()) {
+		if (learning && getSolver().makeSpan >= option::learnMakeSpan.getValue()) {
 			stopLearning();
 		}
 
-		if (!isLearingStopped && getSolver().makeSpan <= option::exhaustMakeSpan.getValue()) {
+		if (learning && getSolver().makeSpan <= option::exhaustMakeSpan.getValue()) {
 			learnNeccessary();
 		// // 	// VLOG(1) << "learned pre blocked/ forced " << learnedClauses.size();
 			learnBlockedStates();
 			learnForcedStates();
 			adeptLearned();
 		}
+
+		timeOutClock.resetTimeout();
+	}
+
+	virtual void timeoutHook(){
+		getSolver().solver->set_terminate([]{return 0;});
+		stopLearning();
+
+		doFinalize();
 	}
 
 	virtual void postStepHook(){
 		adeptLearned();
+		auto& solve = carj::getCarj().data["/incplan/result/solves"_json_pointer].back();
+		solve["learned"] =  learnedClauses.size();
 		VLOG(1) << "learned " << learnedClauses.size();
 	};
 
@@ -1071,7 +1118,6 @@ public:
 
 namespace option {
 namespace setup {
-	carj::CarjArg<TCLAP::SwitchArg, bool> exhaustive("", "exhaustiveSearch", "Solve problem for subsets of assumed literals.", cmd, /*default*/ false);
 	carj::CarjArg<TCLAP::SwitchArg, bool> loose("", "loose", "Only assume init and goal.", cmd, /*default*/ false);
 	carj::CarjArg<TCLAP::SwitchArg, bool> transformLearned("", "transformLearned", "Transform learned clauses from privious solves to new time step.", cmd, /*default*/ false);
 
