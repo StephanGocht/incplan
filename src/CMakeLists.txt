@@ -29,6 +29,7 @@ set(SRC_FILES
 	carj/carj.cpp
 	TimePointBasedSolver.cpp
 	DimspecProblem.cpp
+	PDR.cpp
 	)
 
 

@@ -27,6 +27,8 @@
 #include "TimeoutClock.h"
 #include "DimspecProblem.h"
 
+#include "PDR.h"
+
 TCLAP::CmdLine cmd("This tool is does sat planing using an incremental sat solver.", ' ', "0.1");
 namespace option{
 	carj::TCarjArg<TCLAP::ValueArg,int> seed("", "seed", "Use a positive number to choose a seed for randomization, -1 to use a random seed or -2 to deactivate randomization.", /* necessary */ false, /*default*/ -1, /* type description */ "number", cmd);
@@ -1134,6 +1136,7 @@ namespace setup {
 	carj::TCarjArg<TCLAP::ValueArg, double> ratio("r", "ratio", "Ratio between states from start to state from end.", /*neccessary*/ false, /*default*/ 0.5, "number between 0 and 1", cmd);
 	carj::CarjArg<TCLAP::SwitchArg, bool> nonIncrementalSolving("n", "nonIncrementalSolving", "Do not use incremental solving.", cmd, /*default*/ false);
 
+	carj::CarjArg<TCLAP::SwitchArg, bool> usePDR("", "usePDR", "Use property directed reachability.", cmd, /*default*/ false);
 	carj::TCarjArg<TCLAP::UnlabeledValueArg,std::string>  inputFile("inputFile", "File containing the problem. Omit or use - for stdin.", /*neccessary*/ false, "-", "inputFile", cmd);
 	carj::MCarjArg<TCLAP::MultiArg, std::string> pathSearchPrefix("", "pathSearchPrefix", "If passed files are not found their path will be prefixed with values of this parameter.", /*neccessary*/ false, "path", cmd);
 }}
@@ -1190,44 +1193,52 @@ int incplan_main(int argc, const char **argv) {
 	bool solved;
 	{
 		DimspecProblem problem(*in);
-		std::unique_ptr<ISolverStrategy> strategy = nullptr;
-
-		if (option::setup::nonIncrementalSolving.getValue()) {
-			strategy = std::make_unique<NonIncrementalStrategy>();
-		} else if (option::setup::singleEnded.getValue()) {
-			if (option::setup::transformLearned.getValue()) {
-				strategy = std::make_unique<TransfereLearnedStrategy>();
-			} else if (option::setup::loose.getValue()){
-				strategy = std::make_unique<LooseEndedStrategy>();
-			} else {
-				strategy = std::make_unique<SingleEndedStrategy>();
-			}
+		if (option::setup::usePDR.getValue()) {
+			PDRSolver solver(
+				problem,
+				std::move(solverWithRandomizedOptions())
+			);
+			solver.solve();
+			solver.printSolution(option::setup::outputSolverLike.getValue());
 		} else {
-			if (option::setup::transformLearned.getValue()) {
-				strategy = std::make_unique<UltimateDoubleEndedStrategy>(
-					option::setup::ratio.getValue());
-			} else if (option::setup::loose.getValue()){
-				strategy = std::make_unique<LooseDoubleEndedStrategy>(
-					option::setup::ratio.getValue());
+			std::unique_ptr<ISolverStrategy> strategy = nullptr;
+			if (option::setup::nonIncrementalSolving.getValue()) {
+				strategy = std::make_unique<NonIncrementalStrategy>();
+			} else if (option::setup::singleEnded.getValue()) {
+				if (option::setup::transformLearned.getValue()) {
+					strategy = std::make_unique<TransfereLearnedStrategy>();
+				} else if (option::setup::loose.getValue()){
+					strategy = std::make_unique<LooseEndedStrategy>();
+				} else {
+					strategy = std::make_unique<SingleEndedStrategy>();
+				}
 			} else {
-				strategy = std::make_unique<DoubleEndedStrategy>(
-					option::setup::ratio.getValue());
+				if (option::setup::transformLearned.getValue()) {
+					strategy = std::make_unique<UltimateDoubleEndedStrategy>(
+						option::setup::ratio.getValue());
+				} else if (option::setup::loose.getValue()){
+					strategy = std::make_unique<LooseDoubleEndedStrategy>(
+						option::setup::ratio.getValue());
+				} else {
+					strategy = std::make_unique<DoubleEndedStrategy>(
+						option::setup::ratio.getValue());
+				}
 			}
-		}
 
-		if (option::setup::solveBeforeGoalClauses.getValue()) {
-			strategy = std::make_unique<PreFinalizationSolveStrategy>(std::move(strategy));
-		}
-		if (option::setup::cleanLitearl.getValue()) {
-			strategy = std::make_unique<CleanAktivationLiteralStrategy>(std::move(strategy));
-		}
+			if (option::setup::solveBeforeGoalClauses.getValue()) {
+				strategy = std::make_unique<PreFinalizationSolveStrategy>(std::move(strategy));
+			}
+			if (option::setup::cleanLitearl.getValue()) {
+				strategy = std::make_unique<CleanAktivationLiteralStrategy>(std::move(strategy));
+			}
 
-		Solver solver(
-			problem,
-			std::move(strategy),
-			getStepFunction());
-		solved = solver.solve();
-		solver.printSolution(option::setup::outputSolverLike.getValue());
+			Solver solver(
+				problem,
+				std::move(strategy),
+				getStepFunction());
+			solved = solver.solve();
+			solver.printSolution(option::setup::outputSolverLike.getValue());
+		}
 	}
 
 	if (!solved) {
