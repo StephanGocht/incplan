@@ -212,7 +212,9 @@ public:
 					}
 				}
 
-				strategy->postStepHook();
+				if (result != ipasir::SolveResult::SAT) {
+					strategy->postStepHook();
+				}
 				newTimepoints.clear();
 			}
 

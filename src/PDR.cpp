@@ -8,6 +8,7 @@
 #include <memory>
 #include <vector>
 #include <iostream>
+#include <random>
 
 struct InferedClause {
     int activationLiteral;
