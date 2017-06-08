@@ -7,6 +7,7 @@ class MockIpasir: public Ipasir {
 public:
 	MOCK_METHOD0(signature, std::string ());
 	MOCK_METHOD1(add, void (int lit_or_zero));
+	MOCK_METHOD1(addAsLearned, void (int lit_or_zero));
 	MOCK_METHOD1(assume, void (int lit));
 	MOCK_METHOD0(solve, ipasir::SolveResult ());
 	MOCK_METHOD1(val, int (int lit));

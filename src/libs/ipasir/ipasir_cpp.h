@@ -35,6 +35,23 @@ public:
 	virtual void add(int lit_or_zero) = 0;
 
 	/**
+	 * Add the given literal into the currently added clause
+	 * or finalize the clause with a 0.  Clauses added this way
+	 * cannot be removed. The addition of removable clauses
+	 * can be simulated using activation literals and assumptions.
+	 *
+	 * Required state: INPUT or SAT or UNSAT
+	 * State after: INPUT
+	 *
+	 * Literals are encoded as (non-zero) integers as in the
+	 * DIMACS formats.  They have to be smaller or equal to
+	 * INT_MAX and strictly larger than INT_MIN (to avoid
+	 * negation overflow).  This applies to all the literal
+	 * arguments in API functions.
+	 */
+	virtual void addAsLearned(int lit_or_zero) = 0;
+
+	/**
 	 * Perform add for every literal in clause and add(0)
 	 *
 	 * Required state: INPUT or SAT or UNSAT
@@ -150,6 +167,7 @@ public:
 
 	virtual void reset();
 
+	virtual void addAsLearned(int lit_or_zero);
 private:
 	void* solver;
 	std::function<int(void)> terminateCallback;

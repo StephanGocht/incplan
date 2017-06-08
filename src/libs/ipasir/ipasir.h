@@ -129,4 +129,24 @@ void ipasir_set_learn (void * solver, void * state, int max_length, void (*learn
 	void eipasir_set_select_literal_callback(void *solver, void *state, int (*select_literal)(void *));
 #endif
 
+/**
+ * In contrast to clauses added with add, these clauses may be removed
+ * if the solver does not find them helpfull
+ *
+ * Add the given literal into the currently added clause
+ * or finalize the clause with a 0.  Clauses added this way
+ * cannot be removed. The addition of removable clauses
+ * can be simulated using activation literals and assumptions.
+ *
+ * Required state: INPUT or SAT or UNSAT
+ * State after: INPUT
+ *
+ * Literals are encoded as (non-zero) integers as in the
+ * DIMACS formats.  They have to be smaller or equal to
+ * INT_MAX and strictly larger than INT_MIN (to avoid
+ * negation overflow).  This applies to all the literal
+ * arguments in API functions.
+ */
+void ipasir_add_as_learned(void * solver, int lit_or_zero);
+
 #endif

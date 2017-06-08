@@ -40,6 +40,7 @@ set(SRC_FILES
 #set (COTIRE_MINIMUM_NUMBER_OF_TARGET_SOURCES 1)
 
 add_library(ipasir_wrapper libs/ipasir/ipasir_cpp.cpp)
+add_library(ipasir_dummy libs/ipasir/ipasir_dummy_impl.cpp)
 add_library(ipasir_wrapper_extended libs/ipasir/ipasir_cpp.cpp)
 target_compile_definitions(ipasir_wrapper_extended PRIVATE USE_EXTENDED_IPASIR=1)
 
@@ -58,9 +59,11 @@ set_target_properties(all_sources PROPERTIES
 add_library(libincplan_debugprint ipasirprint.cpp)
 add_executable(incplan_debugprint main.cpp)
 target_link_libraries(incplan_debugprint
+	-Wl,--allow-multiple-definition
 	all_sources
 	ipasir_wrapper
-	libincplan_debugprint)
+	libincplan_debugprint
+	ipasir_dummy)
 
 
 if (${BUILD_TESTS} STREQUAL "ON")
@@ -71,11 +74,13 @@ if (${BUILD_TESTS} STREQUAL "ON")
 
 	add_executable(unitTest ${UNIT_TEST_FILES})
 	target_link_libraries(unitTest
+		-Wl,--allow-multiple-definition
 		all_sources
 		ipasir_wrapper
 		gtest_main
 		gmock_main
-		libincplan_debugprint)
+		libincplan_debugprint
+		ipasir_dummy)
 	set_target_properties(unitTest PROPERTIES
 		COTIRE_PREFIX_HEADER_IGNORE_PATH "${CMAKE_SOURCE_DIR}"
 			_PREFIX_HEADER_INCLUDE_PATH "${CMAKE_SOURCE_DIR}/libs")
@@ -122,9 +127,11 @@ FOREACH(ipasir_lib ${ipasir_libs})
 	string(REGEX REPLACE "libipasir(.*).a" "\\1" libname ${ipasir_lib})
 	add_executable(incplan-${libname} main.cpp)
 	target_link_libraries(incplan-${libname}
+		-Wl,--allow-multiple-definition
 		all_sources
 		ipasir_wrapper
 		${IPASIR_DIR_ABS}/${ipasir_lib}
+		ipasir_dummy
 		)
 ENDFOREACH()
 

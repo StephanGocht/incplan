@@ -167,7 +167,6 @@ public:
 			makeSpan(0),
 			timePointManager(nullptr)
 		{
-
 			strategy->setSolver(this);
 		}
 

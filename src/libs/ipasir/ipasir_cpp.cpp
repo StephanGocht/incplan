@@ -35,6 +35,10 @@ namespace ipasir {
 		ipasir_add(solver, lit_or_zero);
 	}
 
+	void Solver::addAsLearned(int lit_or_zero){
+		ipasir_add_as_learned(solver, lit_or_zero);
+	}
+
 	void Ipasir::addClause(std::vector<int> clause) {
 		for (int literal: clause) {
 			this->add(literal);

@@ -34,6 +34,10 @@ public:
 		}
 	}
 
+	void addAsLearned(int lit_or_zero){
+		throw "Not Implemented";
+	}
+
 	virtual void assume(int lit) {
 		assumptions.push_back(lit);
 	}
