@@ -10,6 +10,7 @@ DimspecProblem::DimspecProblem(std::istream& in){
 }
 
 
+
 void DimspecProblem::inferAdditionalInformation() {
 	VLOG(2) << "Number Of Literals per Time: " << this->numberLiteralsPerTime;
 

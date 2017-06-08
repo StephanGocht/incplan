@@ -50,6 +50,8 @@ class Solver;
 
 class ISolverStrategy {
 public:
+	virtual ~ISolverStrategy() = default;
+
 	/**
 	 * Initialize the first timepoints and return the timepoint inserted last.
 	 */
@@ -86,6 +88,8 @@ public:
 	{
 
 	}
+
+	virtual ~ISolverStrategyDecorator() = default;
 
 	virtual void doInitialize(){
 		strategy->doInitialize();
@@ -134,7 +138,7 @@ public:
 	std::unique_ptr<ISolverStrategy> strategy;
 	std::function<int(int)> stepToMakespan;
 	TimePoint elementInsertedLast;
-	const DimspecProblem& problem;
+	DimspecProblem& problem;
 
 	int finalMakeSpan;
 	int makeSpan;
@@ -144,7 +148,7 @@ public:
 
 	public:
 		Solver(
-			const DimspecProblem& _problem,
+			DimspecProblem& _problem,
 			std::unique_ptr<ISolverStrategy> _strategy,
 			std::function<int(int)> _stepToMakespan):
 
@@ -212,11 +216,13 @@ public:
 				newTimepoints.clear();
 			}
 
-			LOG(INFO) << "Final Makespan: " << this->makeSpan;
-			this->finalMakeSpan = this->makeSpan;
 
-			carj::getCarj().data["/incplan/result/finalMakeSpan"_json_pointer] = makeSpan;
+			this->finalMakeSpan = this->makeSpan;
 			this->solveResult = result;
+
+			if (result == ipasir::SolveResult::SAT) {
+				storeSolution();
+			}
 
 			return result == ipasir::SolveResult::SAT;
 		}
@@ -227,26 +233,18 @@ public:
 		 *         are named differently
 		 *     if false print one line per time step
 		 */
-		void printSolution(bool outputSolverLike) {
+		void storeSolution() {
+			problem.solution.clear();
+
 			if (this->solveResult == ipasir::SolveResult::SAT) {
-				std::cout << "solution " << this->problem.numberLiteralsPerTime << " " << this->finalMakeSpan + 1 << std::endl;
 				TimePoint t = timePointManager->getFirst();
 				int time = 0;
 
 				do {
+					problem.solution.push_back(std::vector<int>());
 					for (unsigned j = 1; j <= this->problem.numberLiteralsPerTime; j++) {
 						int val = valueProblemLiteral(j,t);
-						if (outputSolverLike) {
-							int offset = time * problem.numberLiteralsPerTime;
-							if (val < 0) {
-								offset = -offset;
-							}
-							val += offset;
-						}
-						std::cout << val << " ";
-					}
-					if (!outputSolverLike) {
-						std::cout << std::endl;
+						problem.solution.back().push_back(val);
 					}
 
 					if (t == timePointManager->getLast()) {
@@ -263,13 +261,9 @@ public:
 
 					time++;
 				} while (true);
-
-				if (outputSolverLike) {
-					std::cout << std::endl;
-				}
-			} else {
-				std::cout << "no solution" << std::endl;
 			}
+
+			problem.storedSolutionNotifier();
 		}
 
 		~Solver(){
@@ -479,6 +473,8 @@ public:
 		ISolverStrategyDecorator::preSolveHook();
 		getSolver().solveSAT();
 	}
+
+	virtual ~PreFinalizationSolveStrategy() = default;
 };
 
 class CleanAktivationLiteralStrategy: public ISolverStrategyDecorator {
@@ -487,6 +483,8 @@ public:
 		ISolverStrategyDecorator(std::move(_strategy))
 	{
 	}
+
+	virtual ~CleanAktivationLiteralStrategy() = default;
 
 	virtual void postStepHook(){
 		ISolverStrategyDecorator::postStepHook();
@@ -499,6 +497,8 @@ public:
 
 class SingleEndedStrategy: public ISolverStrategy {
 public:
+	virtual ~SingleEndedStrategy() = default;
+
 	virtual void doInitialize(){
 		getSolver().timePointManager =
 			std::make_unique<SingleEndedTimePointManager>();
@@ -519,6 +519,9 @@ public:
 };
 
 class NonIncrementalStrategy: public SingleEndedStrategy {
+public:
+	virtual ~NonIncrementalStrategy() = default;
+
 	virtual void preStepHook(){
 		getSolver().reset();
 		doInitialize();
@@ -553,6 +556,9 @@ public:
 	{
 
 	}
+
+	virtual ~DoubleEndedStrategy() = default;
+
 
 	virtual void doInitialize(){
 		getSolver().timePointManager =
@@ -624,6 +630,9 @@ public:
 
 	}
 
+	virtual ~LooseDoubleEndedStrategy() = default;
+
+
 	virtual void doInitialize(){
 		getSolver().timePointManager =
 			std::make_unique<DoubleEndedTimePointManager>(
@@ -674,6 +683,8 @@ public:
 	{
 		timeOutClock.setTimeout(option::timeout.getValue());
 	}
+
+	virtual ~UltimateDoubleEndedStrategy() = default;
 
 	virtual void doInitialize(){
 		learning = true;
@@ -843,6 +854,8 @@ public:
 
 class LooseEndedStrategy: public ISolverStrategy {
 public:
+	virtual ~LooseEndedStrategy() = default;
+
 	virtual void doInitialize(){
 		getSolver().timePointManager =
 			std::make_unique<SingleEndedTimePointManager>();
@@ -875,6 +888,7 @@ public:
 		timeOutClock.setTimeout(option::timeout.getValue());
 	}
 
+	virtual ~TransfereLearnedStrategy() = default;
 
 	virtual void doInitialize(){
 		learning = true;
@@ -1136,6 +1150,7 @@ namespace setup {
 	carj::TCarjArg<TCLAP::ValueArg, double> ratio("r", "ratio", "Ratio between states from start to state from end.", /*neccessary*/ false, /*default*/ 0.5, "number between 0 and 1", cmd);
 	carj::CarjArg<TCLAP::SwitchArg, bool> nonIncrementalSolving("n", "nonIncrementalSolving", "Do not use incremental solving.", cmd, /*default*/ false);
 
+	carj::CarjArg<TCLAP::SwitchArg, bool> reEncode("", "reEncode", "Reencode problem with double ended strategy before solving.", cmd, /*default*/ false);
 	carj::CarjArg<TCLAP::SwitchArg, bool> usePDR("", "usePDR", "Use property directed reachability.", cmd, /*default*/ false);
 	carj::TCarjArg<TCLAP::UnlabeledValueArg,std::string>  inputFile("inputFile", "File containing the problem. Omit or use - for stdin.", /*neccessary*/ false, "-", "inputFile", cmd);
 	carj::MCarjArg<TCLAP::MultiArg, std::string> pathSearchPrefix("", "pathSearchPrefix", "If passed files are not found their path will be prefixed with values of this parameter.", /*neccessary*/ false, "path", cmd);
@@ -1190,59 +1205,68 @@ int incplan_main(int argc, const char **argv) {
 		in = &is;
 	}
 
-	bool solved;
-	{
-		DimspecProblem problem(*in);
-		if (option::setup::usePDR.getValue()) {
-			PDRSolver solver(
-				problem,
-				std::move(solverWithRandomizedOptions())
-			);
-			solver.solve();
-			solver.printSolution(option::setup::outputSolverLike.getValue());
-		} else {
-			std::unique_ptr<ISolverStrategy> strategy = nullptr;
-			if (option::setup::nonIncrementalSolving.getValue()) {
-				strategy = std::make_unique<NonIncrementalStrategy>();
-			} else if (option::setup::singleEnded.getValue()) {
-				if (option::setup::transformLearned.getValue()) {
-					strategy = std::make_unique<TransfereLearnedStrategy>();
-				} else if (option::setup::loose.getValue()){
-					strategy = std::make_unique<LooseEndedStrategy>();
-				} else {
-					strategy = std::make_unique<SingleEndedStrategy>();
-				}
+	bool solved = false;
+
+	DimspecProblem inProblem(*in);
+	DimspecProblem* problem = &inProblem;
+	std::unique_ptr<DoubleEndedProblem> reEncodedProblem;
+	if (option::setup::reEncode.getValue() == true) {
+		reEncodedProblem = std::make_unique<DoubleEndedProblem>(&inProblem);
+		problem = reEncodedProblem.get();
+	}
+
+	if (option::setup::usePDR.getValue()) {
+		PDRSolver solver(
+			*problem,
+			std::move(solverWithRandomizedOptions())
+		);
+		solved = solver.solve();
+	} else {
+		std::unique_ptr<ISolverStrategy> strategy = nullptr;
+		if (option::setup::nonIncrementalSolving.getValue()) {
+			strategy = std::make_unique<NonIncrementalStrategy>();
+		} else if (option::setup::singleEnded.getValue()) {
+			if (option::setup::transformLearned.getValue()) {
+				strategy = std::make_unique<TransfereLearnedStrategy>();
+			} else if (option::setup::loose.getValue()){
+				strategy = std::make_unique<LooseEndedStrategy>();
 			} else {
-				if (option::setup::transformLearned.getValue()) {
-					strategy = std::make_unique<UltimateDoubleEndedStrategy>(
-						option::setup::ratio.getValue());
-				} else if (option::setup::loose.getValue()){
-					strategy = std::make_unique<LooseDoubleEndedStrategy>(
-						option::setup::ratio.getValue());
-				} else {
-					strategy = std::make_unique<DoubleEndedStrategy>(
-						option::setup::ratio.getValue());
-				}
+				strategy = std::make_unique<SingleEndedStrategy>();
 			}
-
-			if (option::setup::solveBeforeGoalClauses.getValue()) {
-				strategy = std::make_unique<PreFinalizationSolveStrategy>(std::move(strategy));
+		} else {
+			if (option::setup::transformLearned.getValue()) {
+				strategy = std::make_unique<UltimateDoubleEndedStrategy>(
+					option::setup::ratio.getValue());
+			} else if (option::setup::loose.getValue()){
+				strategy = std::make_unique<LooseDoubleEndedStrategy>(
+					option::setup::ratio.getValue());
+			} else {
+				strategy = std::make_unique<DoubleEndedStrategy>(
+					option::setup::ratio.getValue());
 			}
-			if (option::setup::cleanLitearl.getValue()) {
-				strategy = std::make_unique<CleanAktivationLiteralStrategy>(std::move(strategy));
-			}
-
-			Solver solver(
-				problem,
-				std::move(strategy),
-				getStepFunction());
-			solved = solver.solve();
-			solver.printSolution(option::setup::outputSolverLike.getValue());
 		}
+
+		if (option::setup::solveBeforeGoalClauses.getValue()) {
+			strategy = std::make_unique<PreFinalizationSolveStrategy>(std::move(strategy));
+		}
+		if (option::setup::cleanLitearl.getValue()) {
+			strategy = std::make_unique<CleanAktivationLiteralStrategy>(std::move(strategy));
+		}
+
+		Solver solver(
+			*problem,
+			std::move(strategy),
+			getStepFunction());
+		solved = solver.solve();
 	}
 
 	if (!solved) {
 		LOG(WARNING) << "Did not get a solution within the maximal make span.";
+		return 1;
+	} else {
+		LOG(INFO) << "Final Makespan: " << inProblem.solution.size() - 1;
+		carj::getCarj().data["/incplan/result/finalMakeSpan"_json_pointer] = inProblem.solution.size() - 1;
+		inProblem.printSolution(option::setup::outputSolverLike.getValue());
 	}
 
 	return 0;

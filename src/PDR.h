@@ -10,10 +10,9 @@ class PDRSolverPIMPL;
 class PDRSolver {
 public:
     PDRSolver(
-        const DimspecProblem& _problem,
+        DimspecProblem& _problem,
         std::unique_ptr<ipasir::Ipasir> _satSolver
     );
-    void printSolution(bool solverLike);
     bool solve();
     virtual ~PDRSolver();
 

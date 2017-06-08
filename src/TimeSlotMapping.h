@@ -25,6 +25,8 @@ public:
 	virtual bool isOnForwardStack(TimePoint t) = 0;
 	virtual TimePoint getFirst() = 0;
 	virtual TimePoint getLast() = 0;
+
+	virtual ~TimePointManager(){};
 };
 
 class SingleEndedTimePointManager: public TimePointManager {
@@ -50,6 +52,8 @@ public:
 	virtual TimePoint getLast() {
 		return std::make_pair(0, next - 1);
 	};
+
+	virtual ~SingleEndedTimePointManager(){};
 private:
 	int next = 0;
 };
@@ -85,6 +89,8 @@ public:
 	{
 
 	}
+
+	virtual ~DoubleEndedTimePointManager(){};
 
 	virtual TimePoint aquireNext() {
 		if (currentBeginTop == -1) {

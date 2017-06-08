@@ -17,7 +17,7 @@ struct InferedClause {
 
 class PDRSolverPIMPL {
 private:
-    const DimspecProblem& problem;
+    DimspecProblem& problem;
     std::unique_ptr<ipasir::Ipasir> satSolver;
     int numHelper = 0;
     int makespan;
@@ -29,13 +29,29 @@ private:
     std::vector<int> abstractionActivationLiteral;
     std::vector<InferedClause> inferedClauses;
     std::vector<std::vector<int>> solutions;
+
+    std::mt19937 g;
 public:
     PDRSolverPIMPL(
-        const DimspecProblem& _problem,
-        std::unique_ptr<ipasir::Ipasir> _satSolver
+        DimspecProblem& _problem,
+        std::unique_ptr<ipasir::Ipasir> _satSolver,
+        int seed
     ):
         problem(_problem),
         satSolver(std::move(_satSolver))
+    {
+        g = std::mt19937(seed);
+    }
+
+    PDRSolverPIMPL(
+        DimspecProblem& _problem,
+        std::unique_ptr<ipasir::Ipasir> _satSolver
+    ):
+        PDRSolverPIMPL(
+            _problem,
+            std::move(_satSolver),
+            std::random_device()()
+        )
     {
 
     }
@@ -48,24 +64,9 @@ public:
         return offset + lit;
     }
 
-    void printSolution(bool solverLike) {
-        int t = 0;
-        for (const auto& solution: solutions) {
-            for (int lit: solution) {
-                if (!solverLike) {
-                    std::cout << lit << " ";
-                } else {
-                    std::cout << at(lit, t) << " ";
-                }
-            }
-            if (!solverLike) {
-                std::cout << std::endl;
-            }
-            t++;
-        }
-        if (solverLike) {
-            std::cout << std::endl;
-        }
+    void storeSolution() {
+        problem.solution = std::move(this->solutions);
+        problem.storedSolutionNotifier();
     }
 
     bool solve(){
@@ -73,6 +74,8 @@ public:
         bool solved = false;
         makespan = 0;
         refines = 0;
+
+        LOG(INFO) << "makespan: " << makespan;
         while (!solved) {
             satSolver->assume(abstractionActivationLiteral[makespan]);
             // satSolver->assume(transferActivation);
@@ -98,7 +101,8 @@ public:
             }
         }
         carj::getCarj().data["/incplan/result/finalMakeSpan"_json_pointer] = makespan;
-        return false;
+        storeSolution();
+        return solved;
     }
 
     void addGuarded(const std::vector<int>& clauses, int guard, bool atNext = false){
@@ -132,6 +136,7 @@ public:
 
         abstractionActivationLiteral.push_back(newHelper());
         addGuarded(problem.initial, abstractionActivationLiteral[0]);
+        addGuarded(problem.invariant, abstractionActivationLiteral[0]);
 
         solutions.push_back(std::vector<int>());
     }
@@ -189,7 +194,6 @@ public:
     void extractInferedClause(int level, const std::vector<int>& solution) {
         inferedClauses.push_back(InferedClause());
         InferedClause& infered = inferedClauses.back();
-        infered.reach = level;
         infered.activationLiteral = newHelper();
 
         std::vector<int> clause;
@@ -199,11 +203,14 @@ public:
             }
         }
 
+        std::shuffle(clause.begin(), clause.end(), g);
+
         std::vector<bool> neccessary;
         neccessary.resize(clause.size());
         std::fill(neccessary.begin(), neccessary.end(), true);
 
-        for (int i = clause.size() - 1; i >= 0; i--) {
+        //for (int i = clause.size() - 1; i >= 0; i--) {
+        for (size_t i = 0; i < clause.size(); i++) {
             if (neccessary[i]) {
                 neccessary[i] = false;
 
@@ -234,17 +241,14 @@ public:
             }
         }
 
-        pushForward(infered);
-
         for (int lit: infered.clause) {
             satSolver->add(lit);
         }
         satSolver->add(-infered.activationLiteral);
         satSolver->add(0);
 
-        satSolver->add(-abstractionActivationLiteral[level + 1]);
-        satSolver->add(infered.activationLiteral);
-        satSolver->add(0);
+        infered.reach = 0;
+        pushForward(infered);
     }
 
     void pushForward(){
@@ -258,7 +262,7 @@ public:
                     }
                     if (satSolver->solve() == ipasir::SolveResult::UNSAT) {
                         infered.reach = i + 1;
-                        satSolver->add(-abstractionActivationLiteral[i + 1]);
+                        satSolver->add(-abstractionActivationLiteral[infered.reach]);
                         satSolver->add(infered.activationLiteral);
                         satSolver->add(0);
                     }
@@ -276,6 +280,10 @@ public:
             }
             if (satSolver->solve() == ipasir::SolveResult::UNSAT) {
                 infered.reach = i + 1;
+
+                satSolver->add(-abstractionActivationLiteral[infered.reach]);
+                satSolver->add(infered.activationLiteral);
+                satSolver->add(0);
             } else {
                 break;
             }
@@ -289,16 +297,12 @@ public:
 };
 
 PDRSolver::PDRSolver(
-    const DimspecProblem& _problem,
+    DimspecProblem& _problem,
     std::unique_ptr<ipasir::Ipasir> _satSolver
 ):
     pimpl(new PDRSolverPIMPL(_problem, std::move(_satSolver)))
 {
 
-}
-
-void PDRSolver::printSolution(bool solverLike) {
-    pimpl->printSolution(solverLike);
 }
 
 bool PDRSolver::solve(){
