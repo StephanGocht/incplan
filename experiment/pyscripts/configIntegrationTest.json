@@ -1,42 +1,61 @@
 {
     "tools": [
+        "experimentrun.tools.ExceptionToConfigAndCancelToolExecution('result.json')",
         "experimentrun.tools.ResolveLinks()"
         , "experimentrun.tools.RunShell('rm *')"
         , "extractProblems.Extract('${/zipFile}', '${/problem/path}', 'problem.pddl')"
         , "extractProblems.Extract('${/zipFile}', '${/problem/domainDescription}', 'domain.pddl')"
         , {"%link": "/madagascar/encode/run"}
         , {"%link": "/incplan/run"}
+        , "experimentrun.tools.RunShell('grep -E \"^ci\" incplanOutput')"
         , "experimentrun.tools.RunShell('grep -E \"^[0-9\\-]\" incplanOutput > solution')"
         , {"%link": "/madagascar/verifySolution/run"}
         , "experimentrun.tools.WriteConfigToFile('result.json')"
         , "experimentrun.tools.RunShell('echo ${/madagascar/verifySolution/result/returnCode}')"
     ],
-    "zipFile": "/home/steohan/ma/benchmarks/pddl/ipc14.zip",
+    "zipFile": "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
             // "problem": {
             //     "domainDescription": "TESTING/seq-agl/CaveDiving/domain.pddl",
             //     "name": "testing01_easy",
             //     "path": "TESTING/seq-agl/CaveDiving/testing01_easy.pddl",
             //     "domain": "CaveDiving"
             // },
+            // "problem": {
+            //     "domainDescription": "TESTING/seq-agl/Thoughtful/domain.pddl",
+            //     "name": "bootstrap-typed-01",
+            //     "path": "TESTING/seq-agl/Thoughtful/bootstrap-typed-01.pddl",
+            //     "domain": "Thoughtful"
+            // },
             "problem": {
-                "domainDescription": "TESTING/seq-agl/Thoughtful/domain.pddl",
-                "name": "bootstrap-typed-01",
-                "path": "TESTING/seq-agl/Thoughtful/bootstrap-typed-01.pddl",
-                "domain": "Thoughtful"
+                "domainDescription": "TESTING/seq-agl/Childsnack/domain.pddl",
+                "name": "child-snack_pfilexx",
+                "path": "TESTING/seq-agl/Childsnack/child-snack_pfile05-2.pddl",
+                "domain": "Childsnack"
             },
             // "problem": {
-            //     "domainDescription": "TESTING/seq-agl/Childsnack/domain.pddl",
-            //     "name": "child-snack_pfile08",
-            //     "path": "TESTING/seq-agl/Childsnack/child-snack_pfile08.pddl",
-            //     "domain": "Childsnack"
+            //     "domainDescription": "TESTING/seq-agl/CityCar/domain.pddl",
+            //     "name": "p4-5-2-0-2",
+            //     "path": "TESTING/seq-agl/CityCar/p4-5-2-0-2.pddl",
+            //     "domain": "CityCar"
             // },
             // "problem": {
             //     "domainDescription": "TESTING/seq-agl/Barman/domain.pddl",
-            //     "name": "p5-11-5-16",
-            //     "path": "TESTING/seq-agl/Barman/p5-11-5-16.pddl",
+            //     "name": "p3-10-4-13",
+            //     "path": "TESTING/seq-agl/Barman/p1-11-5-16.pddl",
             //     "domain": "Barman"
             // },
-
+            // "problem": {
+            //     "domainDescription": "TESTING/seq-agl/Hiking/domain.pddl",
+            //     "name": "testing-5-6-3",
+            //     "path": "TESTING/seq-agl/Hiking/testing-5-6-5.pddl",
+            //     "domain": "Hiking"
+            // },
+    // "%limits": {
+    //     // limit to processor time in seconds [softlimit,hardlimit]
+    //     "RLIMIT_CPU":[10,30],
+    //     // Memory limit in byte
+    //     "RLIMIT_AS":[8589934592,8589934592]
+    // },
     "incplan":{
         "config":{
             "solver":"gmod"
@@ -45,29 +64,35 @@
         "run":{
             "name":"experimentrun.tools.RunShell",
             "parameters": {
-                "command":"${/incplan/bin} --useConfig | tee incplanOutput",
+                "requireNormalExit": true,
+                "command":"${/incplan/bin} --useConfig > incplanOutput",
                 "runInfoTo":"/incplan/result",
                 "externalUsedConfig":"carj.json"
             }
         },
         "parameters": {
             "cleanLitearl": false,
+            "exhaustMakeSpan": -1,
             "exponentialStepBasis": 0.0,
             "exponentialStepOffset": 0.0,
             "icaps2017": false,
             "inputFile": "dimspec.cnf",
             "intermediateSolveStep": false,
+            "learnMakeSpan": 999999999,
             "linearStepSize": 1,
+            "loose": false,
+            "maxSizeLearnedClause": 100,
             "nonIncrementalSolving": false,
             "outputSolverLike": true,
             "pathSearchPrefix": [],
             "ratio": 0.5,
+            "reEncode": true,
+            "seed": -2,
+            "singleEnded": true,
+            "timeout": 10.0,
+            "transformLearned": false,
             "unitInGoal2Assume": true,
-            "singleEnded": false,
-            "exhaustiveSearch": false,
-            "loose": true,
-            "transformLearned": true,
-            "maxSizeLearnedClause": 3
+            "usePDR": false
         }
     },
 
@@ -77,6 +102,7 @@
             "run":{
                 "name":"experimentrun.tools.RunShell",
                 "parameters": {
+                    //"requireNormalExit": true,
                     "command":"${/madagascar/bin} domain.pddl problem.pddl -b dimspec -L &> out_encoding",
                     "runInfoTo":"/madagascar/encode/result"
                 }
@@ -87,6 +113,7 @@
                 "name":"experimentrun.tools.RunShell",
                 "parameters": {
                     "command":"${/madagascar/bin} domain.pddl problem.pddl -s solution -T ${/incplan/result/finalMakeSpan} &> out_plan",
+                    "requireNormalExit": true,
                     "runInfoTo":"/madagascar/verifySolution/result"
                 }
             }
