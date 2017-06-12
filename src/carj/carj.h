@@ -8,7 +8,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
-
+#include <chrono>
 
 namespace carj {
 	using json = nlohmann::json;
@@ -23,10 +23,13 @@ namespace carj {
 		std::string parameterBase);
 
 	class Carj {
+	private:
+		std::chrono::duration<float> writeOverhead;
 	public:
 		static const std::string configPath;
 
 		Carj() {
+			writeOverhead = std::chrono::duration<float>::zero();
 		}
 
 		void init(std::string inputPath = configPath,
@@ -40,11 +43,21 @@ namespace carj {
 			}
 			json::json_pointer p(base);
 			parameter = &data[p];
+			data["carj"].push_back({
+				{"storeOverhead", 0.0}
+			});
+		}
+
+		void write(){
+			auto start = std::chrono::high_resolution_clock::now();
+			std::ofstream o(configPath);
+			o << std::setw(4) << data << std::endl;
+			writeOverhead += std::chrono::duration_cast<std::chrono::duration<float>>(std::chrono::high_resolution_clock::now() - start);
+			data["carj"].back()["storeOverhead"] = writeOverhead.count();
 		}
 
 		~Carj(){
-			std::ofstream o(configPath);
-			o << std::setw(4) << data << std::endl;
+			write();
 		}
 
 		json data;

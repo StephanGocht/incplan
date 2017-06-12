@@ -216,6 +216,7 @@ public:
 					strategy->postStepHook();
 				}
 				newTimepoints.clear();
+				carj::getCarj().write();
 			}
 
 
