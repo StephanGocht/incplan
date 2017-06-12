@@ -44,6 +44,18 @@ public:
 		}
 	}
 
+	void addAsLearned(const TimedLiteral& lit) {
+		if (lit.isHelper) {
+			solver->addAsLearned(helperLiteral2Ipasir(lit.literal, lit.t));
+		} else {
+			solver->addAsLearned(problemLiteral2Ipasir(lit.literal, lit.t));
+		}
+	}
+
+	void finalizeLearned() {
+		solver->addAsLearned(0);
+	}
+
 	void addClause(const std::vector<TimedLiteral> clause) {
 		for (const TimedLiteral& lit: clause) {
 			add(lit);

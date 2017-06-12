@@ -41,6 +41,7 @@ namespace option{
 	//TCLAP::SwitchArg outputLinePerStep("", "outputLinePerStep", "Output each time point in a new line. Each time point will use the same literals.", /*default*/ false);
 	carj::CarjArg<TCLAP::SwitchArg, bool> icaps2017Version("", "icaps2017", "Use this option to use encoding as used in the icaps paper.", cmd, /*default*/ false);
 	carj::CarjArg<TCLAP::SwitchArg, bool> unitInGoal2Assume("u", "unitInGoal2Assume", "Add units in goal clauses using assume instead of add. (singleEnded only)", cmd, /*default*/ false);
+	carj::CarjArg<TCLAP::SwitchArg, bool> useAddLearned("", "useAddLearned", "Use unofficial ipasir extension add_learned_clause.", cmd, /*default*/ false);
 }
 
 enum class HelperVariables { ZeroVariableIsNotAllowed_DoNotRemoveThis,
@@ -789,9 +790,17 @@ public:
 					lit.t.second = timePoint.second - lit.t.second;
 				}
 				lit.t.first = timePoint.first;
-				getSolver().add(lit);
+				if (option::useAddLearned.getValue()) {
+					getSolver().addAsLearned(lit);
+				} else {
+					getSolver().add(lit);
+				}
 			}
-			getSolver().finalizeClause();
+			if (option::useAddLearned.getValue()) {
+				getSolver().finalizeLearned();
+			} else {
+				getSolver().finalizeClause();
+			}
 		}
 	}
 
@@ -880,7 +889,7 @@ class TransfereLearnedStrategy: public LooseEndedStrategy {
 private:
 	std::vector<std::vector<TimedLiteral>> learnedClauses;
 	std::vector<std::vector<TimedLiteral>> newLearnedClauses;
-	std::vector<unsigned> timeShift;
+	std::vector<unsigned> timeSpan;
 	TimeoutClock timeOutClock;
 
 	bool learning;
@@ -1001,8 +1010,8 @@ public:
 
 	void adeptLearned() {
 		for (std::vector<TimedLiteral>& clause: newLearnedClauses) {
-			int tMin;
-			int tMax;
+			int tMin = 0;
+			int tMax = 0;
 			bool init = false;
 
 			for (TimedLiteral& lit:clause) {
@@ -1033,6 +1042,7 @@ public:
 			int shift = tN - (tMax - tMin);
 
 			learnedClauses.push_back(clause);
+			timeSpan.push_back(tMax - tMin);
 			for (int i = 0; i <= shift; i++) {
 				TimePoint t;
 				t.first = 0;
@@ -1046,26 +1056,22 @@ public:
 
 	void addLearnedClause(const std::vector<TimedLiteral> &clause,
 			const TimePoint& timePoint) {
-		if (getSolver().timePointManager->isOnForwardStack(timePoint)) {
-			assert(timePoint.first == 0);
-			int shift = timePoint.second;
-			for (TimedLiteral lit: clause) {
-				assert(lit.t.first == 0);
-				lit.t.second = lit.t.second + shift;
-				getSolver().add(lit);
+		int shift = timePoint.second;
+		assert(timePoint.first == 0);
+		for (TimedLiteral lit: clause) {
+			assert(lit.t.first == 0);
+			lit.t.second = lit.t.second + shift;
+			if (option::useAddLearned.getValue()) {
+					getSolver().addAsLearned(lit);
+				} else {
+					getSolver().add(lit);
+				}
 			}
-			getSolver().finalizeClause();
-		} else {
-			assert(timePoint.first == 1);
-			int shift = timePoint.second;
-			for (TimedLiteral lit: clause) {
-				lit.t.first = 1;
-				lit.t.second = shift - lit.t.second;
-				assert(lit.t.second >= 0);
-				getSolver().add(lit);
+			if (option::useAddLearned.getValue()) {
+				getSolver().finalizeLearned();
+			} else {
+				getSolver().finalizeClause();
 			}
-			getSolver().finalizeClause();
-		}
 	}
 
 	void stopLearning() {
@@ -1081,7 +1087,8 @@ public:
 	virtual void preSolveHook() {
 		// shift all learned clauses one up
 		for (size_t i = 0; i < learnedClauses.size(); i++) {
-			for (const TimePoint& timePoint: getSolver().newTimepoints) {
+			for (TimePoint timePoint: getSolver().newTimepoints) {
+				timePoint.second -= timeSpan[i];
 				addLearnedClause(learnedClauses[i], timePoint);
 			}
 		}
