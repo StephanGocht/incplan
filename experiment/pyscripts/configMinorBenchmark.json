@@ -1,0 +1,99 @@
+{
+    "tools":[
+        "experimentrun.tools.WriteConfigToFile('epxerimentWasRunWithThis.json')",
+        "experimentrun.tools.Eval('/BootstrapConfig')",
+        "experimentrun.tools.ExplodeNBootstrap('/BootstrapConfig')",
+        "experimentrun.tools.WriteConfigToFile('results.json')"
+    ],
+
+    "BootstrapConfig":{
+        "parallel": true,
+        "processors": {"%eval":"list(range(${/BootstrapConfig/numProcessors}))"},
+        "numProcessors": "48"
+    },
+
+    "configurations":[
+        {
+            "config":{
+                "problem":{
+                    "%explode":
+                    ["Barman_p1-11-4-15.dimspec.cnf", "Barman_p1-11-5-15.dimspec.cnf", "Barman_p1-11-5-16.dimspec.cnf", "Barman_p2-10-4-13.dimspec.cnf", "Barman_p2-11-4-15.dimspec.cnf", "Barman_p2-11-5-15.dimspec.cnf", "Barman_p2-11-5-16.dimspec.cnf", "Barman_p2-11-5-17.dimspec.cnf", "Barman_p3-10-4-13.dimspec.cnf", "Barman_p3-11-4-15.dimspec.cnf", "Barman_p3-11-5-15.dimspec.cnf", "Barman_p3-11-5-16.dimspec.cnf", "Barman_p3-11-5-17.dimspec.cnf", "Barman_p4-11-4-14.dimspec.cnf", "Barman_p4-11-4-15.dimspec.cnf", "Barman_p4-11-5-15.dimspec.cnf", "Barman_p5-10-4-13.dimspec.cnf", "Barman_p5-11-4-15.dimspec.cnf", "Barman_p5-11-5-15.dimspec.cnf", "Barman_p5-11-5-16.dimspec.cnf", "CaveDiving_testing01.dimspec.cnf", "CaveDiving_testing01_easy.dimspec.cnf", "CaveDiving_testing02_easy.dimspec.cnf", "CaveDiving_testing03_easy.dimspec.cnf", "CaveDiving_testing04_easy.dimspec.cnf", "CaveDiving_testing05A_easy.dimspec.cnf", "CaveDiving_testing06A_easy.dimspec.cnf", "CaveDiving_testing07_easy.dimspec.cnf", "CaveDiving_testing08_easy.dimspec.cnf", "CaveDiving_testing09_easy.dimspec.cnf", "CaveDiving_testing10_easy.dimspec.cnf", "CaveDiving_testing11_easy.dimspec.cnf", "CaveDiving_testing12_easy.dimspec.cnf", "CaveDiving_testing13_easy.dimspec.cnf", "CaveDiving_testing14_easy.dimspec.cnf", "CaveDiving_testing15_easy.dimspec.cnf", "CaveDiving_testing16_easy.dimspec.cnf", "CaveDiving_testing18A_easy.dimspec.cnf", "CaveDiving_testing18_easy.dimspec.cnf", "CaveDiving_testing20A_easy.dimspec.cnf", "Childsnack_child-snack_pfile05-2.dimspec.cnf", "Childsnack_child-snack_pfile05.dimspec.cnf", "Childsnack_child-snack_pfile06-2.dimspec.cnf", "Childsnack_child-snack_pfile07-2.dimspec.cnf", "Childsnack_child-snack_pfile08-2.dimspec.cnf", "Childsnack_child-snack_pfile08.dimspec.cnf", "Childsnack_child-snack_pfile09-2.dimspec.cnf", "Childsnack_child-snack_pfile09.dimspec.cnf", "Childsnack_child-snack_pfile10-2.dimspec.cnf", "Childsnack_child-snack_pfile10.dimspec.cnf", "Childsnack_child-snack_pfile11-2.dimspec.cnf", "Childsnack_child-snack_pfile11.dimspec.cnf", "Childsnack_child-snack_pfile12.dimspec.cnf", "Childsnack_child-snack_pfile13-2.dimspec.cnf", "Childsnack_child-snack_pfile13.dimspec.cnf", "Childsnack_child-snack_pfile14.dimspec.cnf", "Childsnack_child-snack_pfile15-2.dimspec.cnf", "Childsnack_child-snack_pfile16-2.dimspec.cnf", "Childsnack_child-snack_pfile19-2.dimspec.cnf", "Childsnack_child-snack_pfile19.dimspec.cnf", "CityCar_p3-2-2-0-1.dimspec.cnf", "CityCar_p3-3-2-0-1.dimspec.cnf", "CityCar_p3-4-2-0-1.dimspec.cnf", "CityCar_p3-5-2-0-1.dimspec.cnf", "CityCar_p3-5-2-0-2.dimspec.cnf", "CityCar_p4-2-2-0-1.dimspec.cnf", "CityCar_p4-2-3-0-1.dimspec.cnf", "CityCar_p4-2-3-0-2.dimspec.cnf", "CityCar_p4-3-2-0-1.dimspec.cnf", "CityCar_p4-3-2-0-2.dimspec.cnf", "CityCar_p4-3-3-0-1.dimspec.cnf", "CityCar_p4-3-3-0-2.dimspec.cnf", "CityCar_p4-4-2-0-1.dimspec.cnf", "CityCar_p4-4-2-0-2.dimspec.cnf", "CityCar_p4-4-3-0-1.dimspec.cnf", "CityCar_p4-4-3-0-2.dimspec.cnf", "CityCar_p4-5-2-0-1.dimspec.cnf", "CityCar_p4-5-2-0-2.dimspec.cnf", "CityCar_p4-5-3-0-1.dimspec.cnf", "CityCar_p4-5-3-0-2.dimspec.cnf", "Floortile_p01-4-3-2.dimspec.cnf", "Floortile_p01-5-4-2.dimspec.cnf", "Floortile_p01-5-5-2.dimspec.cnf", "Floortile_p01-6-4-2.dimspec.cnf", "Floortile_p01-6-5-2.dimspec.cnf", "Floortile_p01-6-5-3.dimspec.cnf", "Floortile_p02-5-4-2.dimspec.cnf", "Floortile_p02-6-4-2.dimspec.cnf", "Floortile_p02-6-5-2.dimspec.cnf", "Floortile_p02-6-5-3.dimspec.cnf", "Floortile_p03-6-4-2.dimspec.cnf", "Floortile_p03-6-5-2.dimspec.cnf", "Floortile_p03-6-5-3.dimspec.cnf", "Floortile_p04-5-4-2.dimspec.cnf", "Floortile_p04-5-5-2.dimspec.cnf", "Floortile_p04-6-5-2.dimspec.cnf", "Floortile_p04-6-5-3.dimspec.cnf", "Floortile_p05-4-3-2.dimspec.cnf", "Floortile_p05-6-5-2.dimspec.cnf", "Floortile_p05-6-5-3.dimspec.cnf", "GED_d-10-1.dimspec.cnf", "GED_d-10-2.dimspec.cnf", "GED_d-10-3.dimspec.cnf", "GED_d-10-4.dimspec.cnf", "GED_d-10-5.dimspec.cnf", "GED_d-10-6.dimspec.cnf", "GED_d-11-1.dimspec.cnf", "GED_d-11-3.dimspec.cnf", "GED_d-11-5.dimspec.cnf", "GED_d-11-6.dimspec.cnf", "GED_d-12-11.dimspec.cnf", "GED_d-12-2.dimspec.cnf", "GED_d-12-3.dimspec.cnf", "GED_d-12-5.dimspec.cnf", "GED_d-12-6.dimspec.cnf", "GED_d-12-7.dimspec.cnf", "GED_d-12-8.dimspec.cnf", "GED_d-12-9.dimspec.cnf", "GED_d-3-6.dimspec.cnf", "GED_d-9-5.dimspec.cnf", "Hiking_testing-3-4-3.dimspec.cnf", "Hiking_testing-3-4-4.dimspec.cnf", "Hiking_testing-3-4-5.dimspec.cnf", "Hiking_testing-3-4-6.dimspec.cnf", "Hiking_testing-3-4-7.dimspec.cnf", "Hiking_testing-3-4-8.dimspec.cnf", "Hiking_testing-3-4-9.dimspec.cnf", "Hiking_testing-4-5-3.dimspec.cnf", "Hiking_testing-4-5-4.dimspec.cnf", "Hiking_testing-4-5-5.dimspec.cnf", "Hiking_testing-4-5-6.dimspec.cnf", "Hiking_testing-4-5-7.dimspec.cnf", "Hiking_testing-4-5-8.dimspec.cnf", "Hiking_testing-4-5-9.dimspec.cnf", "Hiking_testing-5-6-3.dimspec.cnf", "Hiking_testing-5-6-4.dimspec.cnf", "Hiking_testing-5-6-5.dimspec.cnf", "Hiking_testing-5-6-6.dimspec.cnf", "Hiking_testing-5-6-7.dimspec.cnf", "Hiking_testing-5-6-8.dimspec.cnf", "Maintenance_maintenance.1.3.060.180.5-000.dimspec.cnf", "Maintenance_maintenance.1.3.060.180.5-001.dimspec.cnf", "Maintenance_maintenance.1.3.060.180.5-002.dimspec.cnf", "Maintenance_maintenance.1.3.100.300.5-000.dimspec.cnf", "Maintenance_maintenance.1.3.100.300.5-001.dimspec.cnf", "Maintenance_maintenance.1.3.100.300.7-000.dimspec.cnf", "Maintenance_maintenance.1.3.100.300.7-001.dimspec.cnf", "Maintenance_maintenance.1.3.100.300.7-002.dimspec.cnf", "Maintenance_maintenance.1.3.150.500.6-001.dimspec.cnf", "Maintenance_maintenance.1.3.200.500.5-001.dimspec.cnf", "Maintenance_maintenance.1.3.200.500.5-002.dimspec.cnf", "Maintenance_maintenance.1.3.200.700.7-000.dimspec.cnf", "Maintenance_maintenance.1.3.200.700.7-001.dimspec.cnf", "Maintenance_maintenance.1.3.200.700.7-002.dimspec.cnf", "Maintenance_maintenance.1.3.200.900.5-000.dimspec.cnf", "Maintenance_maintenance.1.3.200.900.5-001.dimspec.cnf", "Maintenance_maintenance.1.3.200.900.5-002.dimspec.cnf", "Maintenance_maintenance.1.3.200.900.8-000.dimspec.cnf", "Maintenance_maintenance.1.3.200.900.8-001.dimspec.cnf", "Maintenance_maintenance.1.3.200.900.8-002.dimspec.cnf", "Openstacks_p130_2.dimspec.cnf", "Openstacks_p130_3.dimspec.cnf", "Openstacks_p150_2.dimspec.cnf", "Openstacks_p150_3.dimspec.cnf", "Openstacks_p170_1.dimspec.cnf", "Openstacks_p170_2.dimspec.cnf", "Openstacks_p170_3.dimspec.cnf", "Openstacks_p190_1.dimspec.cnf", "Openstacks_p190_2.dimspec.cnf", "Openstacks_p190_3.dimspec.cnf", "Openstacks_p210_1.dimspec.cnf", "Openstacks_p210_2.dimspec.cnf", "Openstacks_p230_1.dimspec.cnf", "Openstacks_p230_2.dimspec.cnf", "Openstacks_p250_1.dimspec.cnf", "Parking_p_28_2.dimspec.cnf", "Parking_p_28_3.dimspec.cnf", "Parking_p_30_1.dimspec.cnf", "Parking_p_30_2.dimspec.cnf", "Parking_p_30_3.dimspec.cnf", "Tetris_p020.dimspec.cnf", "Tetris_p021.dimspec.cnf", "Tetris_p022.dimspec.cnf", "Tetris_p023.dimspec.cnf", "Tetris_p024.dimspec.cnf", "Tetris_p025.dimspec.cnf", "Tetris_p028.dimspec.cnf", "Tetris_p029.dimspec.cnf", "Tetris_p037.dimspec.cnf", "Thoughtful_bootstrap-typed-01.dimspec.cnf", "Thoughtful_bootstrap-typed-02.dimspec.cnf", "Thoughtful_bootstrap-typed-03.dimspec.cnf", "Thoughtful_bootstrap-typed-04.dimspec.cnf", "Thoughtful_bootstrap-typed-05.dimspec.cnf", "Thoughtful_p11_6_53-typed.dimspec.cnf", "Thoughtful_p11_6_59-typed.dimspec.cnf", "Thoughtful_p11_6_62-typed.dimspec.cnf", "Thoughtful_p13_7_78-typed.dimspec.cnf", "Thoughtful_p13_7_79-typed.dimspec.cnf", "Thoughtful_p13_7_86-typed.dimspec.cnf", "Thoughtful_target-typed-20.dimspec.cnf", "Thoughtful_target-typed-21.dimspec.cnf", "Thoughtful_target-typed-22.dimspec.cnf", "Thoughtful_target-typed-23.dimspec.cnf", "Thoughtful_target-typed-24.dimspec.cnf", "Thoughtful_target-typed-25.dimspec.cnf", "Thoughtful_target-typed-26.dimspec.cnf", "Thoughtful_target-typed-27.dimspec.cnf", "Thoughtful_target-typed-28.dimspec.cnf", "Transport_p01.dimspec.cnf", "Transport_p02.dimspec.cnf", "Transport_p03.dimspec.cnf", "Transport_p04.dimspec.cnf", "Transport_p05.dimspec.cnf", "Transport_p06.dimspec.cnf", "Transport_p10.dimspec.cnf", "Transport_p11.dimspec.cnf", "Transport_p12.dimspec.cnf", "Transport_p13.dimspec.cnf", "Transport_p14.dimspec.cnf", "Transport_p15.dimspec.cnf", "Transport_p16.dimspec.cnf", "Transport_p17.dimspec.cnf", "Transport_p20.dimspec.cnf", "Visitall_pfile30.dimspec.cnf", "Visitall_pfile31.dimspec.cnf", "Visitall_pfile32.dimspec.cnf", "Visitall_pfile33.dimspec.cnf"]
+                    // ["Childsnack_child-snack_pfile05-2.dimspec.cnf"]
+                },
+                "setup": {"%explode": [
+                    {
+                        "solver":"glucose4-master",
+                        "transformLearned": false,
+                        "singleEnded": true,
+                        "loose": true
+                    },
+                    {
+                        "solver":{"%explode": ["glucose4-master", "glucose4-clauseActivityChecking"]},
+                        "transformLearned": true,
+                        "singleEnded": true,
+                        "maxSizeLearnedClause": {"%explode": [3, 10, 100, 1000]},
+                        "timeout": 9999999.0
+                    },
+                    {
+                        "solver":"glucose4-master",
+                        "nonIncrementalSolving": true,
+                        "singleEnded":true
+                    },
+                    {
+                        "solver":{"%explode": ["glucose4-master", "glucose4-noLearnedClauses"]},
+                        "singleEnded": {"%explode": [true, false]}
+                    }
+                ]}
+            },
+
+             "tools":[
+                "experimentrun.tools.ExceptionToConfigAndCancelToolExecution('result.json')",
+                "experimentrun.tools.ResolveLinks()",
+                "experimentrun.tools.MakeAndCdTempDir('run_')",
+                {"%link": "/incplan/run"}
+            ],
+
+            "%limits": {
+                // limit to processor time in seconds [softlimit,hardlimit]
+                "RLIMIT_CPU":[360,400],
+                // Memory limit in byte
+                "RLIMIT_AS":[8589934592,8589934592]
+            },
+
+            "incplan":{
+                "bin":"~/ma/tools/incplan/bin/incplan-${/config/setup/solver}",
+                "run":{
+                    "name":"experimentrun.tools.RunShell",
+                    "parameters": {
+                        "requireNormalExit": true,
+                        "command":"${/incplan/bin} --useConfig > incplanOutput",
+                        "runInfoTo":"/incplan/result",
+                        "externalUsedConfig":"carj.json"
+                    }
+                },
+                "parameters": {
+                    "cleanLitearl": false,
+                    "exponentialStepBasis": 0.0,
+                    "exponentialStepOffset": 0.0,
+                    "icaps2017": false,
+                    "inputFile": {"%link": "/config/problem"},
+                    "intermediateSolveStep": false,
+                    "linearStepSize": 1,
+                    "nonIncrementalSolving": {"%link": "/config/setup/nonIncrementalSolving"},
+                    "outputSolverLike": true,
+                    "pathSearchPrefix": ["/home/gocht/server-home/benchresult/instances/", "/home/gocht/benchresult/instances/"],
+                    "ratio": 0.5,
+                    "unitInGoal2Assume": true,
+                    "singleEnded": {"%link": "/config/setup/singleEnded"},
+                    "loose": {"%link": "/config/setup/loose"},
+                    "transformLearned": {"%link": "/config/setup/transformLearned"},
+                    "maxSizeLearnedClause": {"%link": "/config/setup/maxSizeLearnedClause"},
+                    "timeout": {"%link": "/config/setup/timeout"},
+                    "learnMakeSpan": 999999999,
+                    "exhaustMakeSpan": -1,
+                    "seed": 0
+                }
+            }
+        }
+    ]
+}
