@@ -131,6 +131,8 @@ std::unique_ptr<ipasir::Ipasir> solverWithRandomizedOptions() {
 			option::seed.getValue(),
 			std::move(result));
 	}
+
+	LOG(INFO) << "Using solver " << result->signature();
 	return result;
 }
 

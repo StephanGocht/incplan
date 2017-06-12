@@ -96,22 +96,6 @@ else()
 endif()
 
 
-
-# === Target: incplan-heuristical ===
-
-# A target that uses not the default heuristic of the solver but our own.
-
-set(EXTENDED_IPASIR_SOLVER ${CMAKE_SOURCE_DIR}/../lib/libipasirExt_cominisatps2sun_nopre.a)
-if (EXISTS ${EXTENDED_IPASIR_SOLVER})
-	add_executable(incplan-heuristical main.cpp)
-	target_link_libraries(incplan-heuristical
-		all_sources
-		ipasir_wrapper_extended
-		${EXTENDED_IPASIR_SOLVER}
-		)
-endif()
-
-
 # === Target: incplan-[solver_name] ===
 
 # Creates executables for each aviable solver [solver-name]
