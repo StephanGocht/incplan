@@ -15,7 +15,7 @@ namespace carj {
 
 	class Carj;
 	class CarjArgBase;
-
+	TCLAP::CmdLine& getCmd();
 	Carj& getCarj();
 	std::vector<CarjArgBase*>& getArgs();
 

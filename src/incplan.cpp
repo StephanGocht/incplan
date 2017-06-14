@@ -29,7 +29,13 @@
 
 #include "PDR.h"
 
-TCLAP::CmdLine cmd("This tool is does sat planing using an incremental sat solver.", ' ', "0.1");
+TCLAP::CmdLine& carj::getCmd() {
+	static TCLAP::CmdLine cmd("This tool is does sat planing using an incremental sat solver.", ' ', "0.1");
+	return cmd;
+}
+
+TCLAP::CmdLine& cmd = carj::getCmd();
+
 namespace option{
 	carj::TCarjArg<TCLAP::ValueArg,int> seed("", "seed", "Use a positive number to choose a seed for randomization, -1 to use a random seed or -2 to deactivate randomization.", /* necessary */ false, /*default*/ -1, /* type description */ "number", cmd);
 
