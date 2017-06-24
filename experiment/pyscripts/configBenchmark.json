@@ -1,0 +1,292 @@
+{
+    "tools":[
+        "experimentrun.tools.WriteConfigToFile('experimentWasRunWithThis.json')",
+        {
+            "name":"extractProblems.ListIPC14",
+            "parameters": {
+                "filename": "${/configurations/0/zipFile}",
+                "resultPath": "/configurations/0/problem/%explode",
+//                "excludedDomains": ["Openstacks", "Visitall", "Transport"]
+                "excludedDomains": ["Openstacks", "Visitall", "Transport", "Barman", "GED", "Parking"]
+//                "excludedDomains": ["Openstacks", "Visitall", "Transport", "Barman", "GED", "Thoughtful", "Tetris", "Maintenance", "CaveDiving", "CityCar", "Floortile", "Hiking", "Parking"]
+
+            }
+        },
+        "experimentrun.tools.Eval('/BootstrapConfig')",
+        "experimentrun.tools.ExplodeNBootstrap('/BootstrapConfig')",
+        "experimentrun.tools.WriteConfigToFile('results.json')"
+    ],
+
+    "BootstrapConfig":{
+        "parallel": true,
+        "processors": {"%eval":"list(range(${/BootstrapConfig/numProcessors}))"},
+        //"numProcessors": "2"
+        "numProcessors": "16"
+    },
+
+    "configurations":[
+        {
+            "problem": {
+                "domainDescription": "TESTING/seq-agl/Childsnack/domain.pddl",
+                "name": "child-snack_pfile05",
+                "path": "TESTING/seq-agl/Childsnack/child-snack_pfile05.pddl",
+                "domain": "Childsnack"
+            },
+            "config":{"%explode": [
+            {
+                "steps":[
+                    {"%link": "/madagascar/solve/run"}
+                ],
+                "parameters": {
+                    "info":"general",
+                    "encoding":"MpC"
+                }
+            }
+            ,{
+                "encoding": {"%explode": [
+                    {
+                        "name": "exist",
+                        "tool":{"%link": "/madagascar"},
+                        "parameter": "-P 2"
+                    },
+                    {
+                        "name": "forall",
+                        "tool":{"%link": "/madagascar"},
+                        "parameter": "-P 1"
+                    },
+                    {
+                        "name": "r2-exist",
+                        "tool":{"%link": "/srt"},
+                        "parameter": "exist"
+                    },
+                    {
+                        "name": "reinforced",
+                        "tool":{"%link": "/srt"},
+                        "parameter": "reinforced"
+                    }
+                ]},
+
+                "steps":[
+                    {"%link": "/config/encoding/tool/encode/run"},
+                    {"%link": "/incplan/run"},
+                    {"%link": "/config/encoding/tool/verify/run"}
+                ],
+
+                "parameters": {"%explode": [
+                    {
+                        // for all solvers
+                        "info":"general",
+                        "encoding":{"%link": "/config/encoding/name"},
+                        "solver":{"%explode": ["glucose4-master", "cominisatps2sun_nopre"]},
+                        "variant": {"%explode": [
+                            {
+                                "nonIncrementalSolving":true,
+                                "singleEnded":true
+                            },
+                            {
+                                "singleEnded":true
+                            },
+                            {
+                                "singleEnded":false,
+                                "ratio":{"%explode": [0, 0.5, 1]}
+                            }
+                        ]},
+                        "singleEnded":{"%link": "/config/parameters/variant/singleEnded", "default": false}
+                    },
+                    {
+                        "info":"clauseTransformation",
+                        "encoding": {"%link": "/config/encoding/name"},
+                        "solver": "glucose4-master",
+
+                        "singleEnded":true,
+                        "loose":true
+                    },
+                    {
+                        "info":"clauseTransformation",
+                        "encoding":{"%link": "/config/encoding/name"},
+                        "solver": "glucose4-clauseActivityChecking",
+
+                        "singleEnded":true,
+                        "transformLearned":true,
+                        "maxSizeLearnedClause": {"%explode": [5, 50, 1000]}
+                    },
+                    {
+                        // only when disabling capabilities are present
+                        "info":"disableTesting",
+                        "encoding":{"%link": "/config/encoding/name"},
+                        "solver":"glucose4-disableFeatures",
+                        "singleEnded": false,
+                        "variant": {"%explode": [
+                            {
+                                "removeAllLearnedClauses": true,
+                                "resetActivity": true,
+                                "resetPhase": true
+                            },
+                            {
+                                "removeAllLearnedClauses": true,
+                                "resetActivity": false,
+                                "resetPhase": false
+                            },
+                            {
+                                "removeAllLearnedClauses": false,
+                                "resetActivity": true,
+                                "resetPhase": false
+                            },
+                            {
+                                "removeAllLearnedClauses": false,
+                                "resetActivity": false,
+                                "resetPhase": true
+                            }
+                        ]}
+                    }
+                ]}
+            }
+            ]},
+
+            "%limits": {
+                // limit to processor time in seconds [softlimit,hardlimit]
+                "RLIMIT_CPU":[330,335],
+                // Memory limit in byte
+                "RLIMIT_AS":[8590000000,8600000000]
+            },
+
+            "zipFile" : "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
+
+            "tools":[
+                //"experimentrun.tools.WriteConfigToFile('lastExperiment.json')",
+                "experimentrun.tools.MakeAndCdTempDir('run_')",
+                "experimentrun.tools.WriteConfigToFile('experimentWasRunWithThis.json')",
+                "experimentrun.tools.ExceptionToConfigAndCancelToolExecution('result.json')",
+                "experimentrun.tools.ResolveLinks()",
+                "extractProblems.Extract('${/zipFile}', '${/problem/path}', 'problem.pddl')",
+                "extractProblems.Extract('${/zipFile}', '${/problem/domainDescription}', 'domain.pddl')",
+                {"%link": "/config/steps"}
+            ],
+
+            "incplan":{
+                "bin":"~/ma/tools/incplan/bin/incplan-${/config/parameters/solver}",
+                "run": [
+                    {
+                        "name":"experimentrun.tools.RunShell",
+                        "parameters": {
+                            "requireNormalExit": true,
+                            "command":"${/incplan/bin} --useConfig > incplanOutput 2> error_incplan",
+                            "runInfoTo":"/incplan/result",
+                            "externalUsedConfig":"carj.json"
+                        }
+                    },
+                    "helper.IncplanCheckMakespan()"
+                ],
+                "parameters": {
+                    "cleanLitearl": false,
+                    "exhaustMakeSpan": -1,
+                    "exponentialStepBasis": 0.0,
+                    "exponentialStepOffset": 0.0,
+                    "icaps2017": false,
+                    "inputFile": "dimspec.cnf",
+                    "intermediateSolveStep": false,
+                    "learnMakeSpan": 999999999,
+                    "linearStepSize": 1,
+                    "loose": {"%link": "/config/parameters/loose", "default": false},
+                    "maxSizeLearnedClause": {"%link": "/config/parameters/maxSizeLearnedClause", "default": 0},
+                    "nonIncrementalSolving": {"%link": "/config/parameters/variant/nonIncrementalSolving", "default": false},
+                    "outputSolverLike": {"%link": "/config/encoding/tool/outputSolverLike", "default":false},
+                    "pathSearchPrefix": [],
+                    "ratio": {"%link": "/config/parameters/variant/ratio", "default": 0.5},
+                    "reEncode": false,
+                    "seed": 0,
+                    "singleEnded": {"%link": "/config/parameters/singleEnded", "default": false},
+                    "timeout": 600.0,
+                    "transformLearned": {"%link": "/config/parameters/transformLearned", "default": false},
+                    "unitInGoal2Assume": true,
+                    "usePDR": false,
+                    "removeLearnedClauses": false,
+                    "removeAllLearnedClauses": {"%link": "/config/parameters/variant/removeAllLearnedClauses", "default": false},
+                    "resetActivity": {"%link": "/config/parameters/variant/resetActivity", "default": false},
+                    "resetPhase": {"%link": "/config/parameters/variant/resetPhase", "default": false}
+                }
+            },
+
+            "srt": {
+                "outputSolverLike":false,
+                "paths": {
+                    "srt":"~/ma/tools/incplan/bin/srt.jar",
+                    "fast-downward":"python3 ~/ma/tools/fast-downward/src/translate/translate.py"
+                },
+                "encode":{
+                    "run":[
+                        {
+                            "name":"experimentrun.tools.RunShell",
+                            "parameters": {
+                                "requireNormalExit": true,
+                                "command":"${/srt/paths/fast-downward} domain.pddl problem.pddl &> output_fast-downward",
+                                "runInfoTo":"/srt/encode/result-fast-downward"
+                            }
+                        },
+                        {
+                            "name":"experimentrun.tools.RunJava",
+                            "parameters": {
+                                "requireNormalExit": true,
+                                "command":"${/srt/paths/srt} ${/config/encoding/parameter} output.sas > dimspec.cnf 2> error_encoding",
+                                "runInfoTo":"/srt/encode/result"
+                            }
+                        }
+                    ]
+                },
+                "verify":{
+                    "run":[
+                        "experimentrun.tools.RunShell('grep -E \"^[^c]\" incplanOutput > solution')",
+                        {
+                            "name":"experimentrun.tools.RunJava",
+                            "parameters": {
+                                "requireNormalExit": true,
+                                "command":"${/srt/paths/srt} check ${/config/encoding/parameter} output.sas solution &> out_plan",
+                                "runInfoTo":"/srt/verify/result"
+                            }
+                        },
+                        "helper.CheckSrtOutput()"
+                    ]
+                }
+            },
+            "madagascar": {
+                "bin":"~/ma/tools/incplan/bin/MpC",
+                "outputSolverLike":true,
+                "solve":{
+                    "run": [
+                    {
+                        "name":"experimentrun.tools.RunShell",
+                        "parameters": {
+                            "command":"${/madagascar/bin} domain.pddl problem.pddl &> out_plan",
+                            "requireNormalExit": true,
+                            "runInfoTo":"/madagascar/solve/result"
+                        }
+                    },
+                    "helper.MpCCollectMakespan()"
+                    ]
+                },
+                "encode":{
+                    "run":{
+                        "name":"experimentrun.tools.RunShell",
+                        "parameters": {
+                            "requireNormalExit": true,
+                            "command":"${/madagascar/bin} domain.pddl problem.pddl -b dimspec -L ${/config/encoding/parameter} &> out_encoding",
+                            "runInfoTo":"/madagascar/encode/result"
+                        }
+                    }
+                },
+                "verify":{
+                    "run":[
+                        "experimentrun.tools.RunShell('grep -E \"^[0-9\\-]\" incplanOutput > solution')",
+                        {
+                        "name":"experimentrun.tools.RunShell",
+                        "parameters": {
+                            "command":"${/madagascar/bin} domain.pddl problem.pddl -s solution -T ${/incplan/result/finalMakeSpan} ${/config/encoding/parameter} &> out_plan",
+                            "requireNormalExit": true,
+                            "runInfoTo":"/madagascar/verify/result"
+                        }
+                    }]
+                }
+            }
+        }
+    ]
+}
