@@ -18,9 +18,9 @@ public:
 
 	std::vector<std::vector<int>> solution;
 
-	void printSolution(bool outputSolverLike) {
+	void printSolution(bool outputSolverLike, std::ostream& out = std::cout) {
 		if (!outputSolverLike) {
-			std::cout << "solution " << this->numberLiteralsPerTime << " " << this->solution.size() << std::endl;
+			out << "solution " << this->numberLiteralsPerTime << " " << this->solution.size() << std::endl;
 		}
 		int time = 0;
 		for (auto& timedSolution: solution) {
@@ -32,15 +32,15 @@ public:
 					}
 					lit += offset;
 				}
-				std::cout << lit << " ";
+				out << lit << " ";
 			}
 			if (!outputSolverLike) {
-				std::cout << std::endl;
+				out << std::endl;
 			}
 			time += 1;
 		}
 		if (outputSolverLike) {
-			std::cout << std::endl;
+			out << std::endl;
 		}
 	}
 

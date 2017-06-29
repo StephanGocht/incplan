@@ -10,6 +10,8 @@
 #include <vector>
 #include <chrono>
 
+#include <csignal>
+
 namespace carj {
 	using json = nlohmann::json;
 
@@ -50,8 +52,19 @@ namespace carj {
 
 		void write(){
 			auto start = std::chrono::high_resolution_clock::now();
+
+			//Block all signals so we get not interrupted while writing
+			sigset_t mask;
+			sigfillset(&mask);
+			sigprocmask(SIG_SETMASK, &mask, NULL);
+
 			std::ofstream o(configPath);
 			o << std::setw(4) << data << std::endl;
+
+			//Writing is done so unblock the signals again
+			sigemptyset(&mask);
+			sigprocmask(SIG_SETMASK, &mask, NULL);
+
 			writeOverhead += std::chrono::duration_cast<std::chrono::duration<float>>(std::chrono::high_resolution_clock::now() - start);
 			data["carj"].back()["storeOverhead"] = writeOverhead.count();
 		}

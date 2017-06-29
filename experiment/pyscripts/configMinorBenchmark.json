@@ -1,16 +1,19 @@
 {
     "tools":[
-        "experimentrun.tools.WriteConfigToFile('epxerimentWasRunWithThis.json')",
-        "experimentrun.tools.Eval('/BootstrapConfig')",
-        "experimentrun.tools.ExplodeNBootstrap('/BootstrapConfig')",
+        "experimentrun.tools.WriteConfigToFile('experimentWasRunWithThis.json')",
+        "experimentrun.tools.Eval('/tools')",
+        {
+            "name":"experimentrun.tools.ExplodeNBootstrap",
+            "parameters": {
+                "parallel": true,
+                "cluster": true
+                //"processors": {"%eval":"list(range(${/BootstrapConfig/numProcessors}))"},
+                //"numProcessors": "2"
+                //"numProcessors": "16"
+            }
+        },
         "experimentrun.tools.WriteConfigToFile('results.json')"
     ],
-
-    "BootstrapConfig":{
-        "parallel": true,
-        "processors": {"%eval":"list(range(${/BootstrapConfig/numProcessors}))"},
-        "numProcessors": "48"
-    },
 
     "configurations":[
         {
@@ -23,25 +26,15 @@
                 "setup": {"%explode": [
                     {
                         "solver":"glucose4-master",
-                        "transformLearned": false,
-                        "singleEnded": true,
-                        "loose": true
-                    },
-                    {
-                        "solver":{"%explode": ["glucose4-master", "glucose4-clauseActivityChecking"]},
-                        "transformLearned": true,
-                        "singleEnded": true,
-                        "maxSizeLearnedClause": {"%explode": [3, 10, 100, 1000]},
-                        "timeout": 9999999.0
-                    },
-                    {
-                        "solver":"glucose4-master",
                         "nonIncrementalSolving": true,
                         "singleEnded":true
                     },
                     {
-                        "solver":{"%explode": ["glucose4-master", "glucose4-noLearnedClauses"]},
-                        "singleEnded": {"%explode": [true, false]}
+                        "solver":"glucose4-disableFeatures",
+                        "removeLearnedClauses": {"%explode": [true, false]},
+                        "removeAllLearnedClauses": {"%explode": [true, false]},
+                        "resetActivity": false,
+                        "resetPhase": false
                     }
                 ]}
             },
@@ -79,19 +72,23 @@
                     "inputFile": {"%link": "/config/problem"},
                     "intermediateSolveStep": false,
                     "linearStepSize": 1,
-                    "nonIncrementalSolving": {"%link": "/config/setup/nonIncrementalSolving"},
+                    "nonIncrementalSolving": {"%link": "/config/setup/nonIncrementalSolving", "default": false},
                     "outputSolverLike": true,
                     "pathSearchPrefix": ["/home/gocht/server-home/benchresult/instances/", "/home/gocht/benchresult/instances/"],
                     "ratio": 0.5,
                     "unitInGoal2Assume": true,
-                    "singleEnded": {"%link": "/config/setup/singleEnded"},
-                    "loose": {"%link": "/config/setup/loose"},
-                    "transformLearned": {"%link": "/config/setup/transformLearned"},
-                    "maxSizeLearnedClause": {"%link": "/config/setup/maxSizeLearnedClause"},
-                    "timeout": {"%link": "/config/setup/timeout"},
+                    "singleEnded": {"%link": "/config/setup/singleEnded", "default": false},
+                    "loose": false,
+                    "transformLearned": false,
+                    "maxSizeLearnedClause": 0,
+                    "timeout": 9999999,
+                    "removeLearnedClauses": {"%link": "/config/setup/removeLearnedClauses", "default": false},
+                    "removeAllLearnedClauses": {"%link": "/config/setup/removeAllLearnedClauses", "default": false},
+                    "resetActivity": {"%link": "/config/setup/resetActivity", "default": false},
+                    "resetPhase": {"%link": "/config/setup/resetPhase", "default": false},
                     "learnMakeSpan": 999999999,
                     "exhaustMakeSpan": -1,
-                    "seed": 0
+                    "seed": 1
                 }
             }
         }

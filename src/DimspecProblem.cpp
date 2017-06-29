@@ -2,6 +2,9 @@
 
 #include "carj/logging.h"
 #include <cassert>
+#include <limits>
+#include <sstream>
+#include <algorithm>
 
 DimspecProblem::DimspecProblem(std::istream& in){
 	this->numberLiteralsPerTime = 0;
@@ -15,13 +18,47 @@ void DimspecProblem::inferAdditionalInformation() {
 	VLOG(2) << "Number Of Literals per Time: " << this->numberLiteralsPerTime;
 
 	// state variables should all be set in the initial state
-	std::set<int> stateVariables;
+
+	std::set<int> initVariables;
 	for (int lit: this->initial) {
-		stateVariables.insert(std::abs(lit));
+		initVariables.insert(std::abs(lit));
 	}
+
+	std::set<int> transferSrc;
+	std::set<int> transferDst;
+	for (int lit: this->transfer) {
+		unsigned var = std::abs(lit);
+		if (var <= this->numberLiteralsPerTime) {
+			transferSrc.insert(var);
+		} else {
+			transferDst.insert(var - this->numberLiteralsPerTime);
+		}
+	}
+
+	std::set<int> goalVariables;
+	for (int lit: this->goal) {
+		goalVariables.insert(std::abs(lit));
+	}
+
+	std::set<int> stateVariables;
+
+	set_intersection(
+		initVariables.begin(), initVariables.end(),
+		transferSrc.begin(), transferSrc.end(),
+		std::inserter(stateVariables, stateVariables.begin()));
+
+	set_intersection(
+		goalVariables.begin(), goalVariables.end(),
+		transferDst.begin(), transferDst.end(),
+		std::inserter(stateVariables, stateVariables.begin()));
+
+	set_intersection(
+		transferSrc.begin(), transferSrc.end(),
+		transferDst.begin(), transferDst.end(),
+		std::inserter(stateVariables, stateVariables.begin()));
+
 	stateVariables.erase(0);
 	std::copy(stateVariables.begin(), stateVariables.end(), std::back_inserter(this->stateVariables));
-
 	// {
 	// 	std::stringstream ss;
 	// 	ss << "State Variables: ";
@@ -107,7 +144,24 @@ void DimspecProblem::skipComments(std::istream& in){
 	char nextChar;
 	in >> nextChar;
 	while ( nextChar == 'c' ) {
-		in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+		std::string line;
+		getline(in, line);
+		std::stringstream ss(line);
+		std::string actionvars;
+		ss >> actionvars;
+		if (actionvars == "action-vars") {
+			std::replace( line.begin(), line.end(), ',', ' ');
+			std::replace( line.begin(), line.end(), '[', ' ');
+			std::replace( line.begin(), line.end(), ']', ' ');
+			std::stringstream ss(line);
+			ss >> actionvars;
+			while(!ss.eof()) {
+				int var;
+				if (ss >> var) {
+					actionVariables.push_back(var);
+				}
+			}
+		}
 		in >> nextChar;
 	}
 	if (in.eof()) {

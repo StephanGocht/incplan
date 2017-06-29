@@ -35,7 +35,11 @@ public:
 	}
 
 	void addAsLearned(int lit_or_zero){
-		throw "Not Implemented";
+		if (lit_or_zero == 0) {
+			clausesAsLearned.push_back(std::vector<int>());
+		} else {
+			clausesAsLearned.back().push_back(lit_or_zero);
+		}
 	}
 
 	virtual void assume(int lit) {
@@ -91,6 +95,18 @@ public:
 		clauses.clear();
 		clauses.push_back(std::vector<int>());
 
+		assert(clausesAsLearned.back().size() == 0);
+		clausesAsLearned.pop_back();
+		std::cout << "adding clauses as learned: " << clausesAsLearned.size() << std::endl;
+		for (std::vector<int>& clause: clausesAsLearned) {
+			for (int lit: clause) {
+				solver->addAsLearned(map(lit));
+			}
+			solver->addAsLearned(0);
+		}
+		clausesAsLearned.clear();
+		clausesAsLearned.push_back(std::vector<int>());
+
 		for (int literal:assumptions) {
 			solver->assume(map(literal));
 		}
@@ -106,6 +122,7 @@ public:
 	virtual void reset() {
 		solver->reset();
 		clauses.clear();
+		clausesAsLearned.clear();
 		assumptions.clear();
 		toIpasir.clear();
 		fromIpasir.clear();
@@ -117,6 +134,7 @@ private:
 	std::unique_ptr<Ipasir> solver;
 
 	std::vector<std::vector<int>> clauses;
+	std::vector<std::vector<int>> clausesAsLearned;
 	std::vector<int> assumptions;
 
 	std::vector<unsigned> toIpasir;
@@ -128,6 +146,7 @@ private:
 
 	void init() {
 		clauses.push_back(std::vector<int>());
+		clausesAsLearned.push_back(std::vector<int>());
 		toIpasir.push_back(0);
 		fromIpasir.push_back(0);
 	}
@@ -150,6 +169,12 @@ private:
 		unsigned maxVariable = toIpasir.size();
 
 		for (std::vector<int>& clause: clauses) {
+			for (int lit: clause) {
+				addLiteral(newVariables, maxVariable, lit);
+			}
+		}
+
+		for (std::vector<int>& clause: clausesAsLearned) {
 			for (int lit: clause) {
 				addLiteral(newVariables, maxVariable, lit);
 			}

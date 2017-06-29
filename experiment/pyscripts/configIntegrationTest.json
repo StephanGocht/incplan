@@ -6,10 +6,13 @@
         , "extractProblems.Extract('${/zipFile}', '${/problem/path}', 'problem.pddl')"
         , "extractProblems.Extract('${/zipFile}', '${/problem/domainDescription}', 'domain.pddl')"
         , {"%link": "/madagascar/encode/run"}
-        , {"%link": "/incplan/run"}
-        , "experimentrun.tools.RunShell('grep -E \"^ci\" incplanOutput')"
-        , "experimentrun.tools.RunShell('grep -E \"^[0-9\\-]\" incplanOutput > solution')"
+        //, {"%link": "/srt/encode/run"}
+        , "experimentrun.tools.RunShell('~/ma/tools/incplan/bin/incplan-glucose4-master --frozen dimspec.cnf > froozenVars')"
+        //, {"%link": "/incplan/run"}
+        //, "experimentrun.tools.RunShell('grep -E \"^ci\" incplanOutput')"
+        //, "experimentrun.tools.RunShell('grep -E \"^[0-9\\-]\" incplanOutput > solution')"
         , {"%link": "/madagascar/verifySolution/run"}
+        //, {"%link": "/srt/verify/run"}
         , "experimentrun.tools.WriteConfigToFile('result.json')"
         , "experimentrun.tools.RunShell('echo ${/madagascar/verifySolution/result/returnCode}')"
     ],
@@ -28,8 +31,8 @@
             // },
             "problem": {
                 "domainDescription": "TESTING/seq-agl/Childsnack/domain.pddl",
-                "name": "child-snack_pfilexx",
-                "path": "TESTING/seq-agl/Childsnack/child-snack_pfile05-2.pddl",
+                "name": "child-snack_pfile05-2",
+                "path": "TESTING/seq-agl/Childsnack/child-snack_pfile05.pddl",
                 "domain": "Childsnack"
             },
             // "problem": {
@@ -56,9 +59,14 @@
     //     // Memory limit in byte
     //     "RLIMIT_AS":[8589934592,8589934592]
     // },
+    "config":{
+        "encoding": {
+            "parameter": "shortest"
+        }
+    },
     "incplan":{
         "config":{
-            "solver":"gmod"
+            "solver":"glucose4-disableFeatures"
         },
         "bin":"~/ma/tools/incplan/bin/incplan-${/incplan/config/solver}",
         "run":{
@@ -87,12 +95,16 @@
             "pathSearchPrefix": [],
             "ratio": 0.5,
             "reEncode": true,
-            "seed": -2,
+            "seed": -1,
             "singleEnded": true,
             "timeout": 10.0,
             "transformLearned": false,
             "unitInGoal2Assume": true,
-            "usePDR": false
+            "usePDR": false,
+            "removeLearnedClauses": true,
+            "removeAllLearnedClauses": false,
+            "resetActivity": true,
+            "resetPhase": true
         }
     },
 
@@ -117,6 +129,48 @@
                     "runInfoTo":"/madagascar/verifySolution/result"
                 }
             }
+        }
+    },
+
+    "srt": {
+        "outputSolverLike":false,
+        "paths": {
+            "srt":"~/ma/tools/incplan/bin/srt.jar",
+            "fast-downward":"python3 ~/ma/tools/fast-downward/src/translate/translate.py"
+        },
+        "encode":{
+            "run":[
+                {
+                    "name":"experimentrun.tools.RunShell",
+                    "parameters": {
+                        "requireNormalExit": true,
+                        "command":"${/srt/paths/fast-downward} domain.pddl problem.pddl &> output_fast-downward",
+                        "runInfoTo":"/srt/encode/result-fast-downward"
+                    }
+                },
+                {
+                    "name":"experimentrun.tools.RunJava",
+                    "parameters": {
+                        "requireNormalExit": true,
+                        "command":"${/srt/paths/srt} ${/config/encoding/parameter} output.sas > dimspec.cnf 2> error_encoding",
+                        "runInfoTo":"/srt/encode/result"
+                    }
+                }
+            ]
+        },
+        "verify":{
+            "run":[
+                "experimentrun.tools.RunShell('grep -E \"^[^c]\" incplanOutput > solution')",
+                {
+                    "name":"experimentrun.tools.RunJava",
+                    "parameters": {
+                        "requireNormalExit": true,
+                        "command":"${/srt/paths/srt} check ${/config/encoding/parameter} output.sas solution &> out_plan",
+                        "runInfoTo":"/srt/verify/result"
+                    }
+                },
+                "helper.CheckSrtOutput()"
+            ]
         }
     }
 }

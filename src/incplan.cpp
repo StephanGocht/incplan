@@ -15,6 +15,7 @@
 #include <random>
 #include <stack>
 #include <utility>
+#include <sstream>
 
 #include "tclap/CmdLine.h"
 
@@ -37,6 +38,8 @@ TCLAP::CmdLine& carj::getCmd() {
 TCLAP::CmdLine& cmd = carj::getCmd();
 
 namespace option{
+	carj::TCarjArg<TCLAP::ValueArg,int> allSolutions("", "allSolutions", "0 do nothing, 1 avoid same solution, 2 avoid solution with same states, 3 avoid solution with same actions (only possible if action literals are provided)", /* necessary */ false, /*default*/ 0, /* type description */ "positive number", cmd);
+
 	carj::TCarjArg<TCLAP::ValueArg,int> seed("", "seed", "Use a positive number to choose a seed for randomization, -1 to use a random seed or -2 to deactivate randomization.", /* necessary */ false, /*default*/ -1, /* type description */ "number", cmd);
 
 	carj::TCarjArg<TCLAP::ValueArg,int> maxSizeLearnedClause("", "maxSizeLearnedClause", "Maximum number of literals in a learned clause that will be transformed to future time steps.", /* necessary */ false, /*default*/ 2, /* type description */ "positive number", cmd);
@@ -236,6 +239,58 @@ public:
 			}
 
 			return result == ipasir::SolveResult::SAT;
+		}
+
+		bool avoidLiteral(int lit) {
+			switch (option::allSolutions.getValue()) {
+				case 2:
+					return std::find(
+						problem.stateVariables.begin(),
+						problem.stateVariables.end(),
+						std::abs(lit))
+						== problem.stateVariables.end();
+				case 3:
+					return std::find(
+						problem.actionVariables.begin(),
+						problem.actionVariables.end(),
+						std::abs(lit))
+						== problem.actionVariables.end();
+				case 1:
+				default:
+					return false;
+			}
+		}
+
+		bool nextSolution() {
+			TimePoint t = timePointManager->getFirst();
+			for (auto& timePointSolution: problem.solution) {
+				for (int lit: timePointSolution) {
+					if (!avoidLiteral(lit)) {
+						addProblemLiteral(-lit, t);
+					}
+				}
+
+				if (t == timePointManager->getLast()) {
+					break;
+				}
+				try {
+					// todo improve with propper itterator, as t == last
+					// fails for double ended encoding, if no transition
+					// was added
+					t = timePointManager->getSuccessor(t);
+				} catch (std::out_of_range& e){
+					break;
+				}
+			}
+			finalizeClause();
+
+			strategy->doFinalize();
+			ipasir::SolveResult result = solveSAT();
+			if (result == ipasir::SolveResult::SAT) {
+				storeSolution();
+			}
+
+			return (result == ipasir::SolveResult::SAT);
 		}
 
 		/**
@@ -1151,6 +1206,8 @@ public:
 
 namespace option {
 namespace setup {
+	carj::CarjArg<TCLAP::SwitchArg, bool> printFrozenVariables("", "frozen", "Prints all variables that need to be frozen when preprocessing the formula.", cmd, /*default*/ false);
+
 	carj::CarjArg<TCLAP::SwitchArg, bool> loose("", "loose", "Only assume init and goal.", cmd, /*default*/ false);
 	carj::CarjArg<TCLAP::SwitchArg, bool> transformLearned("", "transformLearned", "Transform learned clauses from privious solves to new time step.", cmd, /*default*/ false);
 
@@ -1225,6 +1282,17 @@ int incplan_main(int argc, const char **argv) {
 	bool solved = false;
 
 	DimspecProblem inProblem(*in);
+
+	if (option::setup::printFrozenVariables.getValue()) {
+		for (int var:inProblem.stateVariables) {
+			std::cout << var << std::endl;
+		}
+		for (int var:inProblem.stateVariables) {
+			std::cout << var + inProblem.numberLiteralsPerTime << std::endl;
+		}
+		return 0;
+	}
+
 	DimspecProblem* problem = &inProblem;
 	std::unique_ptr<DoubleEndedProblem> reEncodedProblem;
 	if (option::setup::reEncode.getValue() == true) {
@@ -1275,6 +1343,20 @@ int incplan_main(int argc, const char **argv) {
 			std::move(strategy),
 			getStepFunction());
 		solved = solver.solve();
+
+		if (solved && option::allSolutions.getValue() > 0) {
+			bool hasNewSolution = true;
+			int solutionNum = 0;
+			while (hasNewSolution) {
+				std::stringstream ss;
+				ss << "variant" << solutionNum << ".sol";
+				std::ofstream out(ss.str());
+				inProblem.printSolution(option::setup::outputSolverLike.getValue(), out);
+
+				solutionNum++;
+				hasNewSolution = solver.nextSolution();
+			}
+		}
 	}
 
 	if (!solved) {

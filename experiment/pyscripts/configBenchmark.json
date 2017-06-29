@@ -1,28 +1,31 @@
 {
     "tools":[
         "experimentrun.tools.WriteConfigToFile('experimentWasRunWithThis.json')",
+        "experimentrun.tools.Eval('/tools')",
         {
             "name":"extractProblems.ListIPC14",
             "parameters": {
                 "filename": "${/configurations/0/zipFile}",
                 "resultPath": "/configurations/0/problem/%explode",
+                "excludedDomains": []
 //                "excludedDomains": ["Openstacks", "Visitall", "Transport"]
-                "excludedDomains": ["Openstacks", "Visitall", "Transport", "Barman", "GED", "Parking"]
+//                "excludedDomains": ["Openstacks", "Visitall", "Transport", "Barman", "GED", "Parking"]
 //                "excludedDomains": ["Openstacks", "Visitall", "Transport", "Barman", "GED", "Thoughtful", "Tetris", "Maintenance", "CaveDiving", "CityCar", "Floortile", "Hiking", "Parking"]
 
             }
         },
-        "experimentrun.tools.Eval('/BootstrapConfig')",
-        "experimentrun.tools.ExplodeNBootstrap('/BootstrapConfig')",
+        {
+            "name":"experimentrun.tools.ExplodeNBootstrap",
+            "parameters": {
+                "parallel": true,
+                "cluster": true
+                //"processors": {"%eval":"list(range(${/BootstrapConfig/numProcessors}))"},
+                //"numProcessors": "2"
+                //"numProcessors": "16"
+            }
+        },
         "experimentrun.tools.WriteConfigToFile('results.json')"
     ],
-
-    "BootstrapConfig":{
-        "parallel": true,
-        "processors": {"%eval":"list(range(${/BootstrapConfig/numProcessors}))"},
-        //"numProcessors": "2"
-        "numProcessors": "16"
-    },
 
     "configurations":[
         {
@@ -33,15 +36,24 @@
                 "domain": "Childsnack"
             },
             "config":{"%explode": [
-            {
-                "steps":[
-                    {"%link": "/madagascar/solve/run"}
-                ],
-                "parameters": {
-                    "info":"general",
-                    "encoding":"MpC"
-                }
-            }
+            // {
+            //     "steps":[
+            //         {"%link": "/madagascar/solve/run"}
+            //     ],
+            //     "parameters": {
+            //         "info":"general",
+            //         "encoding":"MpC"
+            //     }
+            // }
+            // ,{
+            //     "steps":[
+            //         {"%link": "/PDRplan/run"}
+            //     ],
+            //     "parameters": {
+            //         "info":"general",
+            //         "encoding":"PDRplan"
+            //     }
+            // }
             ,{
                 "encoding": {"%explode": [
                     {
@@ -73,43 +85,45 @@
                 ],
 
                 "parameters": {"%explode": [
-                    {
-                        // for all solvers
-                        "info":"general",
-                        "encoding":{"%link": "/config/encoding/name"},
-                        "solver":{"%explode": ["glucose4-master", "cominisatps2sun_nopre"]},
-                        "variant": {"%explode": [
-                            {
-                                "nonIncrementalSolving":true,
-                                "singleEnded":true
-                            },
-                            {
-                                "singleEnded":true
-                            },
-                            {
-                                "singleEnded":false,
-                                "ratio":{"%explode": [0, 0.5, 1]}
-                            }
-                        ]},
-                        "singleEnded":{"%link": "/config/parameters/variant/singleEnded", "default": false}
-                    },
-                    {
-                        "info":"clauseTransformation",
-                        "encoding": {"%link": "/config/encoding/name"},
-                        "solver": "glucose4-master",
+                    // {
+                    //     // for all solvers
+                    //     "info":"general",
+                    //     "encoding":{"%link": "/config/encoding/name"},
+                    //     "solver":{"%explode": ["glucose4-master", "cominisatps2sun_nopre"]},
+                    //     "variant": {"%explode": [
+                    //         {
+                    //             "nonIncrementalSolving":true,
+                    //             "singleEnded":true
+                    //         },
+                    //         {
+                    //             "singleEnded":true
+                    //         },
+                    //         {
+                    //             "singleEnded":false,
+                    //             "ratio":{"%explode": [0, 0.5, 1]}
+                    //         }
+                    //     ]},
+                    //     "singleEnded":{"%link": "/config/parameters/variant/singleEnded", "default": false}
+                    // },
+                    // {
+                    //     "info":"clauseTransformation",
+                    //     "encoding": {"%link": "/config/encoding/name"},
+                    //     "solver": "glucose4-master",
 
-                        "singleEnded":true,
-                        "loose":true
-                    },
-                    {
-                        "info":"clauseTransformation",
-                        "encoding":{"%link": "/config/encoding/name"},
-                        "solver": "glucose4-clauseActivityChecking",
+                    //     "singleEnded":true,
+                    //     "loose":true
+                    // },
+                    // {
+                    //     "info":"clauseTransformation",
+                    //     "encoding":{"%link": "/config/encoding/name"},
+                    //     "solver": "glucose4-clauseActivityChecking",
 
-                        "singleEnded":true,
-                        "transformLearned":true,
-                        "maxSizeLearnedClause": {"%explode": [5, 50, 1000]}
-                    },
+                    //     "singleEnded":true,
+                    //     "transformLearned":true,
+                    //     "useAddLearned": true,
+                    //     "maxSizeLearnedClause": {"%explode": [5, 50, 1000]}
+                    // }
+                    //,
                     {
                         // only when disabling capabilities are present
                         "info":"disableTesting",
@@ -145,22 +159,25 @@
 
             "%limits": {
                 // limit to processor time in seconds [softlimit,hardlimit]
-                "RLIMIT_CPU":[330,335],
+                "RLIMIT_CPU":[330,360],
                 // Memory limit in byte
-                "RLIMIT_AS":[8590000000,8600000000]
+                "RLIMIT_AS":[8590000000,8800000000]
             },
 
             "zipFile" : "/home/gocht/ma/benchmarks/pddl/ipc14.zip",
 
             "tools":[
                 //"experimentrun.tools.WriteConfigToFile('lastExperiment.json')",
+                "experimentrun.tools.RunShell('cd ')",
                 "experimentrun.tools.MakeAndCdTempDir('run_')",
                 "experimentrun.tools.WriteConfigToFile('experimentWasRunWithThis.json')",
                 "experimentrun.tools.ExceptionToConfigAndCancelToolExecution('result.json')",
                 "experimentrun.tools.ResolveLinks()",
                 "extractProblems.Extract('${/zipFile}', '${/problem/path}', 'problem.pddl')",
                 "extractProblems.Extract('${/zipFile}', '${/problem/domainDescription}', 'domain.pddl')",
-                {"%link": "/config/steps"}
+                {"%link": "/config/steps"},
+                "experimentrun.tools.RunShell('rm problem.pddl domain.pddl solution output.sas dimspec.cnf')",
+                "experimentrun.tools.WriteConfigToFile('result.json')"
             ],
 
             "incplan":{
@@ -189,6 +206,7 @@
                     "linearStepSize": 1,
                     "loose": {"%link": "/config/parameters/loose", "default": false},
                     "maxSizeLearnedClause": {"%link": "/config/parameters/maxSizeLearnedClause", "default": 0},
+                    "useAddLearned": {"%link": "/config/parameters/useAddLearned", "default": false},
                     "nonIncrementalSolving": {"%link": "/config/parameters/variant/nonIncrementalSolving", "default": false},
                     "outputSolverLike": {"%link": "/config/encoding/tool/outputSolverLike", "default":false},
                     "pathSearchPrefix": [],
@@ -247,6 +265,34 @@
                         "helper.CheckSrtOutput()"
                     ]
                 }
+            },
+            "minireachIC3":{
+                "bin" : "~/ma/tools/minireachIC3",
+                "run": [
+                    {
+                        "name":"experimentrun.tools.RunShell",
+                        "parameters": {
+                            "requireNormalExit": true,
+                            "command":"${/minireachIC3/bin}  -format=dimspec dimspec.cnf 2> out_minireachIC3",
+                            "runInfoTo":"/minireachIC3/result",
+                            "externalUsedConfig":"carj.json"
+                        }
+                    }
+                ]
+            },
+            "PDRplan": {
+                "bin": "~/ma/tools/PDRplan/pdr",
+                "run": [
+                    {
+                        "name":"experimentrun.tools.RunShell",
+                        "parameters": {
+                            "requireNormalExit": true,
+                            "command":"${/PDRplan/bin}  -p domain.pddl -f problem.pddl 2> out_PDRplan",
+                            "runInfoTo":"/PDRplan/result",
+                            "externalUsedConfig":"carj.json"
+                        }
+                    }
+                ]
             },
             "madagascar": {
                 "bin":"~/ma/tools/incplan/bin/MpC",
