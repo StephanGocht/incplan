@@ -27,12 +27,12 @@ public:
 	enum class HelperVariablePosition {AllBefore, SingleBefore, SingleAfter};
 
 private:
-	int varsPerTime;
-	int helperPerTime;
-
 	std::map<TimePoint, int> timePoints;
 
 public:
+	int varsPerTime;
+	int helperPerTime;
+
 	std::unique_ptr<ipasir::Ipasir> solver;
 	const HelperVariablePosition helperVariablePosition;
 

@@ -30,6 +30,10 @@
 
 #include "PDR.h"
 
+extern "C" {
+	#include "lglib.h"
+}
+
 TCLAP::CmdLine& carj::getCmd() {
 	static TCLAP::CmdLine cmd("This tool is does sat planing using an incremental sat solver.", ' ', "0.1");
 	return cmd;
@@ -40,7 +44,7 @@ TCLAP::CmdLine& cmd = carj::getCmd();
 namespace option{
 	carj::TCarjArg<TCLAP::ValueArg,int> allSolutions("", "allSolutions", "0 do nothing, 1 avoid same solution, 2 avoid solution with same states, 3 avoid solution with same actions (only possible if action literals are provided)", /* necessary */ false, /*default*/ 0, /* type description */ "positive number", cmd);
 
-	carj::TCarjArg<TCLAP::ValueArg,int> seed("", "seed", "Use a positive number to choose a seed for randomization, -1 to use a random seed or -2 to deactivate randomization.", /* necessary */ false, /*default*/ -1, /* type description */ "number", cmd);
+	carj::TCarjArg<TCLAP::ValueArg,int> seed("", "seed", "Use a positive number to choose a seed for randomization, -1 to use a random seed or -2 to deactivate randomization.", /* necessary */ false, /*default*/ -2, /* type description */ "number", cmd);
 
 	carj::TCarjArg<TCLAP::ValueArg,int> maxSizeLearnedClause("", "maxSizeLearnedClause", "Maximum number of literals in a learned clause that will be transformed to future time steps.", /* necessary */ false, /*default*/ 2, /* type description */ "positive number", cmd);
 
@@ -664,7 +668,23 @@ public:
 
 		int activationLiteral = static_cast<int>(HelperVariables::ActivationLiteral);
 		getSolver().assumeHelperLiteral(activationLiteral, elementInsertedLast);
+
+		freeze(linkSource, linkDestination);
 	};
+
+	void freeze(TimePoint src, TimePoint dst) {
+		LOG(INFO) << "Freezing Variables";
+		LGL* lgl = static_cast<LGL*>(this->getSolver().solver->internalSolverReference());
+		lglmeltall(lgl);
+		for (int i = 1; i <= this->getSolver().varsPerTime; i++) {
+			lglfreeze(lgl, this->getSolver().problemLiteral2Ipasir(i, src));
+			lglfreeze(lgl, this->getSolver().problemLiteral2Ipasir(i, dst));
+		}
+		for (int i = 1; i <= this->getSolver().helperPerTime; i++) {
+			lglfreeze(lgl, this->getSolver().helperLiteral2Ipasir(i, src));
+			lglfreeze(lgl, this->getSolver().helperLiteral2Ipasir(i, dst));
+		}
+	}
 
 	void addLink(TimePoint A, TimePoint B, TimePoint helperLiteralBinding) {
 		unsigned numberLiteralsPerTime = getSolver().problem.numberLiteralsPerTime;

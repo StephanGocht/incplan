@@ -130,6 +130,10 @@ public:
 		init();
 	};
 
+	virtual void* internalSolverReference(){
+		return solver->internalSolverReference();
+	};
+
 private:
 	std::unique_ptr<Ipasir> solver;
 

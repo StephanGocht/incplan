@@ -86,4 +86,8 @@ namespace ipasir {
 		eipasir_set_select_literal_callback(this->solver, this, &ipasir_select_literal_callback);
 		#endif
 	}
+
+	void* Solver::internalSolverReference(){
+		return solver;
+	}
 }

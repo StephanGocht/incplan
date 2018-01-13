@@ -136,6 +136,8 @@ public:
 	virtual void set_learn (int max_length, std::function<void(int*)>) = 0;
 
 	virtual void reset() = 0;
+
+	virtual void* internalSolverReference() = 0;
 };
 
 extern "C" {
@@ -168,6 +170,8 @@ public:
 	virtual void reset();
 
 	virtual void addAsLearned(int lit_or_zero);
+
+	virtual void* internalSolverReference();
 private:
 	void* solver;
 	std::function<int(void)> terminateCallback;

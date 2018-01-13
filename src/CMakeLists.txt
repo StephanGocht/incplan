@@ -119,6 +119,16 @@ FOREACH(ipasir_lib ${ipasir_libs})
 		)
 ENDFOREACH()
 
+
+add_executable(incplan-lgl main.cpp Lingeling.cpp)
+target_link_libraries(incplan-lgl
+	-Wl,--allow-multiple-definition
+	all_sources
+	ipasir_wrapper
+	${CMAKE_SOURCE_DIR}/../lib/liblgl.a
+	ipasir_dummy
+	)
+
 # === Target: core ===
 
 # Dummy target which builds all targets but only for one solver
